@@ -1,0 +1,394 @@
+---
+title: "PCA_analysis"
+author: "KRG"
+date: "7/13/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+library(dplyr)
+library(DESeq2)
+library(GenomicFeatures)
+library(ChIPseeker)
+library(ggplot2)
+library(eulerr)
+```
+
+## unfiltered PCA of all samples (Figure S2D)
+
+```{r }
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/KRG_all_final_peaksDF_finalGRs_rename.txt", header = TRUE, sep = "\t")
+
+all_samples <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/final_samples_KRG.txt", header = TRUE, sep = "\t")
+
+row.names(all_samples) <- all_samples$X
+all_samples <- all_samples[,2:4]
+m_all <- row.names(all_samples)
+colnames(all) <- gsub("_rm5_rm3.bed", "", colnames(all))
+row.names(all) <- all$peakID
+
+#check that sample names match
+m_all %in% colnames(all)
+all_x <- all[m_all]
+
+dds_all <- DESeqDataSetFromMatrix(countData = all_x, colData = all_samples, design = ~ Experiment + Antibody + Lysate)
+
+dds_all <- estimateSizeFactors(dds_all,type="poscounts")
+
+rld_all <- varianceStabilizingTransformation(dds_all)
+
+p <-  plotPCA(rld_all,intgroup=c("Experiment", "Antibody", "Lysate"), ntop=10^6, returnData=TRUE)
+
+#reorder/rename levels so can set colors/shapes 
+p$group <- paste0(p$Antibody, "/", p$Lysate)
+p$group <- as.factor(p$group)
+p$group <- factor(p$group, levels = c("Ago1/Aag2", "Ago1/aegypti","rIgG/Aag2", "rIgG/aegypti", "Ago2/Aag2","Ago2/aegypti", "mIgG/Aag2","mIgG/aegypti"))
+
+#set PC1 direction to be consistent with subsequent PCAs
+p$PC1 <- (p$PC1)*-1
+#calculate variation as a rounded percent
+percentVar <- round(100 * attr(p, "percentVar")) 
+
+ggplot(p, aes(x = PC1, y = PC2, color = group, shape = Experiment, label=name)) +
+geom_point(size =3) + 
+scale_shape_manual(values=c(0,3,5, 8, 4,1, 2, 6)) + 
+scale_color_manual(values =c("#1B0B80", "#3360A9",  "#64C3DB", "#D2E1E5", "#8A0F09","#FA0F0C", "#F87F11", "#F4DBC7"), name="Antibody/Lysate") +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
+ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
+```
+
+## Annotate and filter for PCA calculations - this table is the basis for Table S3, and was used to test different filtering parameters for Figure S2A-C
+
+```{r }
+#annotate
+
+gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
+
+TxDb <- makeTxDbFromGFF(gtffile)
+
+allGR <- makeGRangesFromDataFrame(all,
+                                     keep.extra.columns=FALSE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames",
+                                     start.field="start",
+                                     end.field="end",
+                                     strand.field="strand",
+                                     starts.in.df.are.0based=FALSE)
+
+allanno <- annotatePeak(allGR,
+                              TxDb=TxDb,
+                              sameStrand=FALSE,
+                              genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                            "Intron", "Promoter", "Downstream", "Intergenic"),
+                              overlap = "all")
+
+allannodf <- as.data.frame(allanno)
+
+allannodf$peakID <- paste0(allannodf$seqnames, ":", allannodf$start, "_", allannodf$end, ":", allannodf$strand)
+
+v <- merge(all, allannodf, by="peakID", all.x=TRUE)
+all <- v[,c(1:200, 206:214)]
+
+#get peak biological complexity (BC) - in how many samples by antibody/lysate was a peak called 
+
+#first define boolean columns, with TRUE/FALSE if the peak was called in that sample
+bool <- grep("*.txt", colnames(all), value = TRUE)
+
+temp <- strsplit(bool, "_")
+mat  <- matrix(unlist(temp), ncol=6, byrow=TRUE)
+mat <- mat[,2:3]
+df <- cbind(bool, mat)
+col.names <- c("name", "Lysate", "Antibody")
+df <- as.data.frame(df)
+df <- setNames(df, col.names)
+df$group <- paste0(df$Lysate, df$Antibody)
+df_group <- df %>% group_by(group)
+df_group$name <- as.character(df_group$name)
+aegyptiAgo1 <- subset(df_group$name, df_group$group == "aegyptiAgo1")
+aegyptiAgo2 <- subset(df_group$name, df_group$group == "aegyptiAgo2")
+aegyptirIgG <- subset(df_group$name, df_group$group == "aegyptirIgG")
+aegyptimIgG <- subset(df_group$name, df_group$group == "aegyptimIgG")
+Aag2Ago1 <- subset(df_group$name, df_group$group == "Aag2Ago1")
+Aag2Ago2 <- subset(df_group$name, df_group$group == "Aag2Ago2")
+Aag2rIgG <- subset(df_group$name, df_group$group == "Aag2rIgG")
+Aag2mIgG <- subset(df_group$name, df_group$group == "Aag2mIgG")
+
+#then count peakBC
+all$aegyptiAgo1_peakBC <- rowSums(all[aegyptiAgo1])
+all$aegyptiAgo2_peakBC <- rowSums(all[aegyptiAgo2])
+all$aegyptirIgG_peakBC <- rowSums(all[aegyptirIgG])
+all$aegyptimIgG_peakBC <- rowSums(all[aegyptimIgG])
+all$Aag2Ago1_peakBC <- rowSums(all[Aag2Ago1])
+all$Aag2Ago2_peakBC <- rowSums(all[Aag2Ago2])
+all$Aag2rIgG_peakBC <- rowSums(all[Aag2rIgG])
+all$Aag2mIgG_peakBC <- rowSums(all[Aag2mIgG])
+
+#define read count columns, which contain raw read counts at each peak region by sample
+aegyptiAgo1b <- gsub("_rm5_rm3.txt", "", aegyptiAgo1)
+aegyptiAgo2b <- gsub("_rm5_rm3.txt", "", aegyptiAgo2)
+aegyptirIgGb <- gsub("_rm5_rm3.txt", "", aegyptirIgG)
+aegyptimIgGb <- gsub("_rm5_rm3.txt", "", aegyptimIgG)
+Aag2Ago1b <- gsub("_rm5_rm3.txt", "", Aag2Ago1)
+Aag2Ago2b <- gsub("_rm5_rm3.txt", "", Aag2Ago2)
+Aag2rIgGb <- gsub("_rm5_rm3.txt", "",Aag2rIgG)
+Aag2mIgGb <- gsub("_rm5_rm3.txt", "", Aag2mIgG)
+
+#get total counts by antibody/lysate
+all$aegyptiAgo1_counts <- rowSums(all[aegyptiAgo1b])
+all$aegyptiAgo2_counts <- rowSums(all[aegyptiAgo2b])
+all$aegyptirIgG_counts <- rowSums(all[aegyptirIgGb])
+all$aegyptimIgG_counts <- rowSums(all[aegyptimIgGb])
+all$Aag2Ago1_counts <- rowSums(all[Aag2Ago1b])
+all$Aag2Ago2_counts <- rowSums(all[Aag2Ago2b])
+all$Aag2rIgG_counts <- rowSums(all[Aag2rIgGb])
+all$Aag2mIgG_counts <- rowSums(all[Aag2mIgGb])
+
+#get normalized counts in reads per million mapped (in peaks)
+all$aegyptiAgo1_counts_norm <- (all$aegyptiAgo1_counts)/(sum(all$aegyptiAgo1_counts))*1E6
+all$aegyptiAgo2_counts_norm <- (all$aegyptiAgo2_counts)/(sum(all$aegyptiAgo2_counts))*1E6
+all$aegyptirIgG_counts_norm <- (all$aegyptirIgG_counts)/(sum(all$aegyptirIgG_counts))*1E6
+all$aegyptimIgG_counts_norm <- (all$aegyptimIgG_counts)/(sum(all$aegyptimIgG_counts))*1E6
+all$Aag2Ago1_counts_norm <- (all$Aag2Ago1_counts)/(sum(all$Aag2Ago1_counts))*1E6
+all$Aag2Ago2_counts_norm <- (all$Aag2Ago2_counts)/(sum(all$Aag2Ago2_counts))*1E6
+all$Aag2rIgG_counts_norm <- (all$Aag2rIgG_counts)/(sum(all$Aag2rIgG_counts))*1E6
+all$Aag2mIgG_counts_norm <- (all$Aag2mIgG_counts)/(sum(all$Aag2mIgG_counts))*1E6
+
+#Specific ab > 10X higher than IgG (norm counts)
+all$aegypti_Ago1_over_rIgG <- ifelse(all$aegyptiAgo1_counts_norm >= (10 * all$aegyptirIgG_counts_norm), paste0("TRUE"), paste0("FALSE"))
+all$aegypti_Ago1_over_rIgG <- ifelse(all$aegyptiAgo1_counts_norm == all$aegyptirIgG_counts_norm, paste0("FALSE"), paste0(all$aegypti_Ago1_over_rIgG))
+
+all$aegypti_Ago2_over_mIgG <- ifelse(all$aegyptiAgo2_counts_norm >= (10 * all$aegyptimIgG_counts_norm), paste0("TRUE"), paste0("FALSE"))
+all$aegypti_Ago2_over_mIgG <- ifelse(all$aegyptiAgo2_counts_norm == all$aegyptimIgG_counts_norm, paste0("FALSE"), paste0(all$aegypti_Ago2_over_mIgG))
+
+all$Aag2_Ago1_over_rIgG <- ifelse(all$Aag2Ago1_counts_norm >= (10 * all$Aag2rIgG_counts_norm), paste0("TRUE"), paste0("FALSE"))
+all$Aag2_Ago1_over_rIgG <- ifelse(all$Aag2Ago1_counts_norm == all$Aag2rIgG_counts_norm, paste0("FALSE"), paste0(all$Aag2_Ago1_over_rIgG))
+
+all$Aag2_Ago2_over_mIgG <- ifelse(all$Aag2Ago2_counts_norm >= (10 * all$Aag2mIgG_counts_norm), paste0("TRUE"), paste0("FALSE")) 
+all$Aag2_Ago2_over_mIgG <- ifelse(all$Aag2Ago2_counts_norm == all$Aag2mIgG_counts_norm, paste0("FALSE"), paste0(all$Aag2_Ago2_over_mIgG))
+
+#get the number of samples with a raw read count equal to or greater than 10 at each peak location, by antibody/lysate
+all$Aag2_Ago1_nhipeaks <- apply(all[Aag2Ago1b], 1, function(x) length(which(x>=10)))
+all$Aag2_Ago2_nhipeaks <- apply(all[Aag2Ago2b], 1, function(x) length(which(x>=10)))
+all$Aag2_rIgG_nhipeaks <- apply(all[Aag2rIgGb], 1, function(x) length(which(x>=10)))
+all$Aag2_mIgG_nhipeaks <- apply(all[Aag2mIgGb], 1, function(x) length(which(x>=10)))
+all$aegypti_Ago1_nhipeaks <- apply(all[aegyptiAgo1b], 1, function(x) length(which(x>=10)))
+all$aegypti_Ago2_nhipeaks <- apply(all[aegyptiAgo2b], 1, function(x) length(which(x>=10)))
+all$aegypti_rIgG_nhipeaks <- apply(all[aegyptirIgGb], 1, function(x) length(which(x>=10)))
+all$aegypti_mIgG_nhipeaks <- apply(all[aegyptimIgGb], 1, function(x) length(which(x>=10)))
+
+#get the number of samples with at least one read at each peak location, by antibody/lysate
+all$aegypti_Ago1_BCsample <- apply(all[aegyptiAgo1b], 1, function(x) length(which(x>0)))
+all$aegypti_Ago2_BCsample <- apply(all[aegyptiAgo2b], 1, function(x) length(which(x>0)))
+all$aegypti_rIgG_BCsample <- apply(all[aegyptirIgGb], 1, function(x) length(which(x>0)))
+all$aegypti_mIgG_BCsample <- apply(all[aegyptimIgGb], 1, function(x) length(which(x>0)))
+all$Aag2_Ago1_BCsample <- apply(all[Aag2Ago1b], 1, function(x) length(which(x>0)))
+all$Aag2_Ago2_BCsample <- apply(all[Aag2Ago2b], 1, function(x) length(which(x>0)))
+all$Aag2_rIgG_BCsample <- apply(all[Aag2rIgGb], 1, function(x) length(which(x>0)))
+all$Aag2_mIgG_BCsample <- apply(all[Aag2mIgGb], 1, function(x) length(which(x>0)))
+
+length(which(all$Aag2Ago1_peakBC > 0))
+length(which(all$Aag2Ago1_peakBC > 0 & grepl("3' UTR", all$annotation)))
+length(which(all$Aag2Ago1_peakBC > 0))
+length(which(all$Aag2Ago1_peakBC > 0 & grepl("3' UTR", all$annotation)))
+
+#final filtering: peakBC > 0 and Ab is 10X above sample, nhi = 2 or more 
+Aag2 <- subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE" | all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
+aegypti <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE" | all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
+
+
+```
+
+##Cells PCA, Figure 3E
+
+```{r}
+cell_samples <- subset(all_samples, all_samples$Lysate=="Aag2")
+cell_samples$Lysate <- NULL
+
+m_cells <- row.names(cell_samples)
+#check that sample names match
+m_cells %in% colnames(Aag2)
+Aag2x <- Aag2[m_cells] 
+
+dds_Aag2 <- DESeqDataSetFromMatrix(countData = Aag2x, colData = cell_samples, design = ~ Experiment + Antibody) 
+
+dds_Aag2 <- estimateSizeFactors(dds_Aag2,type="poscounts")
+
+Aag2_rld <- varianceStabilizingTransformation(dds_Aag2)
+
+b <-  plotPCA(Aag2_rld,intgroup=c("Experiment", "Antibody"), ntop=1E6, returnData=TRUE)
+
+#reorder levels so can set colors 
+b$Antibody <- factor(b$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
+#set PC2 to be consistent with all unfiltered PCA
+b$PC2 <- (b$PC2)*-1
+#calculate variation as a rounded percent
+percentVar <- round(100 * attr(b, "percentVar")) 
+ 
+ggplot(b, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
+geom_point(size =3) + 
+scale_color_manual(values =c("#1B0B80", "#64C3DB", "#8A0F09", "#F87F11"), name="Antibody") +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
+ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
+```
+
+##aegypti PCA, Figure 3H
+```{r}
+aegypti_samples <- subset(all_samples, all_samples$Lysate=="aegypti")
+aegypti_samples$Lysate <- NULL
+
+#have 2 IgG samples with all zeros - need to drop or will give an error in the PCA
+drop <- c("KRG092419_aegypti_mIgG_Exp7A", "KRG092419_aegypti_mIgG_Exp7B")
+aegypti_samples <- aegypti_samples[!rownames(aegypti_samples) %in% drop, ]
+m_aegypti <- row.names(aegypti_samples)
+
+#check sample names match
+m_aegypti %in% colnames(aegypti)
+
+aegypti_x <- aegypti[m_aegypti]
+
+dds_aegypti <- DESeqDataSetFromMatrix(countData = aegypti_x, colData = aegypti_samples, design = ~ Experiment + Antibody) #
+
+dds_aegypti  <- estimateSizeFactors(dds_aegypti, type="poscounts")
+
+rld_aegypti <- varianceStabilizingTransformation(dds_aegypti)
+
+d <-  plotPCA(rld_aegypti ,intgroup=c("Experiment", "Antibody"), ntop=10^6, returnData=TRUE)
+
+#reorder levels so can set colors 
+d$Antibody <- factor(d$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
+#set PC2 to be consistent with all unfiltered PCA
+d$PC2 <- (d$PC2)*-1
+#calculate variation as a rounded percent
+percentVar <- round(100 * attr(d, "percentVar")) 
+
+
+ggplot(d, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
+geom_point(size =3) + 
+scale_color_manual(values =c("#3360A9", "#D2E1E5", "#FA0F0C", "#F4DBC7"), name="Antibody") +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
+ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
+```
+
+##Make annotation pie charts on filtered peaks, Figure 3A-D
+```{r}
+cells_Ago1 <-subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE")
+
+aegypti_Ago1 <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE")
+
+cells_Ago2 <-subset(all, all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
+
+aegypti_Ago2 <- subset(all, all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
+
+aegypti_Ago2GR <- makeGRangesFromDataFrame(aegypti_Ago2,
+                                     keep.extra.columns=FALSE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames.x",
+                                     start.field="start.x",
+                                     end.field="end.x",
+                                     strand.field="strand.x",
+                                     starts.in.df.are.0based=FALSE)
+
+aegypti_Ago2anno <- annotatePeak(aegypti_Ago2GR,
+                              TxDb=TxDb,
+                              sameStrand=FALSE,
+                              genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                            "Intron", "Promoter", "Downstream", "Intergenic"),
+                              overlap = "all")
+
+plotAnnoPie(aegypti_Ago2anno)
+
+
+aegypti_Ago1GR <- makeGRangesFromDataFrame(aegypti_Ago1,
+                                           keep.extra.columns=FALSE,
+                                           ignore.strand=FALSE,
+                                           seqinfo=NULL,
+                                           seqnames.field="seqnames.x",
+                                     start.field="start.x",
+                                     end.field="end.x",
+                                     strand.field="strand.x",
+                                           starts.in.df.are.0based=FALSE)
+
+aegypti_Ago1GRanno <- annotatePeak(aegypti_Ago1GR,
+                                 TxDb=TxDb,
+                                 sameStrand=FALSE,
+                                 genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                               "Intron", "Promoter", "Downstream", "Intergenic"),
+                                 overlap = "all")
+
+plotAnnoPie(aegypti_Ago1GRanno)
+
+cells_Ago1GR <- makeGRangesFromDataFrame(cells_Ago1,
+                                           keep.extra.columns=FALSE,
+                                           ignore.strand=FALSE,
+                                           seqinfo=NULL,
+                                           seqnames.field="seqnames.x",
+                                     start.field="start.x",
+                                     end.field="end.x",
+                                     strand.field="strand.x",
+                                           starts.in.df.are.0based=FALSE)
+
+cells_Ago1anno <- annotatePeak(cells_Ago1GR,
+                                 TxDb=TxDb,
+                                 sameStrand=FALSE,
+                                 genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                               "Intron", "Promoter", "Downstream", "Intergenic"),
+                                 overlap = "all")
+
+plotAnnoPie(cells_Ago1anno)
+
+cells_Ago2GR <- makeGRangesFromDataFrame(cells_Ago2,
+                                           keep.extra.columns=FALSE,
+                                           ignore.strand=FALSE,
+                                           seqinfo=NULL,
+                                           seqnames.field="seqnames.x",
+                                     start.field="start.x",
+                                     end.field="end.x",
+                                     strand.field="strand.x",
+                                           starts.in.df.are.0based=FALSE)
+
+cells_Ago2anno <- annotatePeak(cells_Ago2GR,
+                                 TxDb=TxDb,
+                                 sameStrand=FALSE,
+                                 genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                               "Intron", "Promoter", "Downstream", "Intergenic"),
+                                 overlap = "all")
+
+plotAnnoPie(cells_Ago2anno)
+```
+
+##Now do Venn Diagrams to compare genes in different filtered ab/lysate combinations, Figure S2F
+```{r}
+#make list of unique genes in filtered 
+AA1 <- unique(subset(all$geneId, all$peakID %in% cells_Ago1$peakID))
+#remove NA, because not all peaks could be annotated to a gene
+AA1 <- AA1[!is.na( AA1)]
+AA2 <- unique(subset(all$geneId, all$peakID %in% cells_Ago2$peakID))
+AA2 <- AA2[!is.na( AA2)]
+AeA1 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago1$peakID))
+AeA1 <- AeA1[!is.na( AeA1)]
+AeA2 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago2$peakID))
+AeA2 <- AeA2[!is.na(AeA2)]
+filt <- list(Aag2Ago1 = AA1, Aag2Ago2 = AA2, aegyptiAgo1 = AeA1, aegyptiAgo2 = AeA2)
+
+plot(venn(filt))
+
+```
+
+## Venn Diagram to compare genes found in Zhang et al. and my aegypti Ago1 genes, Figure S2E
+```{r}
+Zhang <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Zhang_peaks.txt", header = TRUE, sep = "\t")
+reps <- grep("rep", colnames(Zhang), value = TRUE)
+Zhang$all_counts <- rowSums(Zhang[reps])
+#use their filtering criteria, at least one read/sample 
+Zhangfilt <-as.character(unique(subset(Zhang$annotation.ID, Zhang$all_counts > 6)))
+Zhangfilt <- Zhangfilt[!is.na(Zhangfilt)]
+AeA1 <- unique(subset(all$geneId, all$aegyptiAgo1_counts > 8))
+AeA1 <- AeA1[!is.na( AeA1)]
+compare <- list(aegyptiAgo1 = AeA1, Zhang = Zhangfilt)
+plot(venn(compare))
+```
+

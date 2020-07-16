@@ -1,0 +1,155 @@
+---
+title: "overlaps_strand_bias_to_upload"
+author: "KRG"
+date: "6/28/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(GenomicRanges)
+library(GenomicFeatures)
+library(rtracklayer)
+library(data.table)
+```
+
+## Get strand bias ratio for overlapping peaks
+
+```{r }
+#read in all peaks
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_021520.txt", sep = "\t", header = TRUE)
+
+allGR <- makeGRangesFromDataFrame(all,
+                                     keep.extra.columns = TRUE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames",
+                                     start.field="start",
+                                     end.field="end",
+                                     strand.field="strand",
+                                     starts.in.df.are.0based=FALSE)
+
+#get overlapping and disjoint ranges
+pos_all <- allGR[allGR@strand=="+"]
+neg_all <- allGR[allGR@strand=="-"]
+
+overlapping <- mergeByOverlaps(pos_all, neg_all, minoverlap=10L, ignore.strand = TRUE)
+overlapping_r <- c(overlapping@listData$pos_all,overlapping@listData$neg_all)   
+overlapping_rf <- reduce(overlapping_r, ignore.strand=TRUE) #just giving region with overlap
+nonoverlapping <- allGR[allGR %outside% overlapping_rf]
+
+#read in all mapped reads, concatenated by antibody/lysate
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped"
+all_reads <- dir(Dir, pattern="*.bed$",full.names = TRUE)
+all_reads <- grep("cat", all_reads, value = TRUE)
+all_reads_gr <- lapply(all_reads, import, format="BED")
+names(all_reads_gr) <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped/", "", all_reads)
+
+#get reads at overlapping peaks
+lreads_over_overpeaks <- lapply(all_reads_gr, function(x) mergeByOverlaps(x, overlapping_rf, ignore.strand=TRUE))
+lreads_over_overpeaksdf <- lapply(lreads_over_overpeaks, as.data.frame)
+lreads_over_overpeaksdf<- lapply(lreads_over_overpeaksdf, function(x) cbind(x, overlapID = paste0(x$overlapping_rf.seqnames, ":", x$overlapping_rf.start,"_", x$overlapping_rf.end)))
+
+lreads_over_overpeaksdf<- rbindlist(lreads_over_overpeaksdf, idcol = TRUE)
+lreads_over_overpeaksdf$duplicated <- paste0(lreads_over_overpeaksdf$x.name, "_", lreads_over_overpeaksdf$overlapID, "_", lreads_over_overpeaksdf$.id)
+lreads_over_overpeaksdf$duplicatedoverlap <- duplicated(lreads_over_overpeaksdf$duplicated)
+length(which(lreads_over_overpeaksdf$duplicatedoverlap==TRUE)) #check for duplicates; good, 0 
+
+#group by sample and count pos and neg 
+lreads_over_overpeaksdf <- setNames(lreads_over_overpeaksdf, gsub(".id", "sample", colnames(lreads_over_overpeaksdf )))
+
+lread_overlap_bypeak <- lreads_over_overpeaksdf %>% group_by(.dots=c("sample","x.strand", "overlapID")) %>% summarize(count = n(),total_length = sum(x.sampleth))
+
+#if are overlapping reads, calculate count and length bias ratios
+lread <- lread_overlap_bypeak %>% group_by(.dots=c("sample","overlapID")) %>% filter(n()==2) %>% group_by(.dots=c("sample","overlapID")) %>% mutate(pos_over_neg_count = ((subset(count, x.strand=="+"))/(subset(count, x.strand=="-"))), pos_over_neg_legnth = ((subset(total_length, x.strand=="+"))/(subset(total_length, x.strand=="-"))))
+
+lread_coll <- distinct(lread, overlapID, .keep_all = TRUE) #remove duplicate entries because have one positive and one negative read entry for each peak with the same count and length ratios
+
+#now peaks with reads on only one strand
+lread_unpair <- lread_overlap_bypeak %>% group_by(.dots=c("sample","overlapID")) %>% filter(n()==1) %>% group_by(.dots=c("sample","overlapID"))   
+lread_unpair$pos_over_neg_count  <- ifelse(lread_unpair$x.strand=="+", as.numeric(paste0(lread_unpair$count)), as.numeric(1/lread_unpair$count))
+lread_unpair$pos_over_neg_legnth  <- ifelse(lread_unpair$x.strand=="+", as.numeric(paste0(lread_unpair$total_length)), as.numeric(1/lread_unpair$total_length))
+
+
+lread_bind <- rbind(lread_unpair, lread_coll)
+
+```
+
+##Get strand bias ratio for disjoint peaks
+
+```{r}
+lreads_nonover <- lapply(all_reads_gr, function(x) mergeByOverlaps(x, nonoverlapping, ignore.strand=TRUE))
+
+lreads_nonoverdf <- lapply(lreads_nonover, function(x) bind_cols(as.data.frame(x$x), as.data.frame(x$peakID)))
+
+lreads_nonoverdf <- rbindlist(lreads_nonoverdf, idcol = TRUE)
+col.names <- colnames(lreads_nonoverdf)
+col.names <- gsub(".id", "sample", col.names)
+col.names <- col.names[1:8]
+col.names <- c(col.names, "peakID")
+lreads_nonoverdf <- setNames(lreads_nonoverdf, col.names)
+
+lreads_nonoverdf$dups <- paste0(lreads_nonoverdf$sample, "_", lreads_nonoverdf$name, "_", lreads_nonoverdf$peakID)
+lreads_nonoverdf$duplicated <- duplicated(lreads_nonoverdf)
+length(which(lreads_nonoverdf$duplicated==TRUE)) #1, remove
+lreads_nonoverdf <- subset(lreads_nonoverdf, lreads_nonoverdf$duplicated==FALSE)
+
+lreads_nonoverdf  %>% group_by(.dots=c("sample","strand")) %>% summarize(count = n(),total_length = sum(sampleth))
+
+lreads_nonover_bypeak <- lreads_nonoverdf %>% group_by(.dots=c("sample","strand", "peakID")) %>% summarize(read_count = n(),total_length = sum(sampleth))
+
+
+#if are overlapping reads, calculate count and length bias ratios
+lread_non <- lreads_nonover_bypeak %>% group_by(.dots=c("sample","peakID")) %>% filter(n()==2) %>% group_by(.dots=c("sample","peakID")) %>% mutate(pos_over_neg_count = ((subset(read_count, strand=="+"))/(subset(read_count, strand=="-"))), pos_over_neg_legnth = ((subset(total_length, strand=="+"))/(subset(total_length, strand=="-"))))
+
+lread_non_coll <- distinct(lread_non, peakID, .keep_all = TRUE) #remove duplicate entries because have one positive and one negative read entry for each peak with the same count and length ratios
+
+#now peaks with reads on only one strand
+lread_non_unpair <- lreads_nonover_bypeak %>% group_by(.dots=c("sample","peakID")) %>% filter(n()==1) %>% group_by(.dots=c("sample","peakID"))   
+lread_non_unpair$pos_over_neg_count  <- ifelse(lread_non_unpair$strand=="+", as.numeric(paste0(lread_non_unpair$read_count)), as.numeric(1/lread_non_unpair$read_count))
+lread_non_unpair$pos_over_neg_legnth  <- ifelse(lread_non_unpair$strand=="+", as.numeric(paste0(lread_non_unpair$total_length)), as.numeric(1/lread_non_unpair$total_length))
+
+lread_non_bind <- rbind(lread_non_unpair, lread_non_coll)
+
+lread_bind$sample <- paste0(lread_bind$sample, "_", "overlaps")
+lread_non_bind$sample <- paste0(lread_non_bind$sample, "_", "disjoint")
+col.names <- colnames(lread_non_bind)
+col.names <- gsub("peakID", "ID", col.names)
+lread_non_bind <- setNames(lread_non_bind, col.names)
+lread_bind <- setNames(lread_bind, col.names)
+lread_bind  <- as.data.frame(lread_bind )
+lread_non_bind  <- as.data.frame(lread_non_bind )
+lread <- rbind(lread_bind, lread_non_bind)
+
+lread_noIgG <- lread[!grepl("IgG", lread$sample),]
+
+lread_noIgG$log10count <- log10(lread_noIgG$pos_over_neg_count)
+lread_noIgG$log10count_nosense <- ifelse(lread_noIgG$log10count < 0, lread_noIgG$log10count * -1, lread_noIgG$log10count * 1)
+lread_noIgG$log10length <- log10(lread_noIgG$pos_over_neg_legnth)
+lread_noIgG$log10length_nosense <- ifelse(lread_noIgG$log10length < 0, lread_noIgG$log10length * -1, lread_noIgG$log10length * 1)
+
+lread_Aag2 <- lread_noIgG[grepl("Aag2", lread_noIgG$sample),]
+lread_aegypti <- lread_noIgG[grepl("aegypti", lread_noIgG$sample),]
+
+```
+
+##Figure 5I-J
+
+```{r}
+vert <- c(0,2)
+ggplot(lread_Aag2, aes(log10length_nosense, colour = sample, linetype = sample, alpha= sample)) + stat_ecdf() + scale_colour_manual(values=c("#1B0B80","#1B0B80", "#8A0F09", "#8A0F09")) + theme_bw() + scale_linetype_manual(values=c("solid",  "solid", "solid", "solid")) + 
+  scale_alpha_manual(values = c(0.4, 1,0.4, 1)) + geom_vline(xintercept =vert, linetype="dashed") + xlim(0, 6)
+
+ggplot(lread_aegypti, aes(log10length_nosense, colour = sample, linetype = sample, alpha= sample)) + stat_ecdf() + scale_colour_manual(values=c("#3360A9","#3360A9", "#FA0F0C", "#FA0F0C")) + theme_bw() + scale_linetype_manual(values=c("solid",  "solid", "solid", "solid")) + 
+  scale_alpha_manual(values = c(0.4, 1,0.4, 1)) + geom_vline(xintercept =vert, linetype="dashed") + xlim(0, 7)
+
+ks.test(subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago1.bed_overlaps"), subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago2.bed_overlaps"),alternative = c("less"))
+
+ks.test(subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo1.bed_overlaps"), subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo2.bed_overlaps"),alternative = c("less"))
+
+```
+
+

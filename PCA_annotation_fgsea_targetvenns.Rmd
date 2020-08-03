@@ -22,7 +22,7 @@ library(GO.db)
 ## unfiltered PCA of all samples (Figure S2D)
 
 ```{r }
-all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/KRG_all_final_peaksDF_finalGRs_rename.txt", header = TRUE, sep = "\t")
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final.txt", sep = "\t", header = TRUE)
 
 all_samples <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/final_samples_KRG.txt", header = TRUE, sep = "\t")
 

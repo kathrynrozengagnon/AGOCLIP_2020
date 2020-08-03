@@ -20,7 +20,7 @@ library(data.table)
 
 ```{r }
 #read in all peaks
-all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_021520.txt", sep = "\t", header = TRUE)
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final.txt", sep = "\t", header = TRUE)
 
 allGR <- makeGRangesFromDataFrame(all,
                                      keep.extra.columns = TRUE,

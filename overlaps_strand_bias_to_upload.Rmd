@@ -41,7 +41,7 @@ overlapping_r <- c(overlapping@listData$pos_all,overlapping@listData$neg_all)
 overlapping_rf <- reduce(overlapping_r, ignore.strand=TRUE) #just giving region with overlap
 nonoverlapping <- allGR[allGR %outside% overlapping_rf]
 
-#read in all mapped reads, concatenated by antibody/lysate
+#read in all mapped reads, concatenated by antibody/lysate; files are too big to put on Github, available upon request
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped"
 all_reads <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 all_reads <- grep("cat", all_reads, value = TRUE)

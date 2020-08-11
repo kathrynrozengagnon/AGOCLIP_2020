@@ -17,9 +17,8 @@ library(GenomicRanges)
 library(ggplot2)
 ```
 
-
+##seed search function 
 ```{r}
-##seed search fun 
 fetchSequencesForClIP <- function(peaks,reSize=NULL,fasta,add5=0,add3=0){
   swd <- Rsamtools::FaFile(fasta)
   
@@ -198,7 +197,7 @@ annotatePeaksWithPatterns  <- function(peaks,fasta,patterns,resize=64,add5=0,add
 
 ```{r}
 #read in all peaks, with filtering stats/etc added
-all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final.txt", sep = "\t", header = TRUE)
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn.txt", sep = "\t", header = TRUE)
 
 #make GR for seed search
 allGR <- makeGRangesFromDataFrame(all,

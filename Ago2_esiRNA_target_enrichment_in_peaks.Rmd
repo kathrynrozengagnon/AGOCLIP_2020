@@ -326,7 +326,7 @@ mosq_hist <- aegypti_Ago2perf %>% group_by(.dots=c("extendedPeak","perfect_18mer
 perf_hist <- rbind(cells_hist, mosq_hist) #this give #of perfect matches found in each peak for each smalRNA family
 perf_hist2 <- perf_hist %>% group_by(.dots=c("count", "sample")) %>% mutate(peakcount = n())
 
-unique_hist <- distinct(perf_hist2, peakcount, count, sample, .keep_all = TRUE
+unique_hist <- distinct(perf_hist2, peakcount, count, sample, .keep_all = TRUE)
 unique_hist_perc <- unique_hist %>% group_by(sample) %>% mutate(percent_of_peaks = peakcount/(sum(peakcount))) 
 
 unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count==1, paste0("1"), NA)

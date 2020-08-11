@@ -217,7 +217,7 @@ allGR <- makeGRangesFromDataFrame(all,
 ```{r}
 res_Ago2_FL <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/Ago2_known_and_novel_miRNAs_6mer_target.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/all_Ago2_known_novel_rn.fa",
                                   resize=406,
                                   add5=11,
                                   add3=1,
@@ -235,16 +235,16 @@ res_Ago2_FL$filt <- duplicated(res_Ago2_FL$group)
 res_Ago2_FL <- subset(res_Ago2_FL, res_Ago2_FL$filt == FALSE)
 
 #now need to select perfect, one mis, 6 mer of top etc
-seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper.txt", header=TRUE, sep="\t")
+seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper_FINAL_rn.txt", header=TRUE, sep="\t")
 
 seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds.txt", header = TRUE, sep ="\t") #913 unique seed combos
 
 #link to new names
-seed_table <- merge(seeds_df[,c(1:2,34)], seed_table,by.x = "sequence" , by.y = "FL", all.x= TRUE )
+seed_table <- merge(seeds_df[,c(1:2,36)], seed_table,by.x = "sequence" , by.y = "FL", all.x= TRUE )
 
-Ago2_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/Ago2_known_and_novel_miRNAs_6mer_target.fa", format = "fasta")
-Ago2_sRNAs_cells <- Ago2_sRNAs[!grepl("aegypti", names(Ago2_sRNAs))]
-Ago2_sRNAs_aegypti <- Ago2_sRNAs[!grepl("Aag2", names(Ago2_sRNAs))]
+Ago2_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/all_Ago2_known_novel_rn.fa", format = "fasta")
+Ago2_sRNAs_cells <- Ago2_sRNAs[grepl("common-Ago2|Aag2-Ago2|Aag2-Ago2|aae-miR", names(Ago2_sRNAs))]
+Ago2_sRNAs_aegypti <- Ago2_sRNAs[grepl("common-Ago2|aegypti-Ago2|aae-miR", names(Ago2_sRNAs))]
 
 seed_table$Ago2_top <- seed_table$six_mer_target  %in% Ago2_sRNAs
 FL <- DNAStringSet(seed_table$sequence)
@@ -256,15 +256,15 @@ FL_df <- setNames(FL_df, c("FL_target_seq", "smallRNA"))
 
 seed_table <- merge(seed_table, FL_df, by= "smallRNA") 
 Ago2_tom <- seed_table[seed_table$Ago2_top==TRUE,]
-Ago2_eight <- Ago2_tom
-Ago2_tom <- Ago2_tom%>% group_by(.dots=c("six_mer_target", "six_mer", "aae_miRNA_family")) %>% summarise(smallRNAs = paste0(smallRNA, collapse = ":"),  FL_target_seqs = paste0(FL_target_seq, collapse = ":"))
+#Ago2_eight <- Ago2_tom
+Ago2_tom <- Ago2_tom%>% group_by(.dots=c("six_mer_target", "six_mer", "aae_smallRNA_family")) %>% summarise(smallRNAs = paste0(smallRNA, collapse = ":"),  FL_target_seqs = paste0(FL_target_seq, collapse = ":"))
 
 res_Ago2_FL <- merge(res_Ago2_FL, Ago2_tom[,c(1,3,5)], by.x= "Seq", by.y = "six_mer_target",all.x = TRUE )
 res_Ago2_FL$check <- mapply(grepl, pattern=res_Ago2_FL$SeqExtended, x=res_Ago2_FL$FL_target_seqs)
-res_Ago2_FL$perfect_18mer_target <- ifelse(res_Ago2_FL$check==TRUE, paste0(res_Ago2_FL$aae_miRNA_family), paste0("NA"))
+res_Ago2_FL$perfect_18mer_target <- ifelse(res_Ago2_FL$check==TRUE, paste0(res_Ago2_FL$aae_smallRNA_family), paste0("NA"))
 
 res_Ago2_FL$check <- mapply(agrepl, pattern=res_Ago2_FL$SeqExtended, x=res_Ago2_FL$FL_target_seqs, max=1)
-res_Ago2_FL$one_mis_18mer_target <- ifelse(res_Ago2_FL$check==TRUE, paste0(res_Ago2_FL$aae_miRNA_family), paste0("NA"))
+res_Ago2_FL$one_mis_18mer_target <- ifelse(res_Ago2_FL$check==TRUE, paste0(res_Ago2_FL$aae_smallRNA_family), paste0("NA"))
 
 cells_Ago2_6mer <- subset(res_Ago2_FL,res_Ago2_FL$Aag2_Ago2_BCsample > 0 & res_Ago2_FL$Aag2_Ago1_BCsample ==0)
 
@@ -291,6 +291,7 @@ aegypti_Ago2one_mis_graph <- subset(aegypti_Ago2one_mis$startOfPmatch, aegypti_A
 aegypti_Ago2_6mer_graph <- subset(aegypti_Ago2_6mer$startOfPmatch, aegypti_Ago2_6mer$one_mis_18mer_target=="NA")
 
 Ago2_perf <- grep("graph", names(.GlobalEnv),value=TRUE)
+Ago2_perf <- grep("BCsample", Ago2_perf ,value=TRUE, invert = TRUE)
 
 
 Ago2_perf   <- do.call("list",mget(Ago2_perf  ))
@@ -315,5 +316,38 @@ ggplot(data= subset(cellsAgo2_perf, cellsAgo2_perf$sample=="cells_Ago2perf_graph
     geom_smooth(method = lm, formula = y ~ splines::bs(x, 20), se = FALSE)  + xlim(80,320) + theme_bw()
 
 
+```
+
+##make Figure S5G 
+
+```{r}
+cells_hist <- cells_Ago2perf %>% group_by(.dots=c("extendedPeak","perfect_18mer_target")) %>% summarise(count = n()) %>% mutate(sample = c("Aag2"))
+mosq_hist <- aegypti_Ago2perf %>% group_by(.dots=c("extendedPeak","perfect_18mer_target")) %>% summarise(count = n()) %>% mutate(sample = c("aegypti"))
+perf_hist <- rbind(cells_hist, mosq_hist) #this give #of perfect matches found in each peak for each smalRNA family
+perf_hist2 <- perf_hist %>% group_by(.dots=c("count", "sample")) %>% mutate(peakcount = n())
+
+unique_hist <- distinct(perf_hist2, peakcount, count, sample, .keep_all = TRUE)
+
+ggplot(unique_hist, aes(x=count, y = peakcount,color = sample )) +
+  geom_bar(stat = "identity" )
+
+unique_hist_perc <- unique_hist %>% group_by(sample) %>% mutate(percent_of_peaks = peakcount/(sum(peakcount))) 
+
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count==1, paste0("1"), NA)
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 1 & unique_hist_perc$count <= 10, paste0("2-10"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 10 & unique_hist_perc$count <= 20, paste0("11-20"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 20 & unique_hist_perc$count <= 30, paste0("21-30"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 30 & unique_hist_perc$count <= 40, paste0("31-40"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 40 & unique_hist_perc$count <= 50, paste0("41-50"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 50 & unique_hist_perc$count <=60, paste0("51-60"), paste0(unique_hist_perc$count_bin ))
+unique_hist_perc$count_bin <- ifelse(unique_hist_perc$count > 60 & unique_hist_perc$count <=70, paste0("61-70"), paste0(unique_hist_perc$count_bin ))
+
+
+unique_hist_percg <- unique_hist_perc %>% group_by(.dots=c("count_bin", "sample")) %>% summarise(percent=sum(percent_of_peaks))
+
+ggplot(unique_hist_percg, aes(x=count_bin, y = percent,fill = sample)) +
+  geom_bar(stat = "identity",position = position_dodge2(preserve = "single"), width=0.8) + scale_fill_manual(values = c("#8A0F09", "#FA0F0C")) + theme_bw()
+
+  
 ```
 

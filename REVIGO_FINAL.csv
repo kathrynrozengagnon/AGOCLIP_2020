@@ -1,0 +1,351 @@
+term_ID,description,frequency,plot_X,plot_Y,plot_size,uniqueness,dispensability,representative,eliminated
+GO:0000003,"reproduction",0.769%,-0.728, 0.685,4.994,1.000,0.000,3,0
+GO:0002252,"immune effector process",0.185%,-2.199, 0.270,4.375,0.967,0.000,2252,0
+GO:0006458,"'de novo' protein folding",0.027%,-0.052, 0.211,3.543,0.970,0.000,6458,0
+GO:0008283,"cell proliferation",0.394%,-0.440, 0.515,4.704,0.905,0.000,8283,0
+GO:0009629,"response to gravity",0.006%, 1.082, 4.509,2.909,0.933,0.000,9629,0
+GO:0022414,"reproductive process",0.736%,-1.988,-0.231,4.975,0.886,0.000,22414,0
+GO:0044703,"multi-organism reproductive process",0.335%,null,null,4.633,0.871,0.911,22414,1
+GO:0048515,"spermatid differentiation",0.036%,null,null,3.665,0.487,0.934,22414,1
+GO:0003006,"developmental process involved in reproduction",0.296%,null,null,4.580,0.571,0.900,22414,1
+GO:0007286,"spermatid development",0.034%,null,null,3.643,0.478,0.930,22414,1
+GO:0007292,"female gamete generation",0.060%,null,null,3.890,0.573,0.784,22414,1
+GO:0048609,"multicellular organismal reproductive process",0.197%,null,null,4.403,0.596,0.973,22414,1
+GO:0019953,"sexual reproduction",0.275%,null,null,4.548,0.861,0.894,22414,1
+GO:0007281,"germ cell development",0.093%,null,null,4.079,0.451,0.926,22414,1
+GO:0007283,"spermatogenesis",0.091%,null,null,4.068,0.562,0.924,22414,1
+GO:0007276,"gamete generation",0.159%,null,null,4.309,0.551,0.921,22414,1
+GO:0048477,"oogenesis",0.054%,null,null,3.841,0.465,0.943,22414,1
+GO:0032504,"multicellular organism reproduction",0.207%,null,null,4.425,0.612,0.871,22414,1
+GO:0022412,"cellular process involved in reproduction in multicellular organism",0.107%,null,null,4.136,0.541,0.928,22414,1
+GO:0048232,"male gamete generation",0.093%,null,null,4.079,0.563,0.926,22414,1
+GO:0040008,"regulation of growth",0.172%, 2.837, 5.567,4.343,0.873,0.000,40008,0
+GO:0046620,"regulation of organ growth",0.020%,null,null,3.403,0.523,0.770,40008,1
+GO:0040011,"locomotion",0.997%,-0.367, 0.097,5.107,0.994,0.000,40011,0
+GO:0042273,"ribosomal large subunit biogenesis",0.151%, 4.253,-2.145,4.287,0.886,0.000,42273,0
+GO:0044419,"interspecies interaction between organisms",0.262%,-2.321,-0.426,4.526,0.895,0.000,44419,0
+GO:0016032,"viral process",0.131%,null,null,4.226,0.873,0.772,44419,1
+GO:0019080,"viral gene expression",0.015%,null,null,3.297,0.879,0.933,44419,1
+GO:0019083,"viral transcription",0.012%,null,null,3.203,0.870,0.816,44419,1
+GO:0044403,"symbiosis, encompassing mutualism through parasitism",0.168%,null,null,4.335,0.896,0.911,44419,1
+GO:0050955,"thermoception",0.001%,-6.545, 2.223,2.076,0.728,0.000,50955,0
+GO:0050960,"detection of temperature stimulus involved in thermoception",0.000%,null,null,1.740,0.691,0.802,50955,1
+GO:0051674,"localization of cell",0.633%, 1.532, 1.169,4.910,0.964,0.000,51674,0
+GO:0051704,"multi-organism process",0.751%,-1.436, 1.006,4.984,0.994,0.000,51704,0
+GO:0039703,"RNA replication",0.006%,-0.331,-0.976,2.920,0.957,0.018,39703,0
+GO:0061351,"neural precursor cell proliferation",0.033%,-0.412, 1.653,3.624,0.904,0.060,61351,0
+GO:0008037,"cell recognition",0.067%,-0.506,-5.267,3.931,0.854,0.064,8037,0
+GO:0030166,"proteoglycan biosynthetic process",0.022%, 0.213,-0.906,3.448,0.948,0.078,30166,0
+GO:0044282,"small molecule catabolic process",1.273%, 1.921,-3.283,5.213,0.854,0.083,44282,0
+GO:0008356,"asymmetric cell division",0.012%, 0.231,-3.564,3.175,0.846,0.114,8356,0
+GO:0007163,"establishment or maintenance of cell polarity",0.099%, 0.020,-5.080,4.102,0.851,0.131,7163,0
+GO:0030029,"actin filament-based process",0.398%, 0.094,-5.024,4.708,0.836,0.150,30029,0
+GO:0002181,"cytoplasmic translation",0.064%, 0.424,-2.226,3.915,0.941,0.168,2181,0
+GO:0012501,"programmed cell death",0.430%, 0.075,-6.343,4.742,0.808,0.170,12501,0
+GO:0010623,"programmed cell death involved in cell development",0.011%,null,null,3.168,0.564,0.738,12501,1
+GO:0043065,"positive regulation of apoptotic process",0.105%,null,null,4.130,0.738,0.871,12501,1
+GO:0043067,"regulation of programmed cell death",0.322%,null,null,4.616,0.734,0.983,12501,1
+GO:0043068,"positive regulation of programmed cell death",0.109%,null,null,4.144,0.738,0.990,12501,1
+GO:0010942,"positive regulation of cell death",0.114%,null,null,4.165,0.738,0.877,12501,1
+GO:0010941,"regulation of cell death",0.344%,null,null,4.645,0.734,0.964,12501,1
+GO:0042981,"regulation of apoptotic process",0.313%,null,null,4.604,0.735,0.956,12501,1
+GO:0008219,"cell death",0.458%, 0.126,-5.414,4.769,0.834,0.173,8219,0
+GO:0043467,"regulation of generation of precursor metabolites and energy",0.030%, 3.462, 5.092,3.578,0.846,0.183,43467,0
+GO:0006928,"movement of cell or subcellular component",0.973%, 0.313,-5.351,5.097,0.824,0.187,6928,0
+GO:0000278,"mitotic cell cycle",0.561%, 0.322,-7.202,4.857,0.805,0.190,278,0
+GO:0000910,"cytokinesis",0.315%,null,null,4.606,0.797,0.712,278,1
+GO:0022402,"cell cycle process",1.053%,null,null,5.131,0.795,0.800,278,1
+GO:0098586,"cellular response to virus",0.013%, 0.964, 4.223,3.236,0.928,0.199,98586,0
+GO:0051301,"cell division",1.230%, 0.385,-6.857,5.198,0.821,0.207,51301,0
+GO:0043086,"negative regulation of catalytic activity",0.400%, 3.052, 6.418,4.710,0.870,0.212,43086,0
+GO:0035305,"negative regulation of dephosphorylation",0.021%,null,null,3.434,0.796,0.899,43086,1
+GO:0010923,"negative regulation of phosphatase activity",0.018%,null,null,3.354,0.796,0.756,43086,1
+GO:0071444,"cellular response to pheromone",0.022%, 0.816, 4.200,3.445,0.908,0.213,71444,0
+GO:0016072,"rRNA metabolic process",0.965%, 0.155,-1.426,5.093,0.936,0.216,16072,0
+GO:0051235,"maintenance of location",0.129%, 3.055, 6.031,4.219,0.841,0.235,51235,0
+GO:0023051,"regulation of signaling",0.934%, 3.319, 7.094,5.079,0.830,0.247,23051,0
+GO:0009438,"methylglyoxal metabolic process",0.033%, 1.140,-4.976,3.626,0.836,0.259,9438,0
+GO:0006089,"lactate metabolic process",0.042%, 1.187,-5.652,3.728,0.837,0.264,6089,0
+GO:0042325,"regulation of phosphorylation",0.468%, 3.529, 5.805,4.779,0.810,0.281,42325,0
+GO:0019220,"regulation of phosphate metabolic process",0.579%,null,null,4.871,0.809,0.974,42325,1
+GO:0045936,"negative regulation of phosphate metabolic process",0.182%,null,null,4.368,0.767,0.878,42325,1
+GO:0010563,"negative regulation of phosphorus metabolic process",0.182%,null,null,4.368,0.769,0.877,42325,1
+GO:0010646,"regulation of cell communication",0.929%, 3.302, 6.986,5.076,0.812,0.283,10646,0
+GO:0099131,"ATP hydrolysis coupled ion transmembrane transport",0.996%, 1.801, 1.423,5.106,0.952,0.284,99131,0
+GO:0015991,"ATP hydrolysis coupled proton transport",0.163%,null,null,4.321,0.871,0.827,99131,1
+GO:0099132,"ATP hydrolysis coupled cation transmembrane transport",0.729%,null,null,4.971,0.953,0.956,99131,1
+GO:1904886,"beta-catenin destruction complex disassembly",0.000%, 4.709, 2.598,1.505,0.743,0.285,1904886,0
+GO:0090090,"negative regulation of canonical Wnt signaling pathway",0.025%,null,null,3.513,0.672,0.928,1904886,1
+GO:0060070,"canonical Wnt signaling pathway",0.061%,null,null,3.893,0.715,0.871,1904886,1
+GO:0030111,"regulation of Wnt signaling pathway",0.071%,null,null,3.960,0.694,0.896,1904886,1
+GO:0030177,"positive regulation of Wnt signaling pathway",0.028%,null,null,3.550,0.695,0.914,1904886,1
+GO:0030178,"negative regulation of Wnt signaling pathway",0.037%,null,null,3.681,0.666,0.931,1904886,1
+GO:0090263,"positive regulation of canonical Wnt signaling pathway",0.019%,null,null,3.386,0.700,0.911,1904886,1
+GO:0060828,"regulation of canonical Wnt signaling pathway",0.047%,null,null,3.780,0.700,0.718,1904886,1
+GO:0048583,"regulation of response to stimulus",1.120%, 2.418, 6.910,5.158,0.821,0.289,48583,0
+GO:0023041,"neuronal signal transduction",0.001%, 1.750, 7.185,2.004,0.828,0.306,23041,0
+GO:0045216,"cell-cell junction organization",0.051%, 3.735,-3.753,3.814,0.783,0.319,45216,0
+GO:0034329,"cell junction assembly",0.044%,null,null,3.754,0.777,0.978,45216,1
+GO:0019991,"septate junction assembly",0.002%,null,null,2.394,0.811,0.812,45216,1
+GO:0007043,"cell-cell junction assembly",0.025%,null,null,3.500,0.784,0.942,45216,1
+GO:0043297,"apical junction assembly",0.015%,null,null,3.297,0.789,0.915,45216,1
+GO:0034330,"cell junction organization",0.056%, 4.278,-4.871,3.855,0.794,0.323,34330,0
+GO:0043650,"dicarboxylic acid biosynthetic process",0.530%, 1.242,-6.893,4.833,0.811,0.340,43650,0
+GO:0030718,"germ-line stem cell population maintenance",0.005%,-7.214, 1.289,2.823,0.616,0.340,30718,0
+GO:0051174,"regulation of phosphorus metabolic process",0.580%, 3.338, 5.414,4.872,0.823,0.361,51174,0
+GO:0019933,"cAMP-mediated signaling",0.011%, 2.297, 6.692,3.169,0.799,0.365,19933,0
+GO:0035146,"tube fusion",0.001%,-6.594, 1.014,2.121,0.601,0.368,35146,0
+GO:0007189,"adenylate cyclase-activating G-protein coupled receptor signaling pathway",0.016%, 2.230, 6.623,3.320,0.798,0.375,7189,0
+GO:0009201,"ribonucleoside triphosphate biosynthetic process",0.577%, 1.698,-5.859,4.869,0.789,0.381,9201,0
+GO:0009142,"nucleoside triphosphate biosynthetic process",0.651%,null,null,4.922,0.787,0.798,9201,1
+GO:0046034,"ATP metabolic process",1.263%,null,null,5.210,0.773,0.875,9201,1
+GO:0006119,"oxidative phosphorylation",0.250%,null,null,4.507,0.787,0.748,9201,1
+GO:0010604,"positive regulation of macromolecule metabolic process",0.988%, 3.449, 6.544,5.103,0.816,0.383,10604,0
+GO:0031325,"positive regulation of cellular metabolic process",1.004%,null,null,5.110,0.801,0.979,10604,1
+GO:0051247,"positive regulation of protein metabolic process",0.463%,null,null,4.774,0.820,0.903,10604,1
+GO:0051241,"negative regulation of multicellular organismal process",0.211%,null,null,4.432,0.467,0.842,10604,1
+GO:0051240,"positive regulation of multicellular organismal process",0.303%,null,null,4.589,0.485,0.764,10604,1
+GO:0022008,"neurogenesis",0.423%,null,null,4.735,0.432,0.924,10604,1
+GO:2000026,"regulation of multicellular organismal development",0.416%,null,null,4.728,0.427,0.893,10604,1
+GO:0051960,"regulation of nervous system development",0.172%,null,null,4.345,0.439,0.829,10604,1
+GO:0061564,"axon development",0.129%,null,null,4.217,0.421,0.887,10604,1
+GO:0030182,"neuron differentiation",0.334%,null,null,4.632,0.434,0.963,10604,1
+GO:0009893,"positive regulation of metabolic process",1.048%,null,null,5.129,0.824,0.867,10604,1
+GO:0031175,"neuron projection development",0.220%,null,null,4.451,0.404,0.934,10604,1
+GO:0048667,"cell morphogenesis involved in neuron differentiation",0.148%,null,null,4.278,0.414,0.897,10604,1
+GO:0048666,"neuron development",0.270%,null,null,4.539,0.433,0.944,10604,1
+GO:0048699,"generation of neurons",0.366%,null,null,4.671,0.433,0.855,10604,1
+GO:0007010,"cytoskeleton organization",0.786%, 4.187,-2.057,5.004,0.846,0.396,7010,0
+GO:0050808,"synapse organization",0.070%, 4.087,-4.841,3.956,0.791,0.402,50808,0
+GO:0010669,"epithelial structure maintenance",0.006%,-4.796, 4.663,2.918,0.584,0.403,10669,0
+GO:0010883,"regulation of lipid storage",0.010%, 3.180, 4.722,3.114,0.841,0.412,10883,0
+GO:0032507,"maintenance of protein location in cell",0.057%,null,null,3.868,0.739,0.892,10883,1
+GO:0051651,"maintenance of location in cell",0.067%,null,null,3.937,0.738,0.902,10883,1
+GO:0045185,"maintenance of protein location",0.059%,null,null,3.880,0.838,0.799,10883,1
+GO:0007568,"aging",0.088%,-6.848,-0.204,4.052,0.612,0.416,7568,0
+GO:0009892,"negative regulation of metabolic process",1.260%, 3.292, 5.898,5.209,0.776,0.416,9892,0
+GO:0032269,"negative regulation of cellular protein metabolic process",0.423%,null,null,4.734,0.762,0.781,9892,1
+GO:0031324,"negative regulation of cellular metabolic process",1.165%,null,null,5.174,0.752,0.930,9892,1
+GO:0051248,"negative regulation of protein metabolic process",0.435%,null,null,4.747,0.779,0.806,9892,1
+GO:0048585,"negative regulation of response to stimulus",0.344%,null,null,4.645,0.755,0.765,9892,1
+GO:0051093,"negative regulation of developmental process",0.188%,null,null,4.381,0.500,0.721,9892,1
+GO:0051172,"negative regulation of nitrogen compound metabolic process",0.792%,null,null,5.007,0.773,0.841,9892,1
+GO:0007349,"cellularization",0.006%,-7.375, 1.107,2.881,0.599,0.419,7349,0
+GO:0006413,"translational initiation",0.518%, 0.710,-2.080,4.823,0.932,0.429,6413,0
+GO:0001700,"embryonic development via the syncytial blastoderm",0.009%,-6.712, 1.120,3.067,0.587,0.430,1700,0
+GO:0007424,"open tracheal system development",0.013%,-6.805, 1.166,3.221,0.578,0.449,7424,0
+GO:0060446,"branching involved in open tracheal system development",0.003%,null,null,2.637,0.571,0.782,7424,1
+GO:0035147,"branch fusion, open tracheal system",0.001%,null,null,2.117,0.594,0.821,7424,1
+GO:0098722,"asymmetric stem cell division",0.005%, 0.178,-3.271,2.836,0.848,0.460,98722,0
+GO:0007282,"cystoblast division",0.001%,null,null,2.064,0.545,0.844,98722,1
+GO:0045196,"establishment or maintenance of neuroblast polarity",0.001%,null,null,2.188,0.548,0.855,98722,1
+GO:0050968,"detection of chemical stimulus involved in sensory perception of pain",0.001%,-5.323, 3.810,1.973,0.697,0.463,50968,0
+GO:0097435,"supramolecular fiber organization",0.345%, 3.496,-5.259,4.646,0.768,0.463,97435,0
+GO:0010378,"temperature compensation of the circadian clock",0.000%, 1.502, 5.403,1.771,0.879,0.467,10378,0
+GO:0008340,"determination of adult lifespan",0.020%,-6.869, 1.174,3.413,0.577,0.469,8340,0
+GO:0010259,"multicellular organism aging",0.023%,null,null,3.477,0.573,0.834,8340,1
+GO:0090662,"ATP hydrolysis coupled transmembrane transport",1.001%, 1.634, 1.177,5.109,0.959,0.478,90662,0
+GO:0008038,"neuron recognition",0.012%,-6.766,-0.764,3.178,0.520,0.479,8038,0
+GO:0016198,"axon choice point recognition",0.002%,null,null,2.423,0.488,0.828,8038,1
+GO:0016199,"axon midline choice point recognition",0.002%,null,null,2.307,0.494,0.727,8038,1
+GO:0017145,"stem cell division",0.013%,-0.118,-4.160,3.214,0.845,0.482,17145,0
+GO:0006528,"asparagine metabolic process",0.078%, 1.286,-6.035,4.003,0.823,0.482,6528,0
+GO:0048737,"imaginal disc-derived appendage development",0.022%,-6.697, 1.052,3.443,0.568,0.483,48737,0
+GO:0048563,"post-embryonic animal organ morphogenesis",0.026%,null,null,3.527,0.536,0.974,48737,1
+GO:0035120,"post-embryonic appendage morphogenesis",0.021%,null,null,3.427,0.551,0.873,48737,1
+GO:0035107,"appendage morphogenesis",0.055%,null,null,3.846,0.542,0.925,48737,1
+GO:0048707,"instar larval or pupal morphogenesis",0.030%,null,null,3.587,0.547,0.961,48737,1
+GO:0030030,"cell projection organization",0.608%, 3.326,-4.601,4.892,0.759,0.490,30030,0
+GO:0007167,"enzyme linked receptor protein signaling pathway",0.279%, 2.458, 6.521,4.554,0.743,0.494,7167,0
+GO:0042332,"gravitaxis",0.002%, 0.521, 4.364,2.294,0.916,0.495,42332,0
+GO:0007552,"metamorphosis",0.031%,-7.021, 1.158,3.603,0.568,0.496,7552,0
+GO:0044087,"regulation of cellular component biogenesis",0.404%, 5.096, 2.697,4.715,0.773,0.499,44087,0
+GO:0001763,"morphogenesis of a branching structure",0.048%,-6.952, 1.121,3.790,0.560,0.500,1763,0
+GO:0030865,"cortical cytoskeleton organization",0.035%, 4.367,-2.339,3.650,0.862,0.501,30865,0
+GO:0007264,"small GTPase mediated signal transduction",0.485%, 2.544, 6.763,4.794,0.745,0.502,7264,0
+GO:0031329,"regulation of cellular catabolic process",0.093%, 4.560, 4.607,4.078,0.834,0.509,31329,0
+GO:0002165,"instar larval or pupal development",0.035%,-7.115, 1.189,3.650,0.554,0.511,2165,0
+GO:0009886,"post-embryonic animal morphogenesis",0.035%,null,null,3.647,0.550,0.805,2165,1
+GO:0048569,"post-embryonic animal organ development",0.036%,-7.423, 1.282,3.667,0.549,0.516,48569,0
+GO:0006530,"asparagine catabolic process",0.002%, 1.826,-4.077,2.350,0.847,0.525,6530,0
+GO:0009894,"regulation of catabolic process",0.146%, 4.050, 4.066,4.272,0.849,0.530,9894,0
+GO:0046578,"regulation of Ras protein signal transduction",0.194%, 2.403, 6.517,4.397,0.727,0.534,46578,0
+GO:0023057,"negative regulation of signaling",0.290%,null,null,4.570,0.709,0.789,46578,1
+GO:0010648,"negative regulation of cell communication",0.290%,null,null,4.571,0.749,0.790,46578,1
+GO:0007265,"Ras protein signal transduction",0.225%,null,null,4.461,0.751,0.860,46578,1
+GO:0046580,"negative regulation of Ras protein signal transduction",0.018%,null,null,3.369,0.724,0.823,46578,1
+GO:0051056,"regulation of small GTPase mediated signal transduction",0.218%,null,null,4.447,0.725,0.868,46578,1
+GO:0051058,"negative regulation of small GTPase mediated signal transduction",0.019%,null,null,3.385,0.724,0.825,46578,1
+GO:1902531,"regulation of intracellular signal transduction",0.547%,null,null,4.846,0.711,0.930,46578,1
+GO:1902532,"negative regulation of intracellular signal transduction",0.128%,null,null,4.216,0.693,0.928,46578,1
+GO:0009968,"negative regulation of signal transduction",0.275%,null,null,4.548,0.679,0.778,46578,1
+GO:0009966,"regulation of signal transduction",0.857%,null,null,5.041,0.703,0.874,46578,1
+GO:0001580,"detection of chemical stimulus involved in sensory perception of bitter taste",0.004%,-5.229, 3.830,2.720,0.671,0.536,1580,0
+GO:0006429,"leucyl-tRNA aminoacylation",0.054%, 1.103,-5.223,3.839,0.822,0.536,6429,0
+GO:0048878,"chemical homeostasis",0.543%, 2.823, 6.074,4.843,0.835,0.551,48878,0
+GO:0060541,"respiratory system development",0.054%,-7.348, 1.162,3.840,0.547,0.559,60541,0
+GO:0009888,"tissue development",0.491%,-6.906,-0.086,4.799,0.596,0.562,9888,0
+GO:0050793,"regulation of developmental process",1.205%,null,null,5.189,0.493,0.713,9888,1
+GO:0048468,"cell development",0.573%,null,null,4.866,0.492,0.807,9888,1
+GO:0030154,"cell differentiation",1.133%,null,null,5.162,0.490,0.780,9888,1
+GO:0048736,"appendage development",0.062%,-6.803, 1.072,3.901,0.551,0.564,48736,0
+GO:0009414,"response to water deprivation",0.022%, 0.808, 4.347,3.453,0.921,0.568,9414,0
+GO:0007613,"memory",0.022%,-6.738, 2.156,3.441,0.636,0.568,7613,0
+GO:0014706,"striated muscle tissue development",0.077%,-6.826,-0.103,3.995,0.612,0.573,14706,0
+GO:0060429,"epithelium development",0.300%,null,null,4.585,0.580,0.818,14706,1
+GO:0016331,"morphogenesis of embryonic epithelium",0.040%,null,null,3.707,0.522,0.882,14706,1
+GO:0002009,"morphogenesis of an epithelium",0.153%,null,null,4.294,0.545,0.861,14706,1
+GO:0060537,"muscle tissue development",0.081%,null,null,4.016,0.612,0.741,14706,1
+GO:0060562,"epithelial tube morphogenesis",0.100%,null,null,4.108,0.500,0.943,14706,1
+GO:0061138,"morphogenesis of a branching epithelium",0.042%,null,null,3.730,0.531,0.970,14706,1
+GO:0035239,"tube morphogenesis",0.112%,null,null,4.158,0.513,0.856,14706,1
+GO:0030707,"ovarian follicle cell development",0.018%,null,null,3.370,0.467,0.925,14706,1
+GO:0002066,"columnar/cuboidal epithelial cell development",0.031%,null,null,3.604,0.528,0.832,14706,1
+GO:0002065,"columnar/cuboidal epithelial cell differentiation",0.044%,null,null,3.756,0.533,0.711,14706,1
+GO:0007519,"skeletal muscle tissue development",0.038%,null,null,3.688,0.532,0.946,14706,1
+GO:0007444,"imaginal disc development",0.034%,null,null,3.644,0.525,0.738,14706,1
+GO:0048729,"tissue morphogenesis",0.180%,null,null,4.362,0.551,0.872,14706,1
+GO:0048754,"branching morphogenesis of an epithelial tube",0.035%,null,null,3.647,0.526,0.874,14706,1
+GO:0003002,"regionalization",0.117%,-7.523, 1.209,4.177,0.520,0.593,3002,0
+GO:0007351,"tripartite regional subdivision",0.009%,null,null,3.055,0.573,0.957,3002,1
+GO:0008595,"anterior/posterior axis specification, embryo",0.009%,null,null,3.055,0.570,0.879,3002,1
+GO:0035222,"wing disc pattern formation",0.004%,null,null,2.667,0.556,0.958,3002,1
+GO:0035220,"wing disc development",0.025%,null,null,3.509,0.525,0.877,3002,1
+GO:0007560,"imaginal disc morphogenesis",0.024%,null,null,3.493,0.510,0.988,3002,1
+GO:0035114,"imaginal disc-derived appendage morphogenesis",0.021%,null,null,3.436,0.564,0.989,3002,1
+GO:0007491,"sternite morphogenesis",0.023%,null,null,3.473,0.510,0.982,3002,1
+GO:0007478,"leg disc morphogenesis",0.004%,null,null,2.740,0.550,0.983,3002,1
+GO:0007480,"imaginal disc-derived leg morphogenesis",0.004%,null,null,2.736,0.545,0.799,3002,1
+GO:0060811,"intracellular mRNA localization involved in anterior/posterior axis specification",0.003%,null,null,2.624,0.570,0.763,3002,1
+GO:0009953,"dorsal/ventral pattern formation",0.034%,null,null,3.641,0.551,0.885,3002,1
+GO:0007476,"imaginal disc-derived wing morphogenesis",0.018%,null,null,3.368,0.512,0.944,3002,1
+GO:0007472,"wing disc morphogenesis",0.019%,null,null,3.379,0.516,0.968,3002,1
+GO:0008358,"maternal determination of anterior/posterior axis, embryo",0.005%,null,null,2.804,0.582,0.970,3002,1
+GO:0048190,"wing disc dorsal/ventral pattern formation",0.003%,null,null,2.544,0.562,0.755,3002,1
+GO:0007450,"dorsal/ventral pattern formation, imaginal disc",0.003%,null,null,2.577,0.561,0.945,3002,1
+GO:0007447,"imaginal disc pattern formation",0.005%,null,null,2.812,0.551,0.783,3002,1
+GO:0030866,"cortical actin cytoskeleton organization",0.032%, 4.180,-4.088,3.612,0.773,0.600,30866,0
+GO:0044837,"actomyosin contractile ring organization",0.015%,null,null,3.285,0.782,0.944,30866,1
+GO:0000915,"actomyosin contractile ring assembly",0.015%,null,null,3.285,0.741,0.944,30866,1
+GO:0006090,"pyruvate metabolic process",0.817%, 1.054,-6.283,5.021,0.802,0.603,6090,0
+GO:0045333,"cellular respiration",0.984%, 0.812,-6.584,5.101,0.802,0.606,45333,0
+GO:0015980,"energy derivation by oxidation of organic compounds",1.175%,null,null,5.178,0.800,0.853,45333,1
+GO:0022904,"respiratory electron transport chain",0.367%,null,null,4.673,0.814,0.859,45333,1
+GO:0042773,"ATP synthesis coupled electron transport",0.221%,null,null,4.452,0.786,0.878,45333,1
+GO:0042775,"mitochondrial ATP synthesis coupled electron transport",0.069%,null,null,3.949,0.802,0.892,45333,1
+GO:0007389,"pattern specification process",0.147%,-7.556, 1.205,4.274,0.528,0.617,7389,0
+GO:2000178,"negative regulation of neural precursor cell proliferation",0.005%, 3.054, 5.044,2.838,0.782,0.618,2000178,0
+GO:0007406,"negative regulation of neuroblast proliferation",0.003%,null,null,2.528,0.471,0.853,2000178,1
+GO:0007405,"neuroblast proliferation",0.015%,null,null,3.298,0.513,0.862,2000178,1
+GO:1902692,"regulation of neuroblast proliferation",0.007%,null,null,2.956,0.478,0.896,2000178,1
+GO:1903827,"regulation of cellular protein localization",0.132%, 3.774, 5.084,4.229,0.829,0.618,1903827,0
+GO:0050796,"regulation of insulin secretion",0.025%,null,null,3.500,0.694,0.856,1903827,1
+GO:0050709,"negative regulation of protein secretion",0.020%,null,null,3.419,0.711,0.808,1903827,1
+GO:0046676,"negative regulation of insulin secretion",0.005%,null,null,2.843,0.683,0.892,1903827,1
+GO:0046185,"aldehyde catabolic process",0.048%, 1.671,-4.421,3.790,0.832,0.620,46185,0
+GO:0000281,"mitotic cytokinesis",0.070%, 0.200,-6.029,3.953,0.809,0.626,281,0
+GO:0000912,"assembly of actomyosin apparatus involved in cytokinesis",0.015%,null,null,3.288,0.764,0.887,281,1
+GO:0032506,"cytokinetic process",0.192%,null,null,4.393,0.800,0.859,281,1
+GO:0031991,"regulation of actomyosin contractile ring contraction",0.007%,null,null,2.955,0.772,0.846,281,1
+GO:0061640,"cytoskeleton-dependent cytokinesis",0.080%,null,null,4.014,0.810,0.798,281,1
+GO:0009612,"response to mechanical stimulus",0.035%, 1.048, 4.643,3.647,0.915,0.627,9612,0
+GO:0051239,"regulation of multicellular organismal process",0.628%,-4.081, 4.939,4.906,0.528,0.630,51239,0
+GO:0007291,"sperm individualization",0.003%,-6.843,-0.270,2.588,0.520,0.631,7291,0
+GO:0007289,"spermatid nucleus differentiation",0.005%,null,null,2.810,0.490,0.785,7291,1
+GO:0009791,"post-embryonic development",0.163%,-7.056, 1.120,4.320,0.526,0.636,9791,0
+GO:0032272,"negative regulation of protein polymerization",0.045%, 5.376, 2.431,3.765,0.723,0.636,32272,0
+GO:0031333,"negative regulation of protein complex assembly",0.058%,null,null,3.873,0.720,0.820,32272,1
+GO:0030837,"negative regulation of actin filament polymerization",0.042%,null,null,3.736,0.627,0.963,32272,1
+GO:0035295,"tube development",0.178%,-7.121, 1.142,4.359,0.523,0.643,35295,0
+GO:0010001,"glial cell differentiation",0.038%,-6.402,-1.086,3.688,0.500,0.643,10001,0
+GO:0042063,"gliogenesis",0.050%,null,null,3.809,0.493,0.704,10001,1
+GO:0021782,"glial cell development",0.019%,null,null,3.378,0.511,0.922,10001,1
+GO:0042593,"glucose homeostasis",0.067%, 2.349, 6.529,3.937,0.851,0.644,42593,0
+GO:0045851,"pH reduction",0.015%,null,null,3.285,0.857,0.878,42593,1
+GO:0055067,"monovalent inorganic cation homeostasis",0.084%,null,null,4.033,0.848,0.772,42593,1
+GO:0006885,"regulation of pH",0.066%,null,null,3.931,0.845,0.710,42593,1
+GO:0051453,"regulation of intracellular pH",0.028%,null,null,3.551,0.760,0.913,42593,1
+GO:0051452,"intracellular pH reduction",0.015%,null,null,3.271,0.768,0.959,42593,1
+GO:0030004,"cellular monovalent inorganic cation homeostasis",0.042%,null,null,3.729,0.755,0.937,42593,1
+GO:0030641,"regulation of cellular pH",0.028%,null,null,3.560,0.760,0.951,42593,1
+GO:0006935,"chemotaxis",0.475%, 0.391, 4.494,4.785,0.891,0.646,6935,0
+GO:0042330,"taxis",0.480%,null,null,4.789,0.898,0.854,6935,1
+GO:0048870,"cell motility",0.633%,null,null,4.910,0.784,0.877,6935,1
+GO:0016477,"cell migration",0.293%,null,null,4.575,0.795,0.923,6935,1
+GO:0001654,"eye development",0.105%,-6.753, 1.042,4.131,0.519,0.652,1654,0
+GO:0090596,"sensory organ morphogenesis",0.080%,null,null,4.013,0.518,0.921,1654,1
+GO:0048592,"eye morphogenesis",0.053%,null,null,3.834,0.529,0.894,1654,1
+GO:0007507,"heart development",0.127%,null,null,4.211,0.517,0.712,1654,1
+GO:0009887,"animal organ morphogenesis",0.264%,null,null,4.530,0.491,0.778,1654,1
+GO:0007423,"sensory organ development",0.159%,null,null,4.309,0.510,0.734,1654,1
+GO:0048749,"compound eye development",0.020%,null,null,3.405,0.561,0.837,1654,1
+GO:0035162,"embryonic hemopoiesis",0.010%,-6.607, 0.986,3.092,0.565,0.655,35162,0
+GO:0002521,"leukocyte differentiation",0.095%,null,null,4.085,0.474,0.899,35162,1
+GO:1903706,"regulation of hemopoiesis",0.065%,null,null,3.918,0.463,0.876,35162,1
+GO:0048598,"embryonic morphogenesis",0.171%,null,null,4.341,0.511,0.896,35162,1
+GO:0030316,"osteoclast differentiation",0.018%,null,null,3.364,0.518,0.874,35162,1
+GO:0030099,"myeloid cell differentiation",0.074%,null,null,3.977,0.481,0.774,35162,1
+GO:0009792,"embryo development ending in birth or egg hatching",0.155%,null,null,4.298,0.518,0.732,35162,1
+GO:0002573,"myeloid leukocyte differentiation",0.038%,null,null,3.693,0.499,0.846,35162,1
+GO:0007173,"epidermal growth factor receptor signaling pathway",0.025%, 2.324, 6.499,3.505,0.779,0.655,7173,0
+GO:0038127,"ERBB signaling pathway",0.027%,null,null,3.546,0.777,0.774,7173,1
+GO:0035099,"hemocyte migration",0.001%,-5.883, 1.033,2.143,0.563,0.656,35099,0
+GO:0040001,"establishment of mitotic spindle localization",0.016%, 4.153,-2.892,3.322,0.740,0.656,40001,0
+GO:0051293,"establishment of spindle localization",0.019%,null,null,3.379,0.739,0.985,40001,1
+GO:0051653,"spindle localization",0.020%,null,null,3.406,0.813,0.707,40001,1
+GO:0019243,"methylglyoxal catabolic process to D-lactate via S-lactoyl-glutathione",0.021%, 2.162,-5.620,3.421,0.822,0.659,19243,0
+GO:0061727,"methylglyoxal catabolic process to lactate",0.021%,null,null,3.427,0.822,0.999,19243,1
+GO:0051596,"methylglyoxal catabolic process",0.021%,null,null,3.429,0.828,0.945,19243,1
+GO:2000027,"regulation of organ morphogenesis",0.044%,-4.925, 3.930,3.748,0.473,0.660,2000027,0
+GO:0009068,"aspartate family amino acid catabolic process",0.072%, 2.066,-5.993,3.964,0.816,0.661,9068,0
+GO:0048646,"anatomical structure formation involved in morphogenesis",0.409%,-6.954,-0.105,4.720,0.585,0.662,48646,0
+GO:0022603,"regulation of anatomical structure morphogenesis",0.830%,null,null,5.027,0.473,0.798,48646,1
+GO:0000902,"cell morphogenesis",0.948%,null,null,5.085,0.436,0.869,48646,1
+GO:0032989,"cellular component morphogenesis",0.994%,null,null,5.106,0.438,0.886,48646,1
+GO:0045595,"regulation of cell differentiation",0.345%,null,null,4.645,0.453,0.835,48646,1
+GO:0072359,"circulatory system development",0.235%,-7.501, 1.223,4.480,0.507,0.669,72359,0
+GO:0015988,"energy coupled proton transmembrane transport, against electrochemical gradient",0.170%, 1.853, 1.314,4.339,0.872,0.670,15988,0
+GO:0007391,"dorsal closure",0.005%,-7.421, 1.077,2.783,0.571,0.671,7391,0
+GO:0042274,"ribosomal small subunit biogenesis",0.255%, 4.294,-2.172,4.515,0.882,0.673,42274,0
+GO:0006364,"rRNA processing",0.952%,null,null,5.087,0.823,0.789,42274,1
+GO:0006029,"proteoglycan metabolic process",0.028%,-0.016,-0.355,3.550,0.950,0.676,6029,0
+GO:0042255,"ribosome assembly",0.164%, 4.335,-2.077,4.322,0.845,0.677,42255,0
+GO:0000462,"maturation of SSU-rRNA from tricistronic rRNA transcript (SSU-rRNA, 5.8S rRNA, LSU-rRNA)",0.066%,null,null,3.928,0.852,0.752,42255,1
+GO:0000028,"ribosomal small subunit assembly",0.020%,null,null,3.409,0.867,0.749,42255,1
+GO:0030100,"regulation of endocytosis",0.046%, 4.820, 2.180,3.774,0.761,0.684,30100,0
+GO:0042182,"ketone catabolic process",0.038%, 2.135,-5.423,3.693,0.826,0.685,42182,0
+GO:0048858,"cell projection morphogenesis",0.168%,-4.470,-2.734,4.333,0.485,0.691,48858,0
+GO:0010721,"negative regulation of cell development",0.055%,null,null,3.852,0.449,0.885,48858,1
+GO:0007409,"axonogenesis",0.118%,null,null,4.179,0.419,0.966,48858,1
+GO:0007411,"axon guidance",0.066%,null,null,3.930,0.397,0.925,48858,1
+GO:0050770,"regulation of axonogenesis",0.033%,null,null,3.625,0.406,0.880,48858,1
+GO:0050768,"negative regulation of neurogenesis",0.046%,null,null,3.775,0.401,0.904,48858,1
+GO:0050767,"regulation of neurogenesis",0.146%,null,null,4.272,0.400,0.956,48858,1
+GO:0000904,"cell morphogenesis involved in differentiation",0.188%,null,null,4.382,0.464,0.728,48858,1
+GO:0097485,"neuron projection guidance",0.068%,null,null,3.940,0.397,0.927,48858,1
+GO:0032990,"cell part morphogenesis",0.174%,null,null,4.349,0.493,0.716,48858,1
+GO:0045664,"regulation of neuron differentiation",0.117%,null,null,4.177,0.406,0.890,48858,1
+GO:0048812,"neuron projection morphogenesis",0.164%,null,null,4.323,0.409,0.990,48858,1
+GO:0051961,"negative regulation of nervous system development",0.052%,null,null,3.827,0.436,0.882,48858,1
+GO:0045596,"negative regulation of cell differentiation",0.128%,null,null,4.214,0.438,0.868,48858,1
+GO:0060284,"regulation of cell development",0.174%,null,null,4.350,0.456,0.813,48858,1
+GO:0031339,"negative regulation of vesicle fusion",0.001%, 5.345, 1.190,1.991,0.710,0.692,31339,0
+GO:0031631,"negative regulation of synaptic vesicle fusion to presynaptic membrane",0.000%,null,null,0.954,0.691,0.787,31339,1
+GO:0031630,"regulation of synaptic vesicle fusion to presynaptic membrane",0.000%,null,null,1.799,0.692,0.709,31339,1
+GO:0009790,"embryo development",0.311%,-7.086, 1.122,4.600,0.506,0.693,9790,0
+GO:0048513,"animal organ development",0.779%,null,null,5.000,0.468,0.888,9790,1
+GO:0007399,"nervous system development",0.582%,null,null,4.873,0.478,0.861,9790,1
+GO:0048731,"system development",1.264%,null,null,5.210,0.459,0.808,9790,1
+GO:0007293,"germarium-derived egg chamber formation",0.007%,-6.630,-0.615,2.932,0.510,0.696,7293,0
+GO:0016325,"oocyte microtubule cytoskeleton organization",0.002%,null,null,2.334,0.500,0.868,7293,1
+GO:0007308,"oocyte construction",0.007%,null,null,2.976,0.514,0.938,7293,1
+GO:0048599,"oocyte development",0.018%,null,null,3.366,0.492,0.825,7293,1
+GO:0007309,"oocyte axis specification",0.007%,null,null,2.963,0.486,0.937,7293,1
+GO:0007314,"oocyte anterior/posterior axis specification",0.005%,null,null,2.800,0.487,0.978,7293,1
+GO:0009994,"oocyte differentiation",0.020%,null,null,3.412,0.491,0.878,7293,1
+GO:0008103,"oocyte microtubule cytoskeleton polarization",0.001%,null,null,2.127,0.486,0.907,7293,1
+GO:0071214,"cellular response to abiotic stimulus",0.113%, 0.999, 4.894,4.162,0.895,0.696,71214,0
+GO:0000226,"microtubule cytoskeleton organization",0.293%, 3.499,-4.291,4.575,0.745,0.697,226,0
+GO:0031032,"actomyosin structure organization",0.059%,null,null,3.881,0.767,0.847,226,1
+GO:0007015,"actin filament organization",0.240%,null,null,4.488,0.745,0.949,226,1
+GO:0030036,"actin cytoskeleton organization",0.381%,null,null,4.690,0.737,0.843,226,1

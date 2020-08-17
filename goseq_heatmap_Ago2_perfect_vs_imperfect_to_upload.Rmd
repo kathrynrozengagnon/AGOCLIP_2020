@@ -12,11 +12,29 @@ library(magrittr)
 library(pheatmap)
 library(goseq)
 library(GenomicFeatures)
+library(GenomicRanges)
+library(BSgenome)
+library(Biostrings)
 ```
 
-##Read in eggNOG-mapper v2 tsv, mapping geneIDs to annotations and pathways 
+##Get GO terms for all transcripts using eggNOG-mapper v2 
 
 ```{r }
+#get all transcript sequences; gtf and genome fasta available at: https://www.vectorbase.org/downloads 
+gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
+
+TxDb <- makeTxDbFromGFF(gtffile)
+
+test <- exonsBy(TxDb, use.names = TRUE)
+
+AaegL5 <- readDNAStringSet("/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5_fixed.fa", format = "fasta", nrec=-1L)
+tx <- AaegL5[test]
+
+#writeXStringSet(tx, "/Users/kathryn/Reprocess_all_paper_datasets/alltranscripts.fa", format = "fasta")
+
+#fasta of all transcripts is available on my github; was uploaded to eggNOG-mapper v2: http://eggnog-mapper.embl.de/
+
+##tsv available in github; 
 tsv <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/job_MM_e0ep_7ci_annotations.tsv", header = FALSE, sep ="\t",comment.char = "",skip = 4)
 tsvv <- tsv %>% dplyr::select(V1,V7) %>% mutate(Gene=gsub("-..","",V1))
 tsvv %>% group_by(Gene) %>% mutate(newGO=paste(V7,sep=","))
@@ -28,42 +46,46 @@ names(myVec) <- paste0(tsvv$Gene,"_ID")
 jsjs <- unlist(myVec)
 myGOFrame <- data.frame(ID=gsub("_ID.*","",names(jsjs)),GO=jsjs,row.names = NULL)
 myss <- as.vector(myGOFrame[,1])
+```
 
-## get transcript lengths 
-gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
+##Get transcript length and gene sets for goseq
 
-TxDb <- makeTxDbFromGFF(gtffile)
-
+```{r }
+## get transcript lengths; 
 myLens <- transcriptLengths(TxDb) %>% group_by(gene_id) %>% summarise(gene_len=median(tx_len))
 myLens2 <- as.vector(myLens$gene_len)
 names(myLens2) <- myLens$gene_id
 
 ##get gene lists
-all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final.txt", header = TRUE, sep="\t")
+all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn2.txt", header = TRUE, sep="\t")
 all_merge_aegypti_Ago2 <- subset(all_with_pats, all_with_pats$aegypti_Ago2_BCsample > 0)
 aegypti_perf <- all_merge_aegypti_Ago2[grepl("novel|aae", all_merge_aegypti_Ago2$Pperfect_18mer_target),]
-aegypti_perf <- aegypti_perf[grepl("common-Ago2|aegypti-Ago2", aegypti_perf$Pperfect_18mer_target),]
+aegypti_perf <- aegypti_perf[grepl("common-Ago2|aegypti-Ago2", aegypti_perf$Pperfect_18mer_target),] #55
 
 Aag2_perf <- subset(all_with_pats, all_with_pats$Aag2_Ago2_BCsample > 0)
 Aag2_perf <-Aag2_perf[grepl("novel|aae", Aag2_perf$Pperfect_18mer_target),]
-Aag2_perf <-Aag2_perf[grepl("common-Ago2|Aag2-Ago2", Aag2_perf$Pperfect_18mer_target),]
+Aag2_perf <-Aag2_perf[grepl("common-Ago2|Aag2-Ago2", Aag2_perf$Pperfect_18mer_target),] #162
 
 
 aegypti_pat_chim <- subset(all_with_pats, all_with_pats$aegypti_Ago2_BCsample > 0)
 aegypti_pat_chim <- rbind( aegypti_pat_chim[grepl("Ago2_both|Ago2_aegypti", aegypti_pat_chim$top_smallRNA_chimera),], aegypti_pat_chim[grepl("Ago2_both|Ago2_aegypti", aegypti_pat_chim$Ptop_smallRNA),])
-aegypti_pat_chim<- aegypti_pat_chim[!aegypti_pat_chim$peakID %in% aegypti_perf$peakID,]
+aegypti_pat_chim<- aegypti_pat_chim[!aegypti_pat_chim$peakID %in% aegypti_perf$peakID,] 
 
 Aag2_pat_chim <- subset(all_with_pats, all_with_pats$Aag2_Ago2_BCsample > 0)
 Aag2_pat_chim <- rbind(Aag2_pat_chim[grepl("Ago2_both|Ago2_cells", Aag2_pat_chim$top_smallRNA_chimera),], Aag2_pat_chim[grepl("Ago2_both|Ago2_cells", Aag2_pat_chim$Ptop_smallRNA),])
 Aag2_pat_chim<- Aag2_pat_chim[!Aag2_pat_chim$peakID %in% Aag2_perf$peakID,]
+```
 
-##goseq for each geneset
+##Goseq, Table S7
+
+```{r }
+##goseq for each gene set
 aegypti_perf_Ago2 <- aegypti_perf$geneId
 aegypti_perf_Ago2 <- aegypti_perf_Ago2[!is.na(aegypti_perf_Ago2)] 
 g <- myss %in% as.vector(aegypti_perf_Ago2)+0
 names(g) <- myss
 g <- g[!duplicated(names(g))]
-length(which(g==1)) #12
+length(which(g==1))
 
 xcscswcd <- nullp(g,NULL,NULL,bias.data = myLens2[match(names(g),names(myLens2),incomparables = 0)])
 GOaegypti_Ago2_perf <- goseq(xcscswcd,NULL,NULL,gene2cat = myGOFrame)
@@ -73,7 +95,7 @@ aegypti_pat_chim_Ago2 <- aegypti_pat_chim_Ago2[!is.na(aegypti_pat_chim_Ago2)]
 h <- myss %in% as.vector(aegypti_pat_chim_Ago2)+0
 names(h) <- myss
 h <- h[!duplicated(names(h))]
-length(which(h==1)) #1154
+length(which(h==1))
 
 xcscswcd <- nullp(h,NULL,NULL,bias.data = myLens2[match(names(h),names(myLens2),incomparables = 0)])
 GOaegypti_Ago2_pat_chim <- goseq(xcscswcd,NULL,NULL,gene2cat = myGOFrame)
@@ -110,30 +132,39 @@ col.names <- colnames(go_merge2)
 col.names <- c(col.names[1], gsub(".x", "_aegypti_pat_chim", col.names[2:5]),gsub(".y", "_aegypti_perf", col.names[6:9])) 
 go_merge2 <- setNames(go_merge2, col.names)
 go_merge <- merge(go_merge, go_merge2, by="category")
-#write.table(go_merge, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S7.txt", col.names = TRUE, row.names = FALSE, sep ="\t", quote = FALSE)
-#select significant
-go_merge <- subset(go_merge, go_merge$over_represented_pvalue_cells_pat_chim <0.05 | go_merge$under_represented_pvalue_cells_pat_chim < 0.05 | go_merge$over_represented_pvalue_cells_perf < 0.05 | go_merge$under_represented_pvalue_cells_perf <0.05 | go_merge$over_represented_pvalue_aegypti_pat_chim < 0.05 | go_merge$under_represented_pvalue_aegypti_pat_chim <0.05 | go_merge$over_represented_pvalue_aegypti_perf <0.05 | go_merge$under_represented_pvalue_aegypti_perf <0.05)
 
-#just keep overrepresented
+col.names <- colnames(go_merge)
+col.names <- gsub("perf", "perfect", col.names)
+col.names <- gsub("pat_chim", "imperfect", col.names)
+go_merge <- setNames(go_merge, col.names)
+
+#Table S7:
+#write.table(go_merge, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S7.txt", col.names = TRUE, row.names = FALSE, sep ="\t", quote = FALSE)
+
+#select significant overrepresented 
+go_merge <- subset(go_merge, go_merge$over_represented_pvalue_cells_imperfect <0.01 |  go_merge$over_represented_pvalue_cells_perfect < 0.01 |  go_merge$over_represented_pvalue_aegypti_imperfect < 0.01 | go_merge$over_represented_pvalue_aegypti_perfect <0.01 )
 go_merge_over_pval <- go_merge[,c(1:2, 4,8,12,16)]
 row.names(go_merge_over_pval) <- go_merge_over_pval[,c(2)]
-go_merge_over_pval <- subset(go_merge_over_pval, go_merge_over_pval$over_represented_pvalue_cells_pat_chim <0.01 | go_merge_over_pval$over_represented_pvalue_cells_perf <0.01 | go_merge_over_pval$over_represented_pvalue_aegypti_pat_chim <0.01 | go_merge_over_pval$over_represented_pvalue_aegypti_perf <0.01)
-#write.table(go_merge_over_pval[,1], "/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/GOsem_up.txt", col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
-go_merge_over_pval <- as.matrix(go_merge_over_pval[,c(3:6)] )#take higher significance because many terms 
 
-#simplfy by semantic redundancy, keep the most unique terms (from REVIGO, only BPs)
-BP <- read.csv("/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/REVIGO_FINAL.csv", header = TRUE)
-#BP2 <- read.csv("/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/REVIGO_sig_over_BP_thru250.csv", header = TRUE)
-#BP <- rbind(BP, BP2)
+#write terms for collapse by semantic redundancy
+#write.table(go_merge_over_pval$category, "/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/GOsem_up.txt", col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE) 
+#this file is available on github
+
+go_merge_over_pval <- as.matrix(go_merge_over_pval[,c(3:6)] )
+
+#"GOsem_up.txt" was uploaded to REVIGO to simplify by semantic redundancy: http://revigo.irb.hr/ 
+#REVIGO output was downloaded, only considering biological processes (BPs))
+
+BP <- read.csv("/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/REVIGO_FINAL.csv", header = TRUE) #this file is available on my github
 
 BP <- BP[!grepl("null", BP$plot_X),]
 go_merge_over_pval <- go_merge_over_pval[row.names(go_merge_over_pval) %in% BP$description,] 
 
-#select 10 most significant terms for each set
-go_merge_over_pval_filt <- as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-10, over_represented_pvalue_aegypti_perf)
-go_merge_over_pval_filt <- rbind(go_merge_over_pval_filt, as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-10, over_represented_pvalue_aegypti_pat_chim))
-go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-10, over_represented_pvalue_cells_pat_chim))
-go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-10, over_represented_pvalue_cells_perf))
+#select 15 most significant terms for each set
+go_merge_over_pval_filt <- as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_aegypti_perfect)
+go_merge_over_pval_filt <- rbind(go_merge_over_pval_filt, as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_aegypti_imperfect))
+go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_cells_imperfect))
+go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_cells_perfect))
 topVarGenes <- unique(go_merge_over_pval_filt$GO)
 
 #make metadata for heatmap

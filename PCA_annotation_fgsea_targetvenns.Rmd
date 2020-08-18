@@ -195,155 +195,7 @@ all$Aag2_rIgG_BCsample <- apply(all[Aag2rIgGb], 1, function(x) length(which(x>0)
 all$Aag2_mIgG_BCsample <- apply(all[Aag2mIgGb], 1, function(x) length(which(x>0)))
 
 #write.table(all, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_add_filtering.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
-
-#final filtering: peakBC > 0 and Ab is 10X above sample, nhi = 2 or more 
-Aag2 <- subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE" | all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
-row.names(Aag2) <- Aag2$peakID
-
-aegypti <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE" | all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
-row.names(aegypti) <- aegypti$peakID
-
-
 ```
-
-##Cells PCA, Figure 3E
-
-```{r}
-cell_samples <- subset(all_samples, all_samples$Lysate=="Aag2")
-cell_samples$Lysate <- NULL
-
-m_cells <- row.names(cell_samples)
-#check that sample names match
-m_cells %in% colnames(Aag2)
-Aag2x <- Aag2[m_cells] 
-
-dds_Aag2 <- DESeqDataSetFromMatrix(countData = Aag2x, colData = cell_samples, design = ~ Experiment + Antibody) 
-
-dds_Aag2 <- estimateSizeFactors(dds_Aag2,type="poscounts")
-
-Aag2_rld <- varianceStabilizingTransformation(dds_Aag2)
-
-b <-  plotPCA(Aag2_rld,intgroup=c("Experiment", "Antibody"), ntop=1E6, returnData=TRUE)
-
-#reorder levels so can set colors 
-b$Antibody <- factor(b$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
-#set PC2 to be consistent with all unfiltered PCA
-b$PC2 <- (b$PC2)*-1
-#calculate variation as a rounded percent
-percentVar <- round(100 * attr(b, "percentVar")) 
- 
-ggplot(b, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
-geom_point(size =3) + 
-scale_color_manual(values =c("#1B0B80", "#64C3DB", "#8A0F09", "#F87F11"), name="Antibody") +
-xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
-ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
-```
-
-##aegypti PCA, Figure 3H
-
-```{r}
-aegypti_samples <- subset(all_samples, all_samples$Lysate=="aegypti")
-aegypti_samples$Lysate <- NULL
-
-#have 2 IgG samples with all zeros - need to drop or will give an error in the PCA
-drop <- c("KRG092419_aegypti_mIgG_Exp7A", "KRG092419_aegypti_mIgG_Exp7B")
-aegypti_samples <- aegypti_samples[!rownames(aegypti_samples) %in% drop, ]
-m_aegypti <- row.names(aegypti_samples)
-
-#check sample names match
-m_aegypti %in% colnames(aegypti)
-
-aegypti_x <- aegypti[m_aegypti]
-
-dds_aegypti <- DESeqDataSetFromMatrix(countData = aegypti_x, colData = aegypti_samples, design = ~ Experiment + Antibody) #
-
-dds_aegypti  <- estimateSizeFactors(dds_aegypti, type="poscounts")
-
-rld_aegypti <- varianceStabilizingTransformation(dds_aegypti)
-
-d <-  plotPCA(rld_aegypti ,intgroup=c("Experiment", "Antibody"), ntop=10^6, returnData=TRUE)
-
-#reorder levels so can set colors 
-d$Antibody <- factor(d$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
-#set PC2 to be consistent with all unfiltered PCA
-d$PC2 <- (d$PC2)*-1
-#calculate variation as a rounded percent
-percentVar <- round(100 * attr(d, "percentVar")) 
-
-
-ggplot(d, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
-geom_point(size =3) + 
-scale_color_manual(values =c("#3360A9", "#D2E1E5", "#FA0F0C", "#F4DBC7"), name="Antibody") +
-xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
-ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
-```
-
-##fgsea of targeted genes/pathways that drive Ago1 and Ago seperation by PCA; Figures 3F and 3I and Tables S4 and S5
-
-```{r}
-#read in eggNOG-mapper v2 tsv, mapping geneIDs to annotations and pathways (see goseq script for more details on transcript annotation/GO terms); annotation tsv available on my github 
-tsv <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/job_MM_e0ep_7ci_annotations.tsv", header = FALSE, sep ="\t",comment.char = "",skip = 4)
-tsvv <- tsv %>% dplyr::select(V1,V7) %>% mutate(Gene=gsub("-..","",V1)) %>% dplyr::select(-V1)
-tsvvGOs <- as.vector(tsvv$V7)
-names(tsvvGOs) <- paste0(tsvv$Gene,"_")
-
-temp <- strsplit(tsvvGOs,",") %>% unlist 
-newFrame <- data.frame(ID=gsub("_.*","",names(temp)),GO=unname(temp))
-temp <- newFrame %>% group_by(GO) %>% dplyr::mutate(newGO=paste(ID,sep=",",collapse=";"))
-
-gt <- lapply(unique(newFrame$GO),function(x)unique(as.vector(newFrame[newFrame$GO %in% x,"ID"])))
-names(gt) <- unique(newFrame$GO)
-
-#get PCA loadings for PC2 by peak for Aag2
-myRotation <- prcomp(t(assay(Aag2_rld)))$rotation
-nflkflerf <- GRanges(gsub("_","-",rownames(myRotation)))
-mcols(nflkflerf) <- data.frame(Names=rownames(myRotation),myRotation)
-Aag2_noNA <- Aag2[!is.na(Aag2$annotation),]
-mergeAag2 <- merge(Aag2_noNA, nflkflerf, by.x="peakID", by.y="Names", all.x = TRUE)
-mergeAag2$PC2 <- (mergeAag2$PC2)*-1
-eff <- mergeAag2[order(abs(mergeAag2$PC2),decreasing = TRUE),]
-eff <- eff[match(unique(eff$geneId),eff$geneId),]
-#write.table(eff,"/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/Aag2_merged_PC2_selected_peaks_unique_genes.txt",quote = FALSE, sep = "\t", col.names = TRUE ) #table available upon request
-myStats <- eff$PC2
-names(myStats) <- eff$geneId
-fef <- fgsea(pathways = gt,
-             stats=myStats,nperm = 1000)
-
-ewfwe <- lapply(as.list(GOTERM),Term) %>% unlist 
-dvsvs <- data.frame(names(ewfwe),unname(ewfwe))
-colnames(dvsvs) <- c("pathway","Term")
-
-sdvcAag2 <- merge(fef,dvsvs,by="pathway",all.x=TRUE) %>% arrange(pval)
-sdvcAag2$leadingEdge <- unlist(lapply(sdvcAag2$leadingEdge,function(x)paste0(x, collapse=":")))
-sdvcAag2 <- sdvcAag2[order(sdvcAag2$NES,decreasing = TRUE),]
-#have many pathways with exactly the same leading edge genes - for these, all p-values, NES, and sizes are exactly the same, so collapse
-
-testAag2 <- sdvcAag2 %>% dplyr::group_by(leadingEdge) %>% dplyr::top_n(1, NES) %>% dplyr::summarise(Term = paste0(Term, collapse=","),pval=dplyr::first(pval),size= dplyr::first(size), NES =dplyr::first(NES)) #this is Table S4
-
-#get PCA loadings for PC2 by peak for aegypti
-myRotation <- prcomp(t(assay(rld_aegypti)))$rotation
-aegypti_noNA <- aegypti[!is.na(aegypti$annotation),]
-mergeaegypti <- merge(aegypti_noNA, nflkflerf, by.x="peakID", by.y="Names", all.x = TRUE)
-mergeaegypti$PC2 <- (mergeaegypti$PC2)*-1
-eff <- mergeaegypti[order(abs(mergeaegypti$PC2),decreasing = TRUE),] 
-eff <- eff[match(unique(eff$geneId),eff$geneId),]
-
-#write.table(eff,"/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/aegypti_merged_PC2_selected_peaks_unique_genes.txt",quote = FALSE, sep = "\t", col.names = TRUE ) # table available upon request
-myStats <- eff$PC2
-names(myStats) <- eff$geneId
-fef <- fgsea(pathways = gt,
-             stats=myStats,nperm = 1000)
-
-
-sdvcaegypti <- merge(fef,dvsvs,by="pathway",all.x=TRUE) %>% arrange(pval)
-sdvcaegypti$leadingEdge <- unlist(lapply(sdvcaegypti$leadingEdge,function(x)paste0(x, collapse=":")))
-sdvcaegypti <- sdvcaegypti[order(sdvcaegypti$NES,decreasing = TRUE),]
-#have many pathways with exactly the same leading edge genes - for these, all p-values, NES, and sizes are exactly the same, so collapse
-
-testaegypti <- sdvcaegypti %>% group_by(leadingEdge) %>% top_n(1, NES) %>% dplyr::summarise(Term = paste0(Term, collapse=","),pval=dplyr::first(pval),size=dplyr::first(size), NES =dplyr::first(NES)) #this is Table S5
-
-```
-
 
 ##Test filtering conditions, Figure S2A-C
 
@@ -555,7 +407,153 @@ bb[[i]] <- as.data.frame(bb[[i]])
 ann_mat <- rbindlist(ann_mat, idcol = TRUE)
 #write.table(ann_mat, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Ago2_distal_intergenic_enrichment_filtering.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep ="\t")
 
+#final filtering: peakBC > 0 and Ab is 10X above sample, nhi = 2 or more 
+Aag2 <- subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE" | all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
+row.names(Aag2) <- Aag2$peakID
+
+aegypti <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE" | all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
+row.names(aegypti) <- aegypti$peakID
+
 ```
+
+##Cells PCA, Figure 3E
+
+```{r}
+cell_samples <- subset(all_samples, all_samples$Lysate=="Aag2")
+cell_samples$Lysate <- NULL
+
+m_cells <- row.names(cell_samples)
+#check that sample names match
+m_cells %in% colnames(Aag2)
+Aag2x <- Aag2[m_cells] 
+
+dds_Aag2 <- DESeqDataSetFromMatrix(countData = Aag2x, colData = cell_samples, design = ~ Experiment + Antibody) 
+
+dds_Aag2 <- estimateSizeFactors(dds_Aag2,type="poscounts")
+
+Aag2_rld <- varianceStabilizingTransformation(dds_Aag2)
+
+b <-  plotPCA(Aag2_rld,intgroup=c("Experiment", "Antibody"), ntop=1E6, returnData=TRUE)
+
+#reorder levels so can set colors 
+b$Antibody <- factor(b$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
+#set PC2 to be consistent with all unfiltered PCA
+b$PC2 <- (b$PC2)*-1
+#calculate variation as a rounded percent
+percentVar <- round(100 * attr(b, "percentVar")) 
+ 
+ggplot(b, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
+geom_point(size =3) + 
+scale_color_manual(values =c("#1B0B80", "#64C3DB", "#8A0F09", "#F87F11"), name="Antibody") +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
+ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
+```
+
+##aegypti PCA, Figure 3H
+
+```{r}
+aegypti_samples <- subset(all_samples, all_samples$Lysate=="aegypti")
+aegypti_samples$Lysate <- NULL
+
+#have 2 IgG samples with all zeros - need to drop or will give an error in the PCA
+drop <- c("KRG092419_aegypti_mIgG_Exp7A", "KRG092419_aegypti_mIgG_Exp7B")
+aegypti_samples <- aegypti_samples[!rownames(aegypti_samples) %in% drop, ]
+m_aegypti <- row.names(aegypti_samples)
+
+#check sample names match
+m_aegypti %in% colnames(aegypti)
+
+aegypti_x <- aegypti[m_aegypti]
+
+dds_aegypti <- DESeqDataSetFromMatrix(countData = aegypti_x, colData = aegypti_samples, design = ~ Experiment + Antibody) #
+
+dds_aegypti  <- estimateSizeFactors(dds_aegypti, type="poscounts")
+
+rld_aegypti <- varianceStabilizingTransformation(dds_aegypti)
+
+d <-  plotPCA(rld_aegypti ,intgroup=c("Experiment", "Antibody"), ntop=10^6, returnData=TRUE)
+
+#reorder levels so can set colors 
+d$Antibody <- factor(d$Antibody, levels = c("Ago1","rIgG",  "Ago2", "mIgG"))
+#set PC2 to be consistent with all unfiltered PCA
+d$PC2 <- (d$PC2)*-1
+#calculate variation as a rounded percent
+percentVar <- round(100 * attr(d, "percentVar")) 
+
+
+ggplot(d, aes(x = PC1, y = PC2, color = Antibody, label=name)) + 
+geom_point(size =3) + 
+scale_color_manual(values =c("#3360A9", "#D2E1E5", "#FA0F0C", "#F4DBC7"), name="Antibody") +
+xlab(paste0("PC1: ", percentVar[1], "% variance")) + 
+ylab(paste0("PC2: ", percentVar[2], "% variance")) + theme_bw()
+```
+
+##fgsea of targeted genes/pathways that drive Ago1 and Ago seperation by PCA; Figures 3F and 3I and Tables S4 and S5
+
+```{r}
+#read in eggNOG-mapper v2 tsv, mapping geneIDs to annotations and pathways (see goseq script for more details on transcript annotation/GO terms); annotation tsv available on my github 
+tsv <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/job_MM_e0ep_7ci_annotations.tsv", header = FALSE, sep ="\t",comment.char = "",skip = 4)
+tsvv <- tsv %>% dplyr::select(V1,V7) %>% mutate(Gene=gsub("-..","",V1)) %>% dplyr::select(-V1)
+tsvvGOs <- as.vector(tsvv$V7)
+names(tsvvGOs) <- paste0(tsvv$Gene,"_")
+
+temp <- strsplit(tsvvGOs,",") %>% unlist 
+newFrame <- data.frame(ID=gsub("_.*","",names(temp)),GO=unname(temp))
+temp <- newFrame %>% group_by(GO) %>% dplyr::mutate(newGO=paste(ID,sep=",",collapse=";"))
+
+gt <- lapply(unique(newFrame$GO),function(x)unique(as.vector(newFrame[newFrame$GO %in% x,"ID"])))
+names(gt) <- unique(newFrame$GO)
+
+#get PCA loadings for PC2 by peak for Aag2
+myRotation <- prcomp(t(assay(Aag2_rld)))$rotation
+nflkflerf <- GRanges(gsub("_","-",rownames(myRotation)))
+mcols(nflkflerf) <- data.frame(Names=rownames(myRotation),myRotation)
+Aag2_noNA <- Aag2[!is.na(Aag2$annotation),]
+mergeAag2 <- merge(Aag2_noNA, nflkflerf, by.x="peakID", by.y="Names", all.x = TRUE)
+mergeAag2$PC2 <- (mergeAag2$PC2)*-1
+eff <- mergeAag2[order(abs(mergeAag2$PC2),decreasing = TRUE),]
+eff <- eff[match(unique(eff$geneId),eff$geneId),]
+#write.table(eff,"/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/Aag2_merged_PC2_selected_peaks_unique_genes.txt",quote = FALSE, sep = "\t", col.names = TRUE ) #table available upon request
+myStats <- eff$PC2
+names(myStats) <- eff$geneId
+fef <- fgsea(pathways = gt,
+             stats=myStats,nperm = 1000)
+
+ewfwe <- lapply(as.list(GOTERM),Term) %>% unlist 
+dvsvs <- data.frame(names(ewfwe),unname(ewfwe))
+colnames(dvsvs) <- c("pathway","Term")
+
+sdvcAag2 <- merge(fef,dvsvs,by="pathway",all.x=TRUE) %>% arrange(pval)
+sdvcAag2$leadingEdge <- unlist(lapply(sdvcAag2$leadingEdge,function(x)paste0(x, collapse=":")))
+sdvcAag2 <- sdvcAag2[order(sdvcAag2$NES,decreasing = TRUE),]
+#have many pathways with exactly the same leading edge genes - for these, all p-values, NES, and sizes are exactly the same, so collapse
+
+testAag2 <- sdvcAag2 %>% dplyr::group_by(leadingEdge) %>% dplyr::top_n(1, NES) %>% dplyr::summarise(Term = paste0(Term, collapse=","),pval=dplyr::first(pval),size= dplyr::first(size), NES =dplyr::first(NES)) #this is Table S4
+
+#get PCA loadings for PC2 by peak for aegypti
+myRotation <- prcomp(t(assay(rld_aegypti)))$rotation
+aegypti_noNA <- aegypti[!is.na(aegypti$annotation),]
+mergeaegypti <- merge(aegypti_noNA, nflkflerf, by.x="peakID", by.y="Names", all.x = TRUE)
+mergeaegypti$PC2 <- (mergeaegypti$PC2)*-1
+eff <- mergeaegypti[order(abs(mergeaegypti$PC2),decreasing = TRUE),] 
+eff <- eff[match(unique(eff$geneId),eff$geneId),]
+
+#write.table(eff,"/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/aegypti_merged_PC2_selected_peaks_unique_genes.txt",quote = FALSE, sep = "\t", col.names = TRUE ) # table available upon request
+myStats <- eff$PC2
+names(myStats) <- eff$geneId
+fef <- fgsea(pathways = gt,
+             stats=myStats,nperm = 1000)
+
+
+sdvcaegypti <- merge(fef,dvsvs,by="pathway",all.x=TRUE) %>% arrange(pval)
+sdvcaegypti$leadingEdge <- unlist(lapply(sdvcaegypti$leadingEdge,function(x)paste0(x, collapse=":")))
+sdvcaegypti <- sdvcaegypti[order(sdvcaegypti$NES,decreasing = TRUE),]
+#have many pathways with exactly the same leading edge genes - for these, all p-values, NES, and sizes are exactly the same, so collapse
+
+testaegypti <- sdvcaegypti %>% group_by(leadingEdge) %>% top_n(1, NES) %>% dplyr::summarise(Term = paste0(Term, collapse=","),pval=dplyr::first(pval),size=dplyr::first(size), NES =dplyr::first(NES)) #this is Table S5
+
+```
+
 
 ##Make annotation pie charts on final filtered peaks, Figure 3A-D
 

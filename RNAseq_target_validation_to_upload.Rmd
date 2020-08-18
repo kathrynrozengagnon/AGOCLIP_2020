@@ -122,11 +122,13 @@ mycolors <- list(Group = mycolors)
 mycolors$Paired <- c("gray50", "black")
 names(mycolors$Paired) <- c("Paired", "Single")
 
-palAgo1 <- colorRampPalette(c( "#08306B","white", "darkorange"))
+paletteLength <- 50
+palAgo1 <- colorRampPalette(c( "#08306B","white", "darkorange"))(paletteLength)
+myBreaks <- c(seq(min(mhCountsAgo1), 0, length.out=ceiling(paletteLength/2) + 1), seq(max(mhCountsAgo1)/paletteLength, max(mhCountsAgo1), length.out=floor(paletteLength/2)))
 
 pheatmap:::pheatmap(mhCountsAgo1,
                     annotation_col = metaData2,
-                     color = palAgo1(255),
+                     color = palAgo1,
                     cluster_cols = TRUE,cluster_rows = TRUE, scale="none", fontsize_col = 6, annotation_colors = mycolors, treeheight_row = 20, fontsize = 6, cellheight = 25, cellwidth = 6)
 
 ```
@@ -310,11 +312,14 @@ mycolors <- list(Group = mycolors)
 mycolors$Paired <- c("gray50", "black")
 names(mycolors$Paired) <- c("Paired", "Single")
 
-palAgo2 <- colorRampPalette(c("darkred", "white", "darkorange"))
+paletteLength <- 50
+palAgo2 <- colorRampPalette(c("darkred", "white", "darkorange"))(paletteLength)
+myBreaks <- c(seq(min(mhCountsAgo2), 0, length.out=ceiling(paletteLength/2) + 1), seq(max(mhCountsAgo2)/paletteLength, max(mhCountsAgo2), length.out=floor(paletteLength/2)))
+
 
 pheatmap:::pheatmap(mhCountsAgo2,
                     annotation_col = metaData2,
-                     color = palAgo2(255),
+                     color = palAgo2, breaks = myBreaks,
                     cluster_cols = TRUE,cluster_rows = TRUE, scale="none", fontsize_col = 6, annotation_colors = mycolors, treeheight_row = 20, fontsize = 6, cellheight = 25, cellwidth = 6)
 
 ```

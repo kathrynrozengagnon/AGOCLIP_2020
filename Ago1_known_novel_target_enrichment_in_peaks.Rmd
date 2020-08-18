@@ -715,7 +715,7 @@ res_Ago1_av_aegypti_known_pats <- subset(res_Ago1_av_known, res_Ago1_av_known$ae
 #all peak ranges
 res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells.fa",,
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,

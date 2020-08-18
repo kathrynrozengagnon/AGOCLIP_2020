@@ -188,6 +188,7 @@ allctrlGR <- GenomicRanges::shift(allGR, 4000)  #note, annotations are no longer
 ##Search top 10 most abundant known miRNA family 6mers in mosquitoes
 
 ```{r}
+##genome fasta available at: https://www.vectorbase.org/downloads
 #all peak ranges
 res <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",

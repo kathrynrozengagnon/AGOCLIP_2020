@@ -201,14 +201,7 @@ res <- res[[1]]
 res <- rbindlist(res)
 
 #make sure are only counting pattern matches 1X
-#if extended peak sequence searched and pattern position are exactly the same, is a duplicate
-
-res$search_seq_pattern <- paste0(res$seqUnderExtendedPeak, "_", res$siteOfPattern)
-nrow(res)
-length(unique(res$search_seq_pattern))
-res$search_seq_pattern <- NULL
-
-#could still have dups if extended sequence of one peak overlaps with the extended peak of another sequence and then a match is in both; 
+#could have dups if extended sequence of one peak overlaps with the extended peak of another sequence and then a match is in both; 
 #if site of pattern and extended seq around pattern match is the same, randomly remove duplicates
 res$group <- paste0(res$SeqExtended, "_", res$siteOfPattern)
 res$startOfPmatch <- as.numeric(res$startOfPmatch)
@@ -226,20 +219,11 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_known_ctrl <- res_Ago1_known_ctrl[[1]]
 res_Ago1_known_ctrl <- rbindlist(res_Ago1_known_ctrl)
-
-
-
-res_Ago1_known_ctrl$search_seq_pattern <- paste0(res_Ago1_known_ctrl$seqUnderExtendedPeak, "_", res_Ago1_known_ctrl$siteOfPattern)
-nrow(res_Ago1_known_ctrl)
-length(unique(res_Ago1_known_ctrl$search_seq_pattern))
-res_Ago1_known_ctrl$search_seq_pattern <- NULL
-
 res_Ago1_known_ctrl$group <- paste0(res_Ago1_known_ctrl$SeqExtended, "_", res_Ago1_known_ctrl$siteOfPattern)
 length(unique(res_Ago1_known_ctrl$group)) #62644
 res_Ago1_known_ctrl$startOfPmatch <- as.numeric(res_Ago1_known_ctrl$startOfPmatch)
 res_Ago1_known_ctrl$filt <- duplicated(res_Ago1_known_ctrl$group)
 res_Ago1_known_ctrl <- subset(res_Ago1_known_ctrl, res_Ago1_known_ctrl$filt == FALSE)
-nrow(res_Ago1_known_ctrl)
 
 #get GRs with the same peak subset for calculating specific coverage
 Ago1_aegypti_ranges <- subset(res_Ago1_known, res_Ago1_known$aegypti_Ago1_BCsample > 0 & res_Ago1_known$aegypti_Ago2_BCsample ==0 )
@@ -265,10 +249,6 @@ res <- annotatePeaksWithPatterns(peaks=allGR,
 
 res <- res[[1]]
 res <- rbindlist(res)
-
-res$search_seq_pattern <- paste0(res$seqUnderExtendedPeak, "_", res$siteOfPattern)
-length(unique(res$search_seq_pattern))
-res$search_seq_pattern <- NULL
 res$group <- paste0(res$SeqExtended, "_", res$siteOfPattern)
 res$startOfPmatch <- as.numeric(res$startOfPmatch)
 res$filt <- duplicated(res$group)
@@ -285,8 +265,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_known_ctrl <- res_Ago1_known_ctrl[[1]]
 res_Ago1_known_ctrl <- rbindlist(res_Ago1_known_ctrl)
-res_Ago1_known_ctrl$search_seq_pattern <- paste0(res_Ago1_known_ctrl$seqUnderExtendedPeak, "_", res_Ago1_known_ctrl$siteOfPattern)
-res_Ago1_known_ctrl$search_seq_pattern <- NULL
 res_Ago1_known_ctrl$group <- paste0(res_Ago1_known_ctrl$SeqExtended, "_", res_Ago1_known_ctrl$siteOfPattern)
 res_Ago1_known_ctrl$startOfPmatch <- as.numeric(res_Ago1_known_ctrl$startOfPmatch)
 res_Ago1_known_ctrl$filt <- duplicated(res_Ago1_known_ctrl$group)
@@ -447,8 +425,6 @@ res_Ago1_aegypti_novel <- annotatePeaksWithPatterns(peaks=allGR,
 
 res_Ago1_aegypti_novel <- res_Ago1_aegypti_novel[[1]]
 res_Ago1_aegypti_novel <- rbindlist(res_Ago1_aegypti_novel)
-res_Ago1_aegypti_novel$search_seq_pattern <- paste0(res_Ago1_aegypti_novel$seqUnderExtendedPeak, "_", res_Ago1_aegypti_novel$siteOfPattern)
-res_Ago1_aegypti_novel$search_seq_pattern <- NULL
 res_Ago1_aegypti_novel$group <- paste0(res_Ago1_aegypti_novel$SeqExtended, "_", res_Ago1_aegypti_novel$siteOfPattern)
 res_Ago1_aegypti_novel$startOfPmatch <- as.numeric(res_Ago1_aegypti_novel$startOfPmatch)
 res_Ago1_aegypti_novel$filt <- duplicated(res_Ago1_aegypti_novel$group)
@@ -465,8 +441,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_aegypti_novel_ctrl <- res_Ago1_aegypti_novel_ctrl[[1]]
 res_Ago1_aegypti_novel_ctrl <- rbindlist(res_Ago1_aegypti_novel_ctrl)
-res_Ago1_aegypti_novel_ctrl$search_seq_pattern <- paste0(res_Ago1_aegypti_novel_ctrl$seqUnderExtendedPeak, "_", res_Ago1_aegypti_novel_ctrl$siteOfPattern)
-res_Ago1_aegypti_novel_ctrl$search_seq_pattern <- NULL
 res_Ago1_aegypti_novel_ctrl$group <- paste0(res_Ago1_aegypti_novel_ctrl$SeqExtended, "_", res_Ago1_aegypti_novel_ctrl$siteOfPattern)
 res_Ago1_aegypti_novel_ctrl$startOfPmatch <- as.numeric(res_Ago1_aegypti_novel_ctrl$startOfPmatch)
 res_Ago1_aegypti_novel_ctrl$filt <- duplicated(res_Ago1_aegypti_novel_ctrl$group)
@@ -496,8 +470,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_cells_novel <- res_Ago1_cells_novel[[1]]
 res_Ago1_cells_novel <- rbindlist(res_Ago1_cells_novel)
-res_Ago1_cells_novel$search_seq_pattern <- paste0(res_Ago1_cells_novel$seqUnderExtendedPeak, "_", res_Ago1_cells_novel$siteOfPattern)
-res_Ago1_cells_novel$search_seq_pattern <- NULL
 res_Ago1_cells_novel$group <- paste0(res_Ago1_cells_novel$SeqExtended, "_", res_Ago1_cells_novel$siteOfPattern)
 res_Ago1_cells_novel$startOfPmatch <- as.numeric(res_Ago1_cells_novel$startOfPmatch)
 res_Ago1_cells_novel$filt <- duplicated(res_Ago1_cells_novel$group)
@@ -514,8 +486,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_cells_novel_ctrl <- res_Ago1_cells_novel_ctrl[[1]]
 res_Ago1_cells_novel_ctrl <- rbindlist(res_Ago1_cells_novel_ctrl)
-res_Ago1_cells_novel_ctrl$search_seq_pattern <- paste0(res_Ago1_cells_novel_ctrl$seqUnderExtendedPeak, "_", res_Ago1_cells_novel_ctrl$siteOfPattern)
-res_Ago1_cells_novel_ctrl$search_seq_pattern <- NULL
 res_Ago1_cells_novel_ctrl$group <- paste0(res_Ago1_cells_novel_ctrl$SeqExtended, "_", res_Ago1_cells_novel_ctrl$siteOfPattern)
 res_Ago1_cells_novel_ctrl$startOfPmatch <- as.numeric(res_Ago1_cells_novel_ctrl$startOfPmatch)
 res_Ago1_cells_novel_ctrl$filt <- duplicated(res_Ago1_cells_novel_ctrl$group)
@@ -665,7 +635,7 @@ ggplot(cells_ago1n_spline , aes(x = x, y = y)) +
  #all peak ranges
 res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos2.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -674,8 +644,6 @@ res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
 
 res_Ago1_av_known <- res_Ago1_av_known[[1]]
 res_Ago1_av_known <- rbindlist(res_Ago1_av_known)
-res_Ago1_av_known$search_seq_pattern <- paste0(res_Ago1_av_known$seqUnderExtendedPeak, "_", res_Ago1_av_known$siteOfPattern)
-res_Ago1_av_known$search_seq_pattern <- NULL
 res_Ago1_av_known$group <- paste0(res_Ago1_av_known$SeqExtended, "_", res_Ago1_av_known$siteOfPattern)
 res_Ago1_av_known$startOfPmatch <- as.numeric(res_Ago1_av_known$startOfPmatch)
 res_Ago1_av_known$filt <- duplicated(res_Ago1_av_known$group)
@@ -684,7 +652,7 @@ res_Ago1_av_known <- subset(res_Ago1_av_known, res_Ago1_av_known$filt == FALSE)
 #control ranges
 res_Ago1_av_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos2.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -692,8 +660,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_av_known_ctrl <- res_Ago1_av_known_ctrl[[1]]
 res_Ago1_av_known_ctrl <- rbindlist(res_Ago1_av_known_ctrl)
-res_Ago1_av_known_ctrl$search_seq_pattern <- paste0(res_Ago1_av_known_ctrl$seqUnderExtendedPeak, "_", res_Ago1_av_known_ctrl$siteOfPattern)
-res_Ago1_av_known_ctrl$search_seq_pattern <- NULL
 res_Ago1_av_known_ctrl$group <- paste0(res_Ago1_av_known_ctrl$SeqExtended, "_", res_Ago1_av_known_ctrl$siteOfPattern)
 res_Ago1_av_known_ctrl$startOfPmatch <- as.numeric(res_Ago1_av_known_ctrl$startOfPmatch)
 res_Ago1_av_known_ctrl$filt <- duplicated(res_Ago1_av_known_ctrl$group)
@@ -715,7 +681,7 @@ res_Ago1_av_aegypti_known_pats <- subset(res_Ago1_av_known, res_Ago1_av_known$ae
 #all peak ranges
 res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells2.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -723,8 +689,6 @@ res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
 
 res_Ago1_av_known <- res_Ago1_av_known[[1]]
 res_Ago1_av_known <- rbindlist(res_Ago1_av_known)
-res_Ago1_av_known$search_seq_pattern <- paste0(res_Ago1_av_known$seqUnderExtendedPeak, "_", res_Ago1_av_known$siteOfPattern)
-res_Ago1_av_known$search_seq_pattern <- NULL
 res_Ago1_av_known$group <- paste0(res_Ago1_av_known$SeqExtended, "_", res_Ago1_av_known$siteOfPattern)
 res_Ago1_av_known$startOfPmatch <- as.numeric(res_Ago1_av_known$startOfPmatch)
 res_Ago1_av_known$filt <- duplicated(res_Ago1_av_known$group)
@@ -734,7 +698,7 @@ res_Ago1_av_known <- subset(res_Ago1_av_known, res_Ago1_av_known$filt == FALSE)
 #control ranges
 res_Ago1_av_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells2.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -742,8 +706,6 @@ patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/
 
 res_Ago1_av_known_ctrl <- res_Ago1_av_known_ctrl[[1]]
 res_Ago1_av_known_ctrl <- rbindlist(res_Ago1_av_known_ctrl)
-res_Ago1_av_known_ctrl$search_seq_pattern <- paste0(res_Ago1_av_known_ctrl$seqUnderExtendedPeak, "_", res_Ago1_av_known_ctrl$siteOfPattern)
-res_Ago1_av_known_ctrl$search_seq_pattern <- NULL
 res_Ago1_av_known_ctrl$group <- paste0(res_Ago1_av_known_ctrl$SeqExtended, "_", res_Ago1_av_known_ctrl$siteOfPattern)
 res_Ago1_av_known_ctrl$startOfPmatch <- as.numeric(res_Ago1_av_known_ctrl$startOfPmatch)
 res_Ago1_av_known_ctrl$filt <- duplicated(res_Ago1_av_known_ctrl$group)

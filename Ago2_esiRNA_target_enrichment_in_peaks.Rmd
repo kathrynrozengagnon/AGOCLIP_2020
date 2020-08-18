@@ -189,6 +189,7 @@ allctrlGR <- GenomicRanges::shift(allGR, 4000)  #note, annotations are no longer
 
 ```{r}
 #all peak ranges
+#genome fasta available at: https://www.vectorbase.org/downloads
 res <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
                                 patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/top10_aegypti_Ago1_known.fa",

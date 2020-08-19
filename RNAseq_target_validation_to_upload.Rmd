@@ -128,7 +128,7 @@ myBreaks <- c(seq(min(mhCountsAgo1), 0, length.out=ceiling(paletteLength/2) + 1)
 
 pheatmap:::pheatmap(mhCountsAgo1,
                     annotation_col = metaData2,
-                     color = palAgo1,
+                     color = palAgo1, breaks = myBreaks,
                     cluster_cols = TRUE,cluster_rows = TRUE, scale="none", fontsize_col = 6, annotation_colors = mycolors, treeheight_row = 20, fontsize = 6, cellheight = 25, cellwidth = 6)
 
 ```

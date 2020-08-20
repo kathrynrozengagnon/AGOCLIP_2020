@@ -1,8 +1,6 @@
 ---
 title: "Reanalyze smallRNA seq from Akbari et al., 2013"
-output:
-  html_document:
-    df_print: paged
+output: html_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)

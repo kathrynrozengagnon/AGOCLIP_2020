@@ -27,6 +27,8 @@ all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_ta
 all_merge_aegypti_Ago1 <- subset(all_with_pats, all_with_pats$aegypti_Ago1_BCsample > 0)
 aegypti_Ago1_3UTR <- all_merge_aegypti_Ago1[grepl( "3' UTR", all_merge_aegypti_Ago1$annotation),]
 
+##selected miRNAs that are high in the ovaries (>5000 RPM) and high in the carcass (<1000 RPM)) using Table S18 and S19 from Akbari et al., 2013
+
 ##miR989
 all_3UTR_989 <- rbind(aegypti_Ago1_3UTR[grepl("miR-989x", aegypti_Ago1_3UTR$aegyptiAgo1_chimera),], aegypti_Ago1_3UTR[grepl("miR-989", aegypti_Ago1_3UTR$PsmallRNA_family),])
 
@@ -36,12 +38,23 @@ all_3UTR_996 <- rbind(aegypti_Ago1_3UTR[grepl("miR-996x", aegypti_Ago1_3UTR$aegy
 ##miR2946
 all_3UTR_2946 <- rbind(aegypti_Ago1_3UTR[grepl("miR-2946x", aegypti_Ago1_3UTR$aegyptiAgo1_chimera),], aegypti_Ago1_3UTR[grepl("miR-2941", aegypti_Ago1_3UTR$PsmallRNA_family),]) #2946 shares seed with 2941, family name is 2941
 
-#write out gene names
-h <-grep("all_3UTR",names(.GlobalEnv),value=TRUE)
-h<- do.call("list",mget(h))
+##also select control miRNAs that are low in the ovaries (<1000 RPM and high in the carcass (>4000 RPM))
 
-h <- lapply(h, function(x) x[,c("geneId", "transcriptId")])
-hu <- lapply(h, unique)
+##miR981
+all_3UTR_981 <- rbind(aegypti_Ago1_3UTR[grepl("miR-981x", aegypti_Ago1_3UTR$aegyptiAgo1_chimera),], aegypti_Ago1_3UTR[grepl("miR-981", aegypti_Ago1_3UTR$PsmallRNA_family),])
+
+##miR7
+all_3UTR_7<- rbind(aegypti_Ago1_3UTR[grepl("miR-7x", aegypti_Ago1_3UTR$aegyptiAgo1_chimera),], aegypti_Ago1_3UTR[grepl("miR-7", aegypti_Ago1_3UTR$PsmallRNA_family),])
+#need to remove 79/71
+all_3UTR_7 <- all_3UTR_7[!grepl("aae-miR-71", all_3UTR_7$PsmallRNA_family),]
+all_3UTR_7 <- all_3UTR_7[!grepl("aae-miR-79", all_3UTR_7$PsmallRNA_family),]
+
+#write out gene names
+#h <-grep("all_3UTR",names(.GlobalEnv),value=TRUE)
+#h<- do.call("list",mget(h))
+
+#h <- lapply(h, function(x) x[,c("geneId", "transcriptId")])
+#hu <- lapply(h, unique)
 
 #run this to write out gene lists:
 #for(i in seq_along(hu)) {
@@ -133,7 +146,7 @@ pheatmap:::pheatmap(mhCountsAgo1,
 
 ```
 
-##eCDFs of miRNA target expression, Figure 6A-C
+##eCDFs of miRNA target expression, Figure 6A-C, Figure S6A-B
 
 ```{r}
 #need to normalize by transcript length for this analysis, use gtf with Matthews et al. gene ids - are not vectorbase IDs, available at: https://github.com/VosshallLab/Aedes_neurotranscriptome
@@ -162,6 +175,7 @@ myCountstest$Fe_Ov_SF_av <- rowMeans(myCountstest[Fe_Ov_SF])
 myCountstest$Fe_Ov_O_av <- rowMeans(myCountstest[Fe_Ov_O])
 myCountstest$Fe_mean <- rowMeans(myCountstest[Fe_all])
 
+#high in ovary miRNAs
 ##miR-989
 test989 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_989,]
 test989<- test989[grepl("mean|av", colnames(test989))]
@@ -192,6 +206,27 @@ ggplot(test2946, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point"
 ks.test(subset(test2946$value, test2946$variable=="Fe_Ov_SF_av"), subset(test2946$value, test2946$variable=="Fe_mean"), alternative = c("greater"))
 
 ks.test(subset(test2946$value, test2946$variable=="Fe_Ov_O_av"), subset(test2946$value, test2946$variable=="Fe_mean"), alternative = c("greater"))
+
+###control miRNAs (low in ovary)
+##miR-7
+test7 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_7,]
+test7<- test7[grepl("mean|av", colnames(test7))]
+test7<- melt(test7)
+ggplot(test7, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
+
+ks.test(subset(test7$value, test7$variable=="Fe_Ov_O_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater"))
+
+ks.test(subset(test7$value, test7$variable=="Fe_Ov_SF_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater"))
+
+#miR-981
+test981 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_981,]
+test981<- test981[grepl("mean|av", colnames(test981))]
+test981<- melt(test981)
+ggplot(test981, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
+
+ks.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater"))
+
+ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater"))
 
 ```
 

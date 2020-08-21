@@ -311,7 +311,7 @@ topAgo2ggraph <- topAgo2gg[grepl("72hr_PBM|NBF|2-4hr", topAgo2gg$sample_group),]
 #reorder factor levels so graph will display properly
 topAgo2ggraph$sample_group <- factor(topAgo2ggraph$sample_group , levels=c("72hr_PBM_Female_Carcass", "NBF-Ovary", "72hr_PBM-Ovary", "2-4hr_Embryo"))
 
-ggplot(topAgo2ggraph, aes(x=type, y= log2(mean_fam_ab), fill=sample_group)) + geom_boxplot(outlier.shape = NA, width = 0.5) + scale_fill_manual(values=c("#CCE70B", "plum", "lightslateblue", "mediumaquamarine")) + theme_bw()
+ggplot(topAgo2ggraph, aes(x=type, y= log2(mean_fam_ab), fill=sample_group)) + geom_boxplot(outlier.shape = NA, width = 0.5, notch = TRUE) + scale_fill_manual(values=c("#CCE70B", "plum", "lightslateblue", "mediumaquamarine")) + theme_bw() + ylim(0, 18)
 
 #stats, all compaed to carcass, by group
 wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM-Ovary" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),

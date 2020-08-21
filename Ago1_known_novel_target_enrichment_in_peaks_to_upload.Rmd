@@ -166,15 +166,15 @@ annotatePeaksWithPatterns  <- function(peaks,fasta,patterns,resize=64,add5=0,add
 ##Get peak ranges and control ranges
 
 ```{r}
-#read in all peaks, with filtering stats/etc added
-all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn2.txt", sep = "\t", header = TRUE)
+#read in all peaks, with filtering stats/etc added from PCA output, available on my github
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_add_filtering.txt", sep = "\t", header = TRUE)
 
 #make GR for seed search
 allGR <- makeGRangesFromDataFrame(all,
                                      keep.extra.columns=TRUE,
                                      ignore.strand=FALSE,
                                      seqinfo=NULL,
-                                     seqnames.field="chromosome",
+                                     seqnames.field="seqnames",
                                      start.field="start",
                                      end.field="end",
                                      strand.field="strand",
@@ -192,7 +192,7 @@ allctrlGR <- GenomicRanges::shift(allGR, 4000)  #note, annotations are no longer
 #genome fasta available at: https://www.vectorbase.org/downloads
 res <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/top10_aegypti_Ago1_known.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_aegypti_Ago1_known_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -212,7 +212,7 @@ res_Ago1_known <- subset(res, res$filt == FALSE)
 #control ranges
 res_Ago1_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/top10_aegypti_Ago1_known.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_aegypti_Ago1_known_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -242,7 +242,7 @@ Ago1_aegypti_seed_known <- subset(res_Ago1_known$startOfPmatch, res_Ago1_known$a
 #all peak ranges
 res <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/top10_cells_Ago1_known.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_cells_Ago1_known_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -258,7 +258,7 @@ res_Ago1_known <- subset(res, res$filt == FALSE)
 #control ranges
 res_Ago1_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/top10_cells_Ago1_known.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_cells_Ago1_known_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -418,7 +418,7 @@ ggplot(cells_ago1k_spline , aes(x = x, y = y)) +
 #all peak ranges
 res_Ago1_aegypti_novel <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/aegypti_Ago1_novel_rn.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/aegypti_Ago1_novel_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -434,7 +434,7 @@ res_Ago1_aegypti_novel <- subset(res_Ago1_aegypti_novel, res_Ago1_aegypti_novel$
 #control ranges
 res_Ago1_aegypti_novel_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/aegypti_Ago1_novel_rn.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/aegypti_Ago1_novel_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -463,7 +463,7 @@ Ago1_aegypti_seed_novel <- subset(res_Ago1_aegypti_novel$startOfPmatch, res_Ago1
 #all peak ranges
 res_Ago1_cells_novel <- annotatePeaksWithPatterns(peaks=allGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/cells_Ago1_novel_rn.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/cells_Ago1_novel_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -479,7 +479,7 @@ res_Ago1_cells_novel <- subset(res_Ago1_cells_novel, res_Ago1_cells_novel$filt =
 #control ranges
 res_Ago1_cells_novel_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/cells_Ago1_novel_rn.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/cells_Ago1_novel_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -636,7 +636,7 @@ ggplot(cells_ago1n_spline , aes(x = x, y = y)) +
  #all peak ranges
 res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos2.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/known_miRNAs_novelab_mos_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -653,7 +653,7 @@ res_Ago1_av_known <- subset(res_Ago1_av_known, res_Ago1_av_known$filt == FALSE)
 #control ranges
 res_Ago1_av_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_mos2.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/known_miRNAs_novelab_mos_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -682,7 +682,7 @@ res_Ago1_av_aegypti_known_pats <- subset(res_Ago1_av_known, res_Ago1_av_known$ae
 #all peak ranges
 res_Ago1_av_known <- annotatePeaksWithPatterns(peaks=allGR,
                                   fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells2.fa",
+                                patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/known_miRNAs_novelab_cells_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,
@@ -699,7 +699,7 @@ res_Ago1_av_known <- subset(res_Ago1_av_known, res_Ago1_av_known$filt == FALSE)
 #control ranges
 res_Ago1_av_known_ctrl <- annotatePeaksWithPatterns(peaks=allctrlGR,
                               fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
-patterns="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/known_miRNAs_novelab_cells2.fa",
+patterns="/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/known_miRNAs_novelab_cells_fam_rn.fa",
                                   resize=406,
                                   add5=1,
                                   add3=1,

@@ -57,10 +57,11 @@ myLens2 <- as.vector(myLens$gene_len)
 names(myLens2) <- myLens$gene_id
 
 ##get gene lists
-all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn2.txt", header = TRUE, sep="\t")
+all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn3.txt", header = TRUE, sep="\t")
+prev <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn2.txt", header = TRUE, sep="\t")
 all_merge_aegypti_Ago2 <- subset(all_with_pats, all_with_pats$aegypti_Ago2_BCsample > 0)
 aegypti_perf <- all_merge_aegypti_Ago2[grepl("novel|aae", all_merge_aegypti_Ago2$Pperfect_18mer_target),]
-aegypti_perf <- aegypti_perf[grepl("common-Ago2|aegypti-Ago2", aegypti_perf$Pperfect_18mer_target),] #55
+aegypti_perf <- aegypti_perf[grepl("common-Ago2|aegypti-Ago2", aegypti_perf$Pperfect_18mer_target),] #57
 
 Aag2_perf <- subset(all_with_pats, all_with_pats$Aag2_Ago2_BCsample > 0)
 Aag2_perf <-Aag2_perf[grepl("novel|aae", Aag2_perf$Pperfect_18mer_target),]
@@ -150,6 +151,8 @@ row.names(go_merge_over_pval) <- go_merge_over_pval[,c(2)]
 #write.table(go_merge_over_pval$category, "/Users/kathryn/Reprocess_all_paper_datasets/GO_analysis/GOsem_up.txt", col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE) 
 #this file is available on github
 
+
+
 go_merge_over_pval <- as.matrix(go_merge_over_pval[,c(3:6)] )
 
 #"GOsem_up.txt" was uploaded to REVIGO to simplify by semantic redundancy: http://revigo.irb.hr/ 
@@ -161,10 +164,10 @@ BP <- BP[!grepl("null", BP$plot_X),]
 go_merge_over_pval <- go_merge_over_pval[row.names(go_merge_over_pval) %in% BP$description,] 
 
 #select 15 most significant terms for each set
-go_merge_over_pval_filt <- as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_aegypti_perfect)
-go_merge_over_pval_filt <- rbind(go_merge_over_pval_filt, as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_aegypti_imperfect))
-go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_cells_imperfect))
-go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-15, over_represented_pvalue_cells_perfect))
+go_merge_over_pval_filt <- as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-12, over_represented_pvalue_aegypti_perfect)
+go_merge_over_pval_filt <- rbind(go_merge_over_pval_filt, as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-12, over_represented_pvalue_aegypti_imperfect))
+go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-12, over_represented_pvalue_cells_imperfect))
+go_merge_over_pval_filt <-  rbind(go_merge_over_pval_filt,as.data.frame(go_merge_over_pval) %>% tibble::rownames_to_column("GO") %>% dplyr::top_n(-12, over_represented_pvalue_cells_perfect))
 topVarGenes <- unique(go_merge_over_pval_filt$GO)
 
 #make metadata for heatmap

@@ -290,7 +290,7 @@ ggplot(data= subset(cellsAgo2_perf, cellsAgo2_perf$sample=="cells_Ago2perf_graph
 
 ```
 
-##count number of prfect, 0-mismatch 18mer targets from the same family by peak; Figure S5G 
+##count number of perfect, 0-mismatch 18mer targets from the same family by peak; Figure S5G
 
 ```{r}
 cells_hist <- cells_Ago2perf %>% group_by(.dots=c("extendedPeak","perfect_18mer_target")) %>% summarise(count = n()) %>% mutate(sample = c("Aag2"))
@@ -299,9 +299,6 @@ perf_hist <- rbind(cells_hist, mosq_hist) #this gives the # of perfect matches f
 perf_hist2 <- perf_hist %>% group_by(.dots=c("count", "sample")) %>% mutate(peakcount = n())
 
 unique_hist <- distinct(perf_hist2, peakcount, count, sample, .keep_all = TRUE)
-
-ggplot(unique_hist, aes(x=count, y = peakcount,color = sample )) +
-  geom_bar(stat = "identity" )
 
 unique_hist_perc <- unique_hist %>% group_by(sample) %>% mutate(percent_of_peaks = peakcount/(sum(peakcount))) 
 

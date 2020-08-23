@@ -21,7 +21,7 @@ library(Biostrings)
 ## Select Ago1 targets for ovary-expressed miRNAs
 
 ```{r}
-all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn2.txt", header = TRUE, sep="\t", stringsAsFactors = FALSE)
+all_with_pats <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/TableS3_final_rn3.txt", header = TRUE, sep="\t", stringsAsFactors = FALSE)
 
 #all_merge$filt <- all_merge$peakID %in% aegypti_Ago1_peaks_filt$peakID
 all_merge_aegypti_Ago1 <- subset(all_with_pats, all_with_pats$aegypti_Ago1_BCsample > 0)
@@ -50,17 +50,17 @@ all_3UTR_7 <- all_3UTR_7[!grepl("aae-miR-71", all_3UTR_7$PsmallRNA_family),]
 all_3UTR_7 <- all_3UTR_7[!grepl("aae-miR-79", all_3UTR_7$PsmallRNA_family),]
 
 #write out gene names
-#h <-grep("all_3UTR",names(.GlobalEnv),value=TRUE)
-#h<- do.call("list",mget(h))
+h <-grep("all_3UTR",names(.GlobalEnv),value=TRUE)
+h<- do.call("list",mget(h))
 
-#h <- lapply(h, function(x) x[,c("geneId", "transcriptId")])
-#hu <- lapply(h, unique)
+h <- lapply(h, function(x) x[,c("geneId", "transcriptId")])
+hu <- lapply(h, unique)
 
 #run this to write out gene lists:
-#for(i in seq_along(hu)) {
-#  write.table(hu[i], paste0("/Users/kathryn/Reprocess_all_paper_datasets/RNAseq_test/Ago1_lists_FINAL/", names(hu)[i], ".txt"), 
-#              col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
-#}
+for(i in seq_along(hu)) {
+  write.table(hu[i], paste0("/Users/kathryn/Reprocess_all_paper_datasets/RNAseq_test/Ago1_lists_FINAL/", names(hu)[i], ".txt"), 
+              col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+}
 
 #get diff genes as control from Matthews et al. ; all data used here are available at: https://github.com/VosshallLab/Aedes_neurotranscriptome
 
@@ -182,9 +182,9 @@ test989<- test989[grepl("mean|av", colnames(test989))]
 test989<- melt(test989)
 ggplot(test989, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test989$value, test989$variable=="Fe_Ov_O_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test989$value, test989$variable=="Fe_Ov_O_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater")) # 0.1657
 
-ks.test(subset(test989$value, test989$variable=="Fe_Ov_SF_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test989$value, test989$variable=="Fe_Ov_SF_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater")) #0.04621
 
 
 ##miR-996
@@ -193,9 +193,9 @@ test996<- test996[grepl("mean|av", colnames(test996))]
 test996<- melt(test996)
 ggplot(test996, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test996$value, test996$variable=="Fe_Ov_O_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test996$value, test996$variable=="Fe_Ov_O_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater")) #0.01493
 
-ks.test(subset(test996$value, test996$variable=="Fe_Ov_SF_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test996$value, test996$variable=="Fe_Ov_SF_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater")) #0.01493
 
 ##miR-2946
 test2946 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_2946,]
@@ -214,7 +214,7 @@ test7<- test7[grepl("mean|av", colnames(test7))]
 test7<- melt(test7)
 ggplot(test7, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test7$value, test7$variable=="Fe_Ov_O_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test7$value, test7$variable=="Fe_Ov_O_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater")) #0.4103
 
 ks.test(subset(test7$value, test7$variable=="Fe_Ov_SF_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater"))
 
@@ -224,9 +224,9 @@ test981<- test981[grepl("mean|av", colnames(test981))]
 test981<- melt(test981)
 ggplot(test981, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater")) #0.6546
 
-ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater"))
+ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater")) #0.7625
 
 ```
 
@@ -252,13 +252,13 @@ aegypti_6mer_Ago2_no_chim  <- aegypti_6mer_Ago2_no_chim [!aegypti_6mer_Ago2_no_c
 
 #8mer targets
 seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds.txt", header = TRUE, sep ="\t", stringsAsFactors = FALSE) #913 unique seed combos
-seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper_FINAL_rn.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper_rn3.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
 
 #link to small RNA names
-seed_table <- merge(seeds_df[,c(1:2, 34)], seed_table,by.x = "sequence" , by.y = "FL", all.x= TRUE )
+seed_table <- merge(seeds_df[,c(1:2, 38)], seed_table,by.x = "sequence" , by.y = "FL", all.x= TRUE )
 
 #select top most abundant/targeting esiRNAs
-Ago2_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/all_Ago2_known_novel_rn.fa", format = "fasta")
+Ago2_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/all_Ago2_known_novel_fam_rn.fa", format = "fasta")
 Ago2_sRNAs_aegypti <- Ago2_sRNAs[grepl("common-Ago2|aegypti-Ago2|aae-miR", names(Ago2_sRNAs))]
 
 seed_table$filt <- seed_table$six_mer_target %in% Ago2_sRNAs_aegypti
@@ -401,14 +401,14 @@ ggplot(Ago2_cdf[grepl("Ov_O", Ago2_cdf$variable),], aes(value, colour = variable
 
 ggplot(Ago2_cdf[grepl("Ov_SF", Ago2_cdf$variable),], aes(value, colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("gray","lightpink", "red4", "red2", "hotpink" )) + theme_bw()
 
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.003818
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.2691
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("g")) #0.04076
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.005088
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.003556
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.1392
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("g")) #0.02057
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.001372
 
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.007697
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) # 0.2971
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) # 0.1324
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.001285
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.006739
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.1516
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) # 0.1609
+ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.001138
 
 ```

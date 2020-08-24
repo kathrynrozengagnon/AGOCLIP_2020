@@ -570,15 +570,7 @@ testaegypti <- sdvcaegypti %>% group_by(leadingEdge) %>% top_n(1, NES) %>% dplyr
 ##Make annotation pie charts on final filtered peaks, Figure 3A-D
 
 ```{r}
-cells_Ago1 <-subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE")
-
-aegypti_Ago1 <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE")
-
-cells_Ago2 <-subset(all, all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
-
-aegypti_Ago2 <- subset(all, all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
-
-aegypti_Ago2GR <- makeGRangesFromDataFrame(aegypti_Ago2,
+aegypti_Ago2GR <- makeGRangesFromDataFrame(aegypti_Ago2_filt,
                                      keep.extra.columns=FALSE,
                                      ignore.strand=FALSE,
                                      seqinfo=NULL,
@@ -598,7 +590,7 @@ aegypti_Ago2anno <- annotatePeak(aegypti_Ago2GR,
 plotAnnoPie(aegypti_Ago2anno)
 
 
-aegypti_Ago1GR <- makeGRangesFromDataFrame(aegypti_Ago1,
+aegypti_Ago1GR <- makeGRangesFromDataFrame(aegypti_Ago1_filt,
                                            keep.extra.columns=FALSE,
                                            ignore.strand=FALSE,
                                            seqinfo=NULL,
@@ -617,7 +609,7 @@ aegypti_Ago1GRanno <- annotatePeak(aegypti_Ago1GR,
 
 plotAnnoPie(aegypti_Ago1GRanno)
 
-cells_Ago1GR <- makeGRangesFromDataFrame(cells_Ago1,
+cells_Ago1GR <- makeGRangesFromDataFrame(Aag2_Ago1_filt,
                                            keep.extra.columns=FALSE,
                                            ignore.strand=FALSE,
                                            seqinfo=NULL,
@@ -636,7 +628,7 @@ cells_Ago1anno <- annotatePeak(cells_Ago1GR,
 
 plotAnnoPie(cells_Ago1anno)
 
-cells_Ago2GR <- makeGRangesFromDataFrame(cells_Ago2,
+cells_Ago2GR <- makeGRangesFromDataFrame(Aag2_Ago2_filt,
                                            keep.extra.columns=FALSE,
                                            ignore.strand=FALSE,
                                            seqinfo=NULL,
@@ -662,14 +654,14 @@ plotAnnoPie(cells_Ago2anno)
 
 ```{r}
 #make list of unique genes in filtered 
-AA1 <- unique(subset(all$geneId, all$peakID %in% cells_Ago1$peakID))
+AA1 <- unique(subset(all$geneId, all$peakID %in% Aag2_Ago1_filt$peakID))
 #remove NA, because not all peaks could be annotated to a gene
 AA1 <- AA1[!is.na( AA1)]
-AA2 <- unique(subset(all$geneId, all$peakID %in% cells_Ago2$peakID))
+AA2 <- unique(subset(all$geneId, all$peakID %in% Aag2_Ago2_filt$peakID))
 AA2 <- AA2[!is.na( AA2)]
-AeA1 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago1$peakID))
+AeA1 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago1_filt$peakID))
 AeA1 <- AeA1[!is.na( AeA1)]
-AeA2 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago2$peakID))
+AeA2 <- unique(subset(all$geneId, all$peakID %in% aegypti_Ago2_filt$peakID))
 AeA2 <- AeA2[!is.na(AeA2)]
 filt <- list(Aag2Ago1 = AA1, Aag2Ago2 = AA2, aegyptiAgo1 = AeA1, aegyptiAgo2 = AeA2)
 

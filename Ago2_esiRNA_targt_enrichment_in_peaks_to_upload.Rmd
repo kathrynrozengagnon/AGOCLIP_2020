@@ -203,6 +203,7 @@ res_Ago2_FL$filt <- duplicated(res_Ago2_FL$group)
 res_Ago2_FL <- subset(res_Ago2_FL, res_Ago2_FL$filt == FALSE)
 
 #now need to select perfect, one mis, or 6mer matches of top esiRNAs
+#Table S6 and seed table for all unfiltered, putative seeds are available in my  github
 seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper_rn3.txt", header=TRUE, sep="\t")
 
 seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds.txt", header = TRUE, sep ="\t") #913 unique seed combos

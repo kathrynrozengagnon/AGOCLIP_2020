@@ -16,7 +16,8 @@ library(ggrepel)
 library(BiocParallel)
 ```
 
-###first reverse map all small RNAs to reads that did not map to AaegL5 
+###first reverse map all small RNAs to reads that did not map to AaegL5
+##note execution of all functions is commented out to keep original files 
 
 ```{r}
 ##get unmapped reads from bam; bams were generated in "Processing" script; data available upon request
@@ -28,9 +29,9 @@ unbam <- function(bams){
    system(cmd,wait = T)
 }
 
-for (i in 1:length(bams)) {
-  unbam(bams[i])
-}
+#for (i in 1:length(bams)) {
+#  unbam(bams[i])
+#}
 
 
 #make indices for mapping
@@ -47,9 +48,9 @@ bowtie_index <- function(genomeFasta,
   
 }
 
-for (i in unmapped) {
-  bowtie_index(i, i)
-}
+#for (i in unmapped) {
+# bowtie_index(i, i)
+#}
 
 ##align all known and putative small RNAs to reads
 bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",index)
@@ -69,9 +70,9 @@ Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera"
 ref <- dir(Dir,pattern="*.fa$",full.names = TRUE)
 ref <- gsub( ".fa", "", ref)
 
-for (i in ref) {
-  bowtie_align("/rugpfs/fs0/rice_lab/scratch/krozen/all_putative_known.fa", i)
-}
+#for (i in ref) {
+#  bowtie_align("/rugpfs/fs0/rice_lab/scratch/krozen/all_putative_known.fa", i)
+#}
 
 bam <- dir(Dir,pattern="*.bam$",full.names = TRUE)
 
@@ -88,7 +89,7 @@ bamtobed <- function(file,filtDup=FALSE){
              con = gsub("\\.bam",".bed",file))
 }
 
-bplapply(bam, bamtobed)
+#bplapply(bam, bamtobed)
 
 #read in bed and chimera process
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped"
@@ -130,9 +131,9 @@ names(chimera) <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for
 
 #write files to chimera inputs: bed with read name, start, stop, srand, read name, and read sequence
 
-for (x in names(chimera)) {
-write.table(chimera[[x]], file=paste0(x,".txt"), sep="\t", quote = FALSE)}
-write.table(test, file=".txt", sep="\t")
+#for (x in names(chimera)) {
+#write.table(chimera[[x]], file=paste0(x,".txt"), sep="\t", quote = FALSE)}
+#write.table(test, file=".txt", sep="\t")
 
 #process to keep read sequence downstream of small RNA sequence
 
@@ -157,9 +158,9 @@ chimeraProcess <- function(input,exclude) {
 exclude <- c("AAAAAAAAAAAAAAAAAAAAAAAAA")
 #this was an "miRNA" discovered by mirdeep that is uninformative, excluded
 
-for (i in 1:length(files)) {
-  chimeraProcess(files[i], exclude = exclude)
-}
+#for (i in 1:length(files)) {
+#  chimeraProcess(files[i], exclude = exclude)
+#}
 
 #reformat output as fasta with only sequence downstream of small RNA 
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing"
@@ -179,9 +180,9 @@ reformat <- function(input) {
 }
 
 
-for (i in 1:length(files)) {
-  reformat(files[i])
-}
+#for (i in 1:length(files)) {
+#  reformat(files[i])
+#}
 
 
 #now map downstream sequence to AaegL5 genome 
@@ -200,7 +201,7 @@ bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",f
 
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing"
 fqfiles <- dir(Dir, pattern= "*txt.fa", full.names = TRUE)
-bplapply(fqfiles, bowtie_align, index = "/Users/kathryn/Bowtie_indices/AaegL5/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
+#bplapply(fqfiles, bowtie_align, index = "/Users/kathryn/Bowtie_indices/AaegL5/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
 
 #convert remapped to BED:
 
@@ -220,15 +221,13 @@ bamtobed <- function(file,filtDup=FALSE){
 
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 mapped <- dir(Dir,pattern="bam$",full.names = TRUE)
-bplapply(mapped, bamtobed)
+#bplapply(mapped, bamtobed)
 
 ```
 
 ##now need to read in remapped chimeric reads, concatenate beds by group and write grouped bed/bigwigs
 
 ```{r}
-# moved remapped beds from high performance computer to my machine
-#unmapped_KRG091819_Aag2_mIgG_Exp6B_chimera.txt.bed" this one was empty in initial revmap 
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 
@@ -247,19 +246,15 @@ t <- names(t) #get names and read these beds in
 chimera <- lapply(t, read.delim, header = FALSE, sep = "")
 names(chimera ) <- t 
 
-n <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/", "", t)
-n <- gsub("_chimera.txt.bed", "", n)
-names(chimera) <- n
-
 #get remapped chimeras by antibody/lysate and write out concatenated beds 
-aegyptiAgo1 <- grep("aegypti_Ago1", n, value = TRUE)
-aegyptiAgo2 <- grep("aegypti_Ago2", n, value = TRUE)
-aegyptirIgG <- grep("aegypti_rIgG", n, value = TRUE)
-aegyptimIgG <- grep("aegypti_mIgG", n, value = TRUE)
-Aag2Ago1 <- grep("Aag2_Ago1", n, value = TRUE)
-Aag2Ago2 <- grep("Aag2_Ago2", n, value = TRUE)
-Aag2rIgG <- grep("Aag2_rIgG", n, value = TRUE)
-Aag2mIgG <- grep("Aag2_mIgG", n, value = TRUE)
+aegyptiAgo1 <- grep("aegypti_Ago1", t, value = TRUE)
+aegyptiAgo2 <- grep("aegypti_Ago2", t, value = TRUE)
+aegyptirIgG <- grep("aegypti_rIgG", t, value = TRUE)
+aegyptimIgG <- grep("aegypti_mIgG", t, value = TRUE)
+Aag2Ago1 <- grep("Aag2_Ago1", t, value = TRUE)
+Aag2Ago2 <- grep("Aag2_Ago2", t, value = TRUE)
+Aag2rIgG <- grep("Aag2_rIgG", t, value = TRUE)
+Aag2mIgG <- grep("Aag2_mIgG", t, value = TRUE)
 
 aegyptiAgo1_chimera_remap <-chimera[c(aegyptiAgo1)]
 aegyptiAgo2_chimera_remap <- chimera[c(aegyptiAgo2)]
@@ -282,12 +277,12 @@ Aag2mIgG_chimera_remap <- do.call(rbind,Aag2mIgG_chimera_remap)
 h <-grep("_chimera_remap",names(.GlobalEnv),value=TRUE)
 h<- do.call("list",mget(h))
 
-for(i in seq_along(h)) {
-  write.table(h[i], paste(names(h)[i], ".bed", sep = ""), 
-              col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
-}
+#for(i in seq_along(h)) {
+#  write.table(h[i], paste(names(h)[i], ".bed", sep = ""), 
+#              col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
+#}
 
-#make  bigwigs
+#make  bigwigs for chimera UTR coverage
 
 pathToBed <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 
@@ -302,7 +297,8 @@ makeCov <- function(pathToBed){
 }
 setwd("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped")
 
-bplapply(pathToBed,makeCov)
+#bplapply(pathToBed,makeCov)
 
 ```
+
 

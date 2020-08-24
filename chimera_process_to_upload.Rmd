@@ -13,12 +13,13 @@ library(stringr)
 library(purrr)
 library(ggplot2)
 library(ggrepel)
+library(BiocParallel)
 ```
 
 ###first reverse map all small RNAs to reads that did not map to AaegL5 
 
 ```{r}
-##get unmapped reads from bam; bams were generated in "Processing" script
+##get unmapped reads from bam; bams were generated in "Processing" script; data available upon request
 Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera"
 bams <- dir(Dir,pattern="*.bam$",full.names = TRUE)
 unbam <- function(bams){
@@ -33,7 +34,7 @@ for (i in 1:length(bams)) {
 
 
 #make indices for mapping
-Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera"
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera"
 unmapped <- dir(Dir,pattern="*.fa$",full.names = TRUE)
 bowtie_index <- function(genomeFasta,
                          outFasta=gsub("\\.fa","",genomeFasta)
@@ -90,7 +91,7 @@ bamtobed <- function(file,filtDup=FALSE){
 bplapply(bam, bamtobed)
 
 #read in bed and chimera process
-Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera/known_novel_sRNA_revmapped"
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 chimera <- lapply(beds, function(x) {
    if (!file.size(x) == 0) {
@@ -112,7 +113,7 @@ test <- lapply(test, setNames, col.names)
 t <- gsub("known_novel_sRNA_revmapped/", "", t)
 t <- gsub(".bed", ".fa", t) #so t has names of all fastas to read in 
 
-Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera" 
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera" 
 fa <- dir(Dir, pattern="*.fa$",full.names = TRUE) #actually did this on hpc, but same idea
 fasta <- lapply(fa, readDNAStringSet, format = "fasta", nrec = -1L)
 names(fasta) <- fa 
@@ -124,11 +125,11 @@ fasta <- lapply(fasta, function(x) tibble::rownames_to_column(x))
 
 #merge together read sequence and bed by rowname (read name)
 chimera <- map2(fasta, test, ~merge(.x,.y, by = "rowname"))
-names(chimera) <- gsub("/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera/unmapped_", "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera/known_novel_sRNA_revmapped/unmapped_", names(chimera))
+names(chimera) <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/unmapped_", "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/unmapped_", names(chimera))
 
 
 #write files to chimera inputs: bed with read name, start, stop, srand, read name, and read sequence
-setwd(Dir)
+
 for (x in names(chimera)) {
 write.table(chimera[[x]], file=paste0(x,".txt"), sep="\t", quote = FALSE)}
 write.table(test, file=".txt", sep="\t")
@@ -137,40 +138,43 @@ write.table(test, file=".txt", sep="\t")
 
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped"
 files <- dir(Dir, pattern="*fa.txt$",full.names = TRUE)
-input <- grep("KRG102219_aegypti_Ago1_Exp8A", files, value =TRUE)
 
-chimeraProcess <- function(input) {
+
+chimeraProcess <- function(input,exclude) {
   
   BR1 <- read.delim(input, header=T)
-  BR1 <- BR1[!grepl("AAAAAAAAAAAAAAAAAAAAAAAAA", BR1$name),] #this was high frequency in my libraries removed
+  BR1 <- BR1[!BR1$name %in% exclude,]
   BR1<- BR1[BR1$strand=="+",]
-  BR1 <- BR1[duplicated(BR1$rowname)==F,] #to remove reads with more than one miRNA mapped 
-  BR1$length <- sapply(as.character(BR1$x), nchar)
+  BR1 <- BR1[duplicated(BR1$rowname)==F,]
   BR1$ups.seq <- mapply(substr, x=BR1$x, start=0, stop=BR1$start)
-  BR1$dns.seq <- mapply(substr, x=BR1$x, start=BR1$stop, stop=BR1$length)
+  BR1$dns.seq <- mapply(substr, x=BR1$x, start=BR1$stop+1, stop=nchar(as.character(BR1$x)))
   outname = paste(input, sep = "")
   outname = gsub(".fa.txt", "_chimera.txt", outname)
+  outname = gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/", "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/", outname)
   write.table(BR1, outname, quote=F, sep="\t")
 }
 
+exclude <- c("AAAAAAAAAAAAAAAAAAAAAAAAA")
+#this was an "miRNA" discovered by mirdeep that is uninformative, excluded
+
 for (i in 1:length(files)) {
-  chimeraProcess(files[i])
+  chimeraProcess(files[i], exclude = exclude)
 }
 
 #reformat output as fasta with only sequence downstream of small RNA 
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing"
 files <- dir(Dir, pattern="*_chimera.txt$",full.names = TRUE)
+
 
 reformat <- function(input) {
   BR1 <- read.delim(input, header=T)
-  BR1$V8 <- paste(BR1$rowname, BR1$name, sep = ";")
-  BR1 <- BR1[c(11,10 )]
+  BR1$ID <- paste(BR1$rowname, BR1$name, sep = ";")
+  BR1 <- BR1[c("ID","dns.seq")] 
   BR1$dns.seq <- as.character(BR1$dns.seq)
-  BR1$length <- nchar(BR1$dns.seq)
-  BR1 <- BR1[BR1$length >= 18,]
-  BR1 <- BR1[1:2]
+  BR1 <- BR1[nchar(BR1$dns.seq)>=18,]
   outname = paste(input, '.fa', sep = "")
   BR2 <- DNAStringSet(BR1$dns.seq, use.names = TRUE)
-  names(BR2) <- BR1$V8
+  names(BR2) <- BR1$ID
   writeXStringSet(BR2, outname, format ="fasta")  
 }
 
@@ -194,9 +198,9 @@ bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",f
   
 }
 
-Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera/known_novel_sRNA_revmapped/AaegL5_remap"
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing"
 fqfiles <- dir(Dir, pattern= "*txt.fa", full.names = TRUE)
-bplapply(fqfiles, bowtie_align, index = "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_ref/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
+bplapply(fqfiles, bowtie_align, index = "/Users/kathryn/Bowtie_indices/AaegL5/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
 
 #convert remapped to BED:
 
@@ -214,20 +218,19 @@ bamtobed <- function(file,filtDup=FALSE){
 }
 
 
-Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_mapped/unmapped_for_chimera/known_novel_sRNA_revmapped/AaegL5_remap"
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 mapped <- dir(Dir,pattern="bam$",full.names = TRUE)
 bplapply(mapped, bamtobed)
 
 ```
 
-##now need to read in remapped chimeric reads, concatenate beds by group and write grouped bed 
+##now need to read in remapped chimeric reads, concatenate beds by group and write grouped bed/bigwigs
 
 ```{r}
 # moved remapped beds from high performance computer to my machine
 #unmapped_KRG091819_Aag2_mIgG_Exp6B_chimera.txt.bed" this one was empty in initial revmap 
-Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/AaegL5_remap"
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
-beds <- grep("KRG", beds, value = TRUE)
 
 chimera <- lapply(beds, function(x) {
    if (!file.size(x) == 0) {
@@ -244,20 +247,28 @@ t <- names(t) #get names and read these beds in
 chimera <- lapply(t, read.delim, header = FALSE, sep = "")
 names(chimera ) <- t 
 
-n <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/AaegL5_remap/", "", t)
+n <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/", "", t)
 n <- gsub("_chimera.txt.bed", "", n)
 names(chimera) <- n
 
 #get remapped chimeras by antibody/lysate and write out concatenated beds 
-aegyptiAgo1 %in% names(chimera)
-aegyptiAgo1_chimera_remap <- test[c(aegyptiAgo1)]
-aegyptiAgo2_chimera_remap <- test[c(aegyptiAgo2)]
-aegyptirIgG_chimera_remap <- test[c(aegyptirIgG)]
-aegyptimIgG_chimera_remap <- test[c(aegyptimIgG)]
-Aag2Ago1_chimera_remap <- test[c(Aag2Ago1)]
-Aag2Ago2_chimera_remap <- test[c(Aag2Ago2)]
-Aag2rIgG_chimera_remap <- test[c(Aag2rIgG)]
-Aag2mIgG_chimera_remap <- test[c(Aag2mIgG)]
+aegyptiAgo1 <- grep("aegypti_Ago1", n, value = TRUE)
+aegyptiAgo2 <- grep("aegypti_Ago2", n, value = TRUE)
+aegyptirIgG <- grep("aegypti_rIgG", n, value = TRUE)
+aegyptimIgG <- grep("aegypti_mIgG", n, value = TRUE)
+Aag2Ago1 <- grep("Aag2_Ago1", n, value = TRUE)
+Aag2Ago2 <- grep("Aag2_Ago2", n, value = TRUE)
+Aag2rIgG <- grep("Aag2_rIgG", n, value = TRUE)
+Aag2mIgG <- grep("Aag2_mIgG", n, value = TRUE)
+
+aegyptiAgo1_chimera_remap <-chimera[c(aegyptiAgo1)]
+aegyptiAgo2_chimera_remap <- chimera[c(aegyptiAgo2)]
+aegyptirIgG_chimera_remap <- chimera[c(aegyptirIgG)]
+aegyptimIgG_chimera_remap <- chimera[c(aegyptimIgG)]
+Aag2Ago1_chimera_remap <- chimera[c(Aag2Ago1)]
+Aag2Ago2_chimera_remap <- chimera[c(Aag2Ago2)]
+Aag2rIgG_chimera_remap <- chimera[c(Aag2rIgG)]
+Aag2mIgG_chimera_remap <- chimera[c(Aag2mIgG)]
 
 aegyptiAgo1_chimera_remap <- do.call(rbind, aegyptiAgo1_chimera_remap)
 aegyptiAgo2_chimera_remap <- do.call(rbind, aegyptiAgo2_chimera_remap)  
@@ -275,5 +286,23 @@ for(i in seq_along(h)) {
   write.table(h[i], paste(names(h)[i], ".bed", sep = ""), 
               col.names = FALSE, row.names = FALSE, sep = "\t", quote = FALSE)
 }
+
+#make  bigwigs
+
+pathToBed <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
+
+pathToBed <- dir(pathToBed, pattern= "*_remap.bed", full.names = TRUE)
+
+
+makeCov <- function(pathToBed){
+  require(magrittr)
+  require(rtracklayer)
+  test <- pathToBed %>% import.bed 
+    coverage(test,weight = (1/length(test))) %>% export.bw(con=gsub("\\.bed","\\.bw",pathToBed))
+}
+setwd("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped")
+
+bplapply(pathToBed,makeCov)
+
 ```
 

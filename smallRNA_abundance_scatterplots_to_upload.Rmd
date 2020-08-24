@@ -810,11 +810,11 @@ outname = gsub(".fa", "_fam_rn.fa",  input)
 writeXStringSet(ss, outname, format = "fasta")
 }
 
-for (i in 1:length(fasta)) {
-  rename_fun(fasta[i], TS6)
-}
+#for (i in 1:length(fasta)) {
+#  rename_fun(fasta[i], TS6)
+#}
 
-#just need to deal with top known because need to append if thay are "top" in cells,  mosquitoes, or both
+#just need to deal with top known because need to append if thay are "top" in cells, mosquitoes, or both
 aaek <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_aegypti_Ago1_known_fam_rn.fa")
 cellk <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_cells_Ago1_known_fam_rn.fa")
 aaekdf <- as.data.frame(aaek)

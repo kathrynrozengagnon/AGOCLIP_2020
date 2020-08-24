@@ -105,7 +105,7 @@ chimera_counts$Aag2_mIgG_BC <- apply(chimera_counts[Aag2mIgG], 1, function(x) le
 #I <- grep(".*(mIgG.*Aag2|Aag2.*mIgG).*", ref, value="TRUE")
 
 
-#fastaProcessmod <- function(input) { 
+#fastaLength <- function(input) { 
 #  require(Biostrings)
 #  fa <- lapply(input, readDNAStringSet, format = "fasta", nrec = -1L) 
 # t <- lapply(fa, length)
@@ -113,14 +113,14 @@ chimera_counts$Aag2_mIgG_BC <- apply(chimera_counts[Aag2mIgG], 1, function(x) le
 # print(t)
 #}
 
-#fastaProcessmod(A) #1839545
-#fastaProcessmod(B) #762423
-#fastaProcessmod(C) #745977
-#fastaProcessmod(D) #402387
-#fastaProcessmod(E) #3368128
-#fastaProcessmod(G) #2964194
-#fastaProcessmod(H) #2632945
-#fastaProcessmod(I) #1423698
+#fastaLength(A) #1839545
+#fastaLength(B) #762423
+#fastaLength(C) #745977
+#fastaLength(D) #402387
+#fastaLength(E) #3368128
+#fastaLength(G) #2964194
+#fastaLength(H) #2632945
+#fastaLength(I) #1423698
 
 #add pseudocount so can calc log2FC 
 chimera_counts$aegyptiAgo1_pseudocount <- rowSums(chimera_counts[aegyptiAgo1]) + 1

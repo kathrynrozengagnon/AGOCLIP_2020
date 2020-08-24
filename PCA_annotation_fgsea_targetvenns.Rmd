@@ -408,11 +408,23 @@ ann_mat <- rbindlist(ann_mat, idcol = TRUE)
 #write.table(ann_mat, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Ago2_distal_intergenic_enrichment_filtering.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep ="\t")
 
 #final filtering: peakBC > 0 and Ab is 10X above sample, nhi = 2 or more 
+#Ago1 and Ago2 sets together for PCA:
 Aag2 <- subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE" | all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
 row.names(Aag2) <- Aag2$peakID
 
 aegypti <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE" | all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
 row.names(aegypti) <- aegypti$peakID
+
+#Individual sets
+Aag2_Ago1_filt <- subset(all, all$Aag2Ago1_peakBC > 0 & all$Aag2_Ago1_nhipeaks > 1 & all$Aag2_Ago1_over_rIgG == "TRUE")
+#write.table(Aag2_Ago1_filt, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_cells_Ago1_matrix_filtered_peaks.txt", col.names = TRUE, row.names = FALSE, quote= FALSE, sp = "\t")
+Aag2_Ago2_filt <- subset(all, all$Aag2Ago2_peakBC > 0 & all$Aag2_Ago2_nhipeaks > 1 & all$Aag2_Ago2_over_mIgG == "TRUE")
+#write.table(Aag2_Ago2_filt, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_cells_Ago2_matrix_filtered_peaks.txt", col.names = TRUE, row.names = FALSE, quote= FALSE, sp = "\t")
+
+aegypti_Ago1_filt <- subset(all, all$aegyptiAgo1_peakBC > 0 & all$aegypti_Ago1_nhipeaks > 1 & all$aegypti_Ago1_over_rIgG == "TRUE")
+#write.table(aegypti_Ago1_filt , "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_aegypti_Ago1_matrix_filtered_peaks.txt", col.names = TRUE, row.names = FALSE, quote= FALSE, sp = "\t")
+aegypti_Ago2_filt <- subset(all, all$aegyptiAgo2_peakBC > 0 & all$aegypti_Ago2_nhipeaks > 1 & all$aegypti_Ago2_over_mIgG == "TRUE")
+#write.table(aegypti_Ago2_filt , "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_aegypti_Ago2_matrix_filtered_peaks.txt", col.names = TRUE, row.names = FALSE, quote= FALSE, sp = "\t")
 
 ```
 

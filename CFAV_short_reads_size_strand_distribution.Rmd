@@ -12,13 +12,12 @@ library(magrittr)
 library(rtracklayer)
 library(data.table)
 library(ggplot2)
-
 ```
 
 ##get size dist of CFAV mapped, short reads 
 
 ```{r cars}
-
+#data is available in my github:  CFAV_beds.zip
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/CFAV_mapped/CFAV_beds"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 cat_beds <- grep("cat*", beds, value = TRUE)
@@ -70,7 +69,6 @@ short_mapped <- rbind(AaegL5_df_short, CFAV_df_short)
 cells_short <- short_mapped[grepl("Aag2", short_mapped$sample),]
 
 ggplot(cells_short, aes(x = width, y = percent, fill=sample, color=sample)) + geom_bar(stat = "identity", position=position_dodge()) +  scale_fill_manual(values = c("white", "white", "#1B0B80", "#8A0F09")) + scale_colour_manual(values = c("#1B0B80", "#8A0F09", "black", "black")) + theme_bw()
-
 
 ```
 

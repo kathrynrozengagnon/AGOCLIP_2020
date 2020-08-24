@@ -179,10 +179,11 @@ seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/
 to_merge <- seed_table[,c("Row.names", "FL", "six_mer", "six_mer_target")]
 chim_merge <- merge(chim_merge, to_merge, by.x = "smallRNA", by.y="Row.names")
 
-novel_byfam <- read.table("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_filtered_miRNAs_by_fam.txt",  sep = "\t", header = TRUE)
-novel_match_aae <- novel_byfam[grepl("aae", novel_byfam$related_miRNA),]
+#get only novel that are related to known miRNA families in  aegypti
+aae <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aae_miRNAs_mature_fixed.fa", format = "fasta", nrec = -1L)
+aae_seeds <- subseq(aae, start=2, end=NA, width=6)
 
-chim_merge$related_to_aae <- ifelse(chim_merge$six_mer %in% novel_match_aae$seed & str_detect(chim_merge$smallRNA, "aae", negate=TRUE), paste0("yes"), paste0("no"))
+chim_merge$related_to_aae <- ifelse(chim_merge$six_mer %in% aae_seeds & str_detect(chim_merge$smallRNA, "aae", negate=TRUE), paste0("yes"), paste0("no"))
 
 ```
 
@@ -439,6 +440,7 @@ TS6_m <- setNames(TS6_m, col.names)
 TS6_m$signficant_Randfold <- gsub('\\;.*', '', TS6_m$signficant_Randfold)
 
 #format seeds in related species cols; mature miRNAs availabl from miRBase: http://www.mirbase.org/ftp.shtml
+#also available in my github for version control
 
 aae <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aae_miRNAs_mature_fixed.fa", format = "fasta", nrec = -1L)
 aae_seeds <- subseq(aae, start=2, end=NA, width=6)
@@ -448,7 +450,7 @@ names(aae_df)[names(aae_df)=="x"] <- "six_mer"
 aae_df <- aae_df %>% group_by(six_mer) %>% summarise(aae_smallRNA_family =paste0(related_aae_miRNAs,collapse=":"))
 
 
-cqu <- readDNAStringSet("/Users/kathryn/mirdeep2_master/cqu_mature.fa", format = "fasta", nrec = -1L)
+cqu <- readDNAStringSet("/Users/kathryn/mirdeep2_master/cqu_mature_fixed.fa", format = "fasta", nrec = -1L)
 cqu_seeds <- subseq(cqu, start=2, end=NA, width=6)
 cqu_df <- as.data.frame(cqu_seeds)
 cqu_df$related_cqu_miRNAs <- row.names(cqu_df)

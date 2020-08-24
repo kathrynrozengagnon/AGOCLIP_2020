@@ -41,6 +41,8 @@ t <- names(t) #get names and read these beds in
 chimera <- lapply(t, read.delim, header = FALSE, sep = "")
 names(chimera ) <- t 
 
+
+
 chimera_counts <- lapply(chimera, function(x) str_split_fixed(x$V4, ";", 2))
 chimera_counts <- lapply(chimera_counts, function(x) x[,2])
 chimera_counts <- lapply(chimera_counts, as.data.frame)
@@ -439,7 +441,7 @@ TS6_m <- setNames(TS6_m, col.names)
 #simplify randfold col
 TS6_m$signficant_Randfold <- gsub('\\;.*', '', TS6_m$signficant_Randfold)
 
-#format seeds in related species cols; mature miRNAs availabl from miRBase: http://www.mirbase.org/ftp.shtml
+#format seeds in related species cols; mature miRNAs available from miRBase: http://www.mirbase.org/ftp.shtml
 #also available in my github for version control
 
 aae <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aae_miRNAs_mature_fixed.fa", format = "fasta", nrec = -1L)
@@ -794,7 +796,7 @@ names(allfa) <- TS6$smallRNA
 
 ```
 
-##rename fastas with final names
+##rename fastas with final names; these are the input fastas provided in my github
 
 ```{r}
 #finally, rewrite DNAstringsets renamed
@@ -817,8 +819,8 @@ writeXStringSet(ss, outname, format = "fasta")
 #}
 
 #just need to deal with top known because need to append if thay are "top" in cells, mosquitoes, or both
-aaek <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_aegypti_Ago1_known_fam_rn.fa")
-cellk <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/top10_cells_Ago1_known_fam_rn.fa")
+aaek <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/renamed_smallRNA_fastas/top10_aegypti_Ago1_known_fam_rn.fa")
+cellk <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/renamed_smallRNA_fastas/top10_cells_Ago1_known_fam_rn.fa")
 aaekdf <- as.data.frame(aaek)
 aaekdf$aae_name <- row.names(aaekdf)
 cellkdf <- as.data.frame(cellk)
@@ -830,13 +832,13 @@ Ago1k$newname <- ifelse(!is.na(Ago1k$aae_name) & is.na(Ago1k$cell_name), paste0(
 bothk <- DNAStringSet(Ago1k$x)
 names(bothk) <- Ago1k$newname
 
-aaen <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/aegypti_Ago1_novel_fam_rn.fa")
-celln <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/cells_Ago1_novel_fam_rn.fa")
+aaen <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/renamed_smallRNA_fastas/aegypti_Ago1_novel_fam_rn.fa")
+celln <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/renamed_smallRNA_fastas/cells_Ago1_novel_fam_rn.fa")
 
 alltog <- c(aaen, celln, bothk)
 alltog <- unique(alltog)
 
-#writeXStringSet(alltog,"/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/all_Ago1_known_and_novel_fam_rn.fa")
+#writeXStringSet(alltog,"/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/renamed_smallRNA_fastas/all_Ago1_known_novel_fam_rn.fa")
 
 ```
 

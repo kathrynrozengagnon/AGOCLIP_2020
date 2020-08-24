@@ -12,7 +12,7 @@ library(stringr)
 library(reshape2)
 ```
 
-##small RNA-seq from Akbari et al. 2013 are shown but were commented out because the files are very large
+##Reprocessing steps of small RNA-seq from Akbari et al. 2013 are shown but were commented out because the files are very large
 
 ```{r}
 # #small RNA seq data were downloaded from ENA: https://www.ebi.ac.uk/ena/browser/home

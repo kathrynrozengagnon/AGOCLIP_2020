@@ -264,8 +264,8 @@ hu &lt;- lapply(h, unique)
 #              col.names = TRUE, row.names = FALSE, sep = &quot;\t&quot;, quote = FALSE)
 #}</code></pre>
 </div>
-<div id="gsva-for-ago1-ovary-specific-mirna-targets-figure-s6a" class="section level2">
-<h2>GSVA for Ago1 ovary-specific miRNA targets (Figure S6A)</h2>
+<div id="gsva-for-ago1-ovary-specific-mirna-targets-figure-s6c" class="section level2">
+<h2>GSVA for Ago1 ovary-specific miRNA targets (Figure S6C)</h2>
 <pre class="r"><code>##get counts from Matthews et al., available at: https://github.com/VosshallLab/Aedes_neurotranscriptome
 
 PECounts &lt;- read.delim(&quot;/Users/kathryn/Reprocess_all_paper_datasets/RNAseq_test/Aedes_neurotranscriptome-home-newDESEQ2/raw_gene_counts/PE_featurecounts.txt&quot;,sep = &quot;\t&quot;,skip=1)
@@ -565,8 +565,8 @@ names(hu) &lt;- names(h)
 #              col.names = TRUE, row.names = FALSE, sep = &quot;\t&quot;, quote = FALSE)
 #}</code></pre>
 </div>
-<div id="now-gsva-for-ago2-figure-s6b" class="section level2">
-<h2>Now GSVA for Ago2, Figure S6B</h2>
+<div id="now-gsva-for-ago2-figure-s6d" class="section level2">
+<h2>Now GSVA for Ago2, Figure S6D</h2>
 <pre class="r"><code>myAgo2List &lt;- dir(&quot;/Users/kathryn/Reprocess_all_paper_datasets/RNAseq_test/Ago2_lists_FINAL/&quot;,full.names = TRUE) %&gt;% lapply(function(x)read.delim(x,header=TRUE)[,1] %&gt;% as.vector)
 
 #map to their geneIDs

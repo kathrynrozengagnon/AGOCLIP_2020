@@ -89,7 +89,7 @@ hu <- lapply(h, unique)
 
 ```
 
-##GSVA for Ago1 ovary-specific miRNA targets (Figure S6A)
+##GSVA for Ago1 ovary-specific miRNA targets (Figure S6C)
 
 ```{r }
 ##get counts from Matthews et al., available at: https://github.com/VosshallLab/Aedes_neurotranscriptome
@@ -316,7 +316,7 @@ names(hu) <- names(h)
 
 ```
 
-##Now GSVA for Ago2, Figure S6B
+##Now GSVA for Ago2, Figure S6D
 
 ```{r}
 myAgo2List <- dir("/Users/kathryn/Reprocess_all_paper_datasets/RNAseq_test/Ago2_lists_FINAL/",full.names = TRUE) %>% lapply(function(x)read.delim(x,header=TRUE)[,1] %>% as.vector)

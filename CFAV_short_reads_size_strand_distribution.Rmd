@@ -29,7 +29,7 @@ CFAV_width <-lapply(cat, function(x) data.frame(width = width(x), strand = x@str
 CFAV_df <- rbindlist(CFAV_width, idcol = TRUE)
 CFAV_df <- setNames(CFAV_df, c("sample", "width", "strand"))
 CFAV_df$sample <- paste0(CFAV_df$sample, "_CFAV_width")
-CFAV_df <- CFAV_df %>% group_by(.dots=c("sample","width", "strand")) %>% mutate(count = n()) %>% summarise_all(first)
+CFAV_df <- CFAV_df %>% group_by(.dots=c("sample","width", "strand")) %>% mutate(count = n()) %>% summarise_all(dplyr::first)
 
 CFAV_df_short <- CFAV_df %>% filter(width < 25)
 
@@ -45,7 +45,8 @@ CFAV_df_short$percent <- ifelse(CFAV_df_short$strand=="-", CFAV_df_short$percent
 
 ```{r }
 #get all widths 
-##files are too big for upload to github, available upon request
+#files are too big for upload to github, available upon request
+#data table for graphing is provided in my github
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped/cat_beds"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 cat_beds <- grep("cat*", beds, value = TRUE)
@@ -57,7 +58,7 @@ AaeL5_width <-lapply(cat, function(x) data.frame(width = width(x), strand = x@st
 AaegL5_df <- rbindlist(AaeL5_width, idcol = TRUE)
 AaegL5_df <- setNames(AaegL5_df, c("sample", "width", "strand"))
 AaegL5_df$sample <- paste0(AaegL5_df$sample, "_AaegL5_width")
-AaegL5_df <- AaegL5_df %>% group_by(.dots=c("sample","width", "strand")) %>% mutate(count = n()) %>% summarise_all(first)
+AaegL5_df <- AaegL5_df %>% group_by(.dots=c("sample","width", "strand")) %>% mutate(count = n()) %>% summarise_all(dplyr::first)
 
 AaegL5_df_short <- AaegL5_df %>% filter(width < 25)
 AaegL5_df_short <- AaegL5_df_short %>% filter(width > 17) #don't have any CFAV reads less than 18nt
@@ -67,6 +68,15 @@ AaegL5_df_short$percent <- ifelse(AaegL5_df_short$strand=="-", AaegL5_df_short$p
 
 short_mapped <- rbind(AaegL5_df_short, CFAV_df_short)
 cells_short <- short_mapped[grepl("Aag2", short_mapped$sample),]
+
+#write.table(cells_short, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/CFAV_AaegL5_short_size_strand_distribution.txt", col.names = TRUE, row.names = TRUE, sep = "\t", quote = FALSE)
+```
+
+## Figure 5H
+
+```{r }
+#data table available in my github
+cells_short <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/CFAV_AaegL5_short_size_strand_distribution.txt", header = TRUE, sep = "\t")
 
 ggplot(cells_short, aes(x = width, y = percent, fill=sample, color=sample)) + geom_bar(stat = "identity", position=position_dodge()) +  scale_fill_manual(values = c("white", "white", "#1B0B80", "#8A0F09")) + scale_colour_manual(values = c("#1B0B80", "#8A0F09", "black", "black")) + theme_bw()
 

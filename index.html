@@ -9,7 +9,7 @@
 <meta name="generator" content="pandoc" />
 
 
-<meta name="author" content="KRG" />
+<meta name="author" content="Kathryn Rozen-Gagnon" />
 
 
 <title>Code used for analysis of Ago1- and Ago2-CLIP in Aedes aegypti whole mosquitoes and Aag2 cells, for the manuscript: Argonaute-CLIP delineates versatile, functional RNAi networks in Aedes aegypti</title>
@@ -190,13 +190,27 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Code used for analysis of Ago1- and Ago2-CLIP in Aedes aegypti whole mosquitoes and Aag2 cells, for the manuscript: Argonaute-CLIP delineates versatile, functional RNAi networks in Aedes aegypti</h1>
-<h4 class="author">KRG</h4>
+<h4 class="author">Kathryn Rozen-Gagnon</h4>
 <h4 class="date">8/25/2020</h4>
 
 </div>
 
 
-<p>Search for known and novel miRNAs in Ago1 peaks (Figures Figure 4A-B and S4A-D): <a href="Ago1_known_novel_target_enrichment_in_peaks_to_upload.html">link</a></p>
+<p>Processing/mapping/peak matrix building code for Ago targets can be seen on my github (there are no graphical outputs): <a href="Processing_peak_matrix_to_upload.Rmd">link</a></p>
+<p>Click <a href="PCA_annotation_fgsea_targetvenns.html">link</a> to see: PCAs of all unfiltered samples (Figure S2D), filtering of high-confidence Ago targets (data underlying Figures S2A-C), and PCAs of high-confidence targets in cells and whole mosquitoes (Figures 3E-H) fgsea of high-confidence gene targets associated with Ago1 or Ago2 (Figures 3F-I and Tables S4-S5) genic annotation of high-confidence targets (Figures 3A-D) Venn diagram of gene targets of Ago1 and Ago2 in cells and whole mosquitoes (Figure S2F) and venn diagram comparing gene targets from Zhang et al., 2017 (Figure S2E)</p>
+<p>Click <a href="mirdeep2_processing_filtering_to_upload.html">link</a> to see: Processing/miRDeep2 discovery/quantification and filtering to obtain high-confidence novel small RNAs Abundance of high-confidence known miRNAs and novel small RNAs in Ago1 and Ago2 (Figures 3L-K) Length distribution of high-confidence novel small RNAs and known miRNAs associated with Ago1 or Ago2, in cells or whole mosquitoes (Figures S3A-B) Venn diagrams showing presence of Ago1-associated high-confidence known (Figure S3C) or novel (Figure S3D) miRNAs in cells compared to whole mosquitoes</p>
+<p>Chimera processing to identify reads containing small RNAs and targets can be seen on my github (there are no graphical outputs): <a href="chimera_process_to_upload.Rmd">link</a></p>
+<p>Click <a href="smallRNA_abundance_scatterplots_to_upload.html">link</a> to see: Quantification of chimera abundance, and comparison of high-confidence known miRNAs and novel small RNAs by overall abudnance, or by chimera abundance (Figures 4D, S4F, S5E-F) Table S6 formatting, naming of novel small RNAs, and getting the most abundant small RNA families to search for 6mers in peaks</p>
+<p>Click <a href="Ago1_known_novel_target_enrichment_in_peaks_to_upload.html">link</a> to see: Search for abundant known and novel miRNAs in Ago1 peaks in cells and whole mosquitoes (Figures Figure 4A-B and S4A-D)</p>
+<p>Click <a href="Ago1_miRNA_target_abundances_pies_TableS3_to_upload.html">link</a> to see: Scatterplots showing the correlation between miRNA families and their targets, and inset pie charts showing the percentages of high-confidence miRNAs by class (Figures S4E and 4C) Table S3 formatting</p>
+<p>Click <a href="metagene_plots_coverage_chimeras.html">link</a> to see: Read coverage over 3’UTRs for Ago1 (Figures 4E and S4G) and Ago2 (Figure 5A) Frequency of chimeras and predicted 6mers over 3’UTRs for Ago1 (Figures 4F and S4H) and Ago2 (Figures S5D and S5F)</p>
+<p>Click <a href="xx">link</a> to see: RF</p>
+<p>Click <a href="CFAV_short_reads_size_strand_distribution.html">link</a> to see: Quantification of size and strand bias for CFAV- or Ae. aegypti-mapped short reads, from Ago1 or AGo2 libraries (Figure 5H)</p>
+<p>Click <a href="overlaps_strand_bias_to_upload.html">link</a> to see: Quantification of strand bias for Ago1 and Ago2 at overlapping target regions (Figures 5I-J)</p>
+<p>Click <a href="xx">link</a> to see: esiRNA Ago2 motif</p>
+<p>Click <a href="goseq_heatmap_Ago2_perfect_vs_imperfect_to_upload.html">link</a> to see: Goseq analysis for functional target network regulated by imperfect or perfect Ago2 targeting in cells and whole mosquitoes (Figure 5M)</p>
+<p>Click <a href="RNAseq_target_validation_to_upload.html">link</a> to see: Selection of mosqutio ovarian miRNA targets or control miRNA targets, their relative expression in all individual mosquito tissues from Matthews et al., 2016 (Figure S6C), or their normalized expression in ovaries compared to all tissues (Figures 6A-C and S6A-B) Selection of targets by type of abundant novel mosquito esiRNAs or Ago2-associated known miRNAs, their relative expression in all individual mosquito tissues from Matthews et al., 2016 (Figure S6D), or their normalized expression in ovaries compared to all tissues (Figures 6E-F)</p>
+<p>Click <a href="reprocess_reanalyze_smallRNA_seq_Akbari_to_upload.html">link</a> to see: Reprocessing of small RNA-seq data from Akbari et al., 2013 to quantify novel esiRNA expression in ovaries (Figure 6D)</p>
 
 
 

@@ -1,0 +1,931 @@
+---
+title: "KRG_mirdeep_filtering_and_smallRNA_abundance"
+author: "KRG"
+date: "11/30/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(data.table)
+library(stringr)
+library(magrittr)
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+library(eulerr)
+library(Biostrings)
+```
+
+## Prepare files for miRDeep2, which takes uncollapsed short fastqs normally; processing steps are commented out
+
+```{r}
+# 
+# #took uncollapsed, QF fastq, converted to fasta in command line:
+# #for i in QF*
+# #do
+# #fastq_to_fasta -Q33 -n -v -i "$i" -o "$i"".fa"
+# #done
+# 
+# #for i in QF*.fa
+# #do
+# #fastx_renamer -n COUNT -i "$i" -o "rn_""$i"
+# #done
+# 
+# #sbatch /rugpfs/fs0/home/krozen/fasta_rename.sh
+# 
+# #for BrdU libraries, stripbarcode now
+# 
+# stripBarcode <- function(filesToRun,
+#                                sb="stripBarcode.pl",
+#                                PATHTOPERLLIB=NULL,
+#                                stderr=file.path(getwd(),"stripBarcode_stderr"),
+#                                stdout=file.path(getwd(),"stripBarcode_stdout"),
+#                                linkerlength=7){
+#   fileToRun <- filesToRun[1]
+#   cmd <- sb
+#   
+#   if(!file.exists(fileToRun)) stop("File does not exist")
+#   
+#   exportPATH <- ifelse(!is.null(PATHTOPERLLIB),paste0("export PERL5LIB=",PATHTOPERLLIB,";"),"")
+#   
+#   cmd2 <- paste0(exportPATH," ",
+#                  cmd," ",
+#                  " -len ",linkerlength," -v ",
+#                  " ",fileToRun," ",
+#                  paste(fileToRun,"_rm5",sep=""))
+#   #"temp.rm")
+#   temp <- system(cmd2,wait = TRUE,intern = TRUE)
+#   
+#   return(temp)
+# }
+# 
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# strip <- dir(Dir, pattern= "rn_QF_BrdU*", full.names = TRUE)
+# bplapply(strip, stripBarcode, sb="/rugpfs/fs0/home/krozen/ctk-master/stripBarcode.pl",  PATHTOPERLLIB = "/rugpfs/fs0/home/krozen/czplib-master")
+# 
+# #split uncollapsed by sample index for standard/BrdU CLIP
+# 
+# fastx_barcode_splitter <- function(fileTofxc,bcFile,mismatches=0,
+#                                    fxc="fastx_barcode_splitter.pl",
+#                                    stderr=file.path(getwd(),"fastx_barcode_splitter_stderr"),
+#                                    stdout=file.path(getwd(),"fastx_barcode_splitter_stdout")){
+#   
+#   cmd <- fxc
+#   
+#   if(!file.exists(fileTofxc))stop("File does not exist")
+#   
+#   prefix <- gsub("QF_|\\.fasta|\\.fastq","",basename(fileTofxc))
+#   
+#   
+#   cmd2 <- paste0("cat ",
+#                  fileTofxc," ",
+#                  "| ",
+#                  cmd," ",
+#                  " --bcfile ",bcFile," ",
+#                  "--bol --mismatches ",mismatches," ",
+#                  "--prefix '",prefix,"_' ")
+#   temp <- system(cmd2,wait = TRUE,intern = TRUE)
+#   
+#   return(temp)
+# }
+# 
+# #For each multiplexed fasta, ran this code with appropriate BC fie
+# pathtoBC <- "/rugpfs/fs0/rice_lab/scratch/krozen/fastq_gz/QF_KRG-102219_S1_L001_R1_001.fasta"
+# bcFile <- "/rugpfs/fs0/rice_lab/scratch/krozen/BC_files/KRG102219_BC.txt"
+# fastx_barcode_splitter(pathtoBC, bcFile, fxc = "/ru-auth/local/home/krozen/bin/fastx_barcode_splitter.pl" )
+# 
+# #then, stripbarcode for standard ones 
+# stripBarcode <- function(filesToRun,
+#                                sb="stripBarcode.pl",
+#                                PATHTOPERLLIB=NULL,
+#                                stderr=file.path(getwd(),"stripBarcode_stderr"),
+#                                stdout=file.path(getwd(),"stripBarcode_stdout"),
+#                                linkerlength=27){
+#   fileToRun <- filesToRun[1]
+#   cmd <- sb
+#   
+#   if(!file.exists(fileToRun)) stop("File does not exist")
+#   
+#   exportPATH <- ifelse(!is.null(PATHTOPERLLIB),paste0("export PERL5LIB=",PATHTOPERLLIB,";"),"")
+#   
+#   cmd2 <- paste0(exportPATH," ",
+#                  cmd," ",
+#                  " -len ",linkerlength," -v ",
+#                  " ",fileToRun," ",
+#                  paste(fileToRun,"_rm5",sep=""))
+#   #"temp.rm")
+#   temp <- system(cmd2,wait = TRUE,intern = TRUE)
+#   
+#   return(temp)
+# }
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# strip <- dir(Dir, pattern= "^KRG", full.names = TRUE)
+# strip <- grep("unmatched", strip, value = TRUE, invert = TRUE)
+# strip <- grep("Exp6", strip, value = TRUE, invert = TRUE)
+# strip <- grep("Exp5", strip, value = TRUE, invert = TRUE)
+# 
+# template <- "/rugpfs/fs0/home/krozen/simple_kate.tmpl"
+# param <- BatchtoolsParam(workers=10000, cluster="slurm",template=template)
+# register(param)
+# 
+# bplapply(strip, stripBarcode, sb="/rugpfs/fs0/home/krozen/ctk-master/stripBarcode.pl",  PATHTOPERLLIB = "/rugpfs/fs0/home/krozen/czplib-master")
+# 
+# 
+# #now clip 3' linker from standard files 
+# 
+# fastx_clipper <- function(fileTofqs,fqc="fastx_clipper",length=18,
+#                           adaptor="GTGTCAGTCACTTCCAGCGG",
+#                           stderr=file.path(getwd(),"clipper_stats_stderr"),
+#                           stdout=file.path(getwd(),"clipper_stats_stdout")){
+#   cmd <- fqc
+#   
+#   if(!file.exists(fileTofqs))stop("File does not exist")
+#   
+#   file_fqs <- file.path(dirname(fileTofqs),gsub("rm5","rm5_rm3.fa",basename(fileTofqs)))
+#   if(file.exists(fileTofqs) & !file.exists(file_fqs)){
+#     
+#     args <- c(
+#       paste0("-l ",length),
+#       paste0("-a  ",adaptor),
+#       paste0("-o ",file_fqs),
+#       paste0("-i ",fileTofqs)
+#     )
+#     print(cmd)
+#     print(args)
+#     
+#     system2(cmd,
+#             args,
+#             stdout=stdout,
+#             stderr=stderr
+#     )
+#   }
+#   return(file_fqs)
+# }
+# 
+# #R command to clip linker:
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# clip <- dir(Dir, pattern= "*rm5", full.names = TRUE)
+# clip <- grep("BrdU_", clip, value = TRUE, invert = TRUE)
+# 
+# bplapply(clip, fastx_clipper, fqc = "/rugpfs/fs0/home/krozen/bin/fastx_clipper")
+
+# fastaProcess <- function(input) { 
+#   require(Biostrings)
+#   seq <-  "GGACGATGC" #this was a linker sequence that formed concatemers, especially in IgG samples; remove
+#   fa <- readDNAStringSet(input, format = "fasta", nrec = -1L)
+#   fa <- fa[width(fa) <= 30]
+#   fa <- as.character(fa)
+#   fa <- grep(seq, fa, value = TRUE, invert = TRUE)
+#  fa <- DNAStringSet(fa)
+#   outname = paste(input, sep = "")
+#   outname = gsub("rm5_rm3.fa", "short_rmlinker.fa", outname)
+#   writeXStringSet(fa, outname)
+# }
+
+#Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files""
+#fapro <- dir(Dir, pattern= "*rm5_rm3.fa, full.names = TRUE)
+#for (i in 1:length(fapro)) {
+#   fastaProcess(fapro[i])
+# }
+
+```
+
+##Align uncollapsed files split by sample to genome using bowtie2
+
+```{r}
+#genome fasta used to make index available at: https://www.vectorbase.org/downloads
+
+# bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",fq)
+# ) {
+#   require(Rbowtie2)
+#   if(!dir.exists(sam)){
+#     bowtie2(bt2Index = index,
+#             samOutput = sam,
+#             seq1 = fq,"--threads 4 -f -L 18")
+#     Rsamtools::asBam(sam,gsub("\\.sam","",sam))
+#   }
+#   
+# }
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# fqfiles <- dir(Dir, pattern= "*short_rmlinker.fa", full.names = TRUE)
+# bplapply(fqfiles, bowtie_align, index = "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_ref/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
+
+#need to convert mapped reads (sams) to miRDeep2 collapsed format to get collapsed fasta and collapsed mapped read formtat (arf) using their bwa_sam_converter.pl script
+
+# sams <- dir("/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files", pattern="*.sam$", full.names = FALSE)
+# 
+# bwa_sam_converter <- function(sam){
+#   cmd <- paste0("perl /rugpfs/fs0/home/krozen/mirdeep2/bin/bwa_sam_converter.pl ",
+#                 "-i ", sam,
+#                " -c -o ",
+#                gsub(".sam","reads_collapsed.fa",sam)," -a ",
+#                gsub(".sam","sam_vs_genome.arf",sam))
+#   system(cmd,intern = TRUE)
+# }
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# setwd(Dir)
+# 
+# for (i in 1:length(sams)) {
+#   bwa_sam_converter(sams[i])
+# }
+
+# #run miRDeep2.pl
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files"
+# 
+# FA <- dir(Dir, pattern="sam_collapsed.fa", full.names = TRUE)
+# 
+# mirdeep <- function(mFA){
+#   genome <- "Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5_fixed.fa"
+#   files <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/aae_miRNAs_mature_fixed.fa /rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/dme_miRNAs_mature_fixed.fa /rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/aae_hairpin_fixed.fa"
+#   cv <- gsub("sam_collapsed.fa","sam_vs_genome.arf",mFA)
+#   log <- gsub("sam_collapsed.fa","_report.log",mFA)
+#   cmd <- paste0("/rugpfs/fs0/home/krozen/mirdeep2/bin/miRDeep2.pl ",
+#                 mFA," ",
+#                 genome," ",
+#                 cv," ",
+#                 files," -v ",
+#                 "2>",log
+#   )
+#   system(cmd,wait = T)
+# }
+# 
+# for (i in 1:length(FA)) {
+#   mirdeep(FA[i])
+# }
+
+
+```
+
+##concatenate uncollapsed, processed reads by sample type (Ab/lysate) and map to genome using bowtie2
+
+```{r}
+#define file groups
+# FA <- dir(Dir,pattern="_short_rmlinker.fa",full.names = TRUE)
+# 
+# Ago1 <- grep("Ago1", FA, value=TRUE) #32
+# Ago1_aegypti <- grep("aegypti", Ago1, value=TRUE) #15
+# Ago1_Aag2 <- grep("Aag2", Ago1, value=TRUE) #17
+# 
+# Ago2 <- grep("Ago2", FA, value=TRUE) #20
+# Ago2_aegypti <- grep("aegypti", Ago2, value=TRUE)#8
+# Ago2_Aag2 <- grep("Aag2", Ago2, value=TRUE) #12
+# 
+# rIgG <- grep("rIgG", FA, value=TRUE)  #23
+# rIgG_aegypti <- grep("aegypti", rIgG, value=TRUE)  #8
+# rIgG_Aag2 <- grep("Aag2", rIgG , value=TRUE) #15
+# 
+# mIgG <- grep("mIgG",FA, value=TRUE) #22
+# mIgG_aegypti <- grep("aegypti", mIgG, value=TRUE) #10
+# mIgG_Aag2 <- grep("Aag2", mIgG, value=TRUE) #12
+# 
+# #read in as a group
+# Ago1_aegypti <- lapply(Ago1_aegypti, readDNAStringSet, format = "fasta", nrec = -1L)
+# Ago1_Aag2 <- lapply(Ago1_Aag2, readDNAStringSet, format = "fasta", nrec = -1L)
+# Ago2_Aag2 <- lapply(Ago2_Aag2, readDNAStringSet, format = "fasta", nrec = -1L)
+# Ago2_aegypti <- lapply(Ago2_aegypti, readDNAStringSet, format = "fasta", nrec = -1L)
+# rIgG_aegypti <- lapply(rIgG_aegypti, readDNAStringSet, format = "fasta", nrec = -1L)
+# mIgG_aegypti <- lapply(mIgG_aegypti, readDNAStringSet, format = "fasta", nrec = -1L)
+# rIgG_Aag2 <- lapply(rIgG_Aag2, readDNAStringSet, format = "fasta", nrec = -1L)
+# mIgG_Aag2 <- lapply(mIgG_Aag2, readDNAStringSet, format = "fasta", nrec = -1L)
+# 
+# Ago1_aegypti <- do.call(c, Ago1_aegypti)
+# Ago1_Aag2 <- do.call(c, Ago1_Aag2)
+# Ago2_aegypti <- do.call(c, Ago2_aegypti)
+# Ago2_Aag2 <- do.call(c, Ago2_Aag2)
+# rIgG_aegypti <- do.call(c, rIgG_aegypti)
+# mIgG_aegypti <- do.call(c, mIgG_aegypti)
+# rIgG_Aag2  <- do.call(c, rIgG_Aag2)
+# mIgG_Aag2   <- do.call(c, mIgG_Aag2)
+# 
+# test <- Filter(function(x) is(x, "DNAStringSet"), mget(ls()))
+# 
+# names(test) <- paste0(Dir, "/cat_short_rmlinker_", names(test))
+
+# for (i in names(test)) {
+#   writeXStringSet(test[[i]], filepath = paste0(Dir,"/cat_short_rmlinker_",i, ".fasta"), format = "fasta")
+# }
+
+#then, map as before:
+#  bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fasta",".sam",fq)
+# ) {
+#   require(Rbowtie2)
+#   if(!dir.exists(sam)){
+#     bowtie2(bt2Index = index,
+#             samOutput = sam,
+#             seq1 = fq,"--threads 4 -f -L 18")
+#     Rsamtools::asBam(sam,gsub("\\.sam","",sam))
+#   }
+#   
+# }
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/cat_bowtie2"
+# fqfiles <- dir(Dir,
+#            pattern="cat_short_rmlinker_*",
+#            full.names = TRUE)
+# bplapply(fqfiles, bowtie_align, index = "/rugpfs/fs0/rice_lab/scratch/krozen/AaegL5_ref/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5")
+
+##then reformat to mirdeep format
+# catsams <- dir("/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files", pattern="*.sam$", full.names = FALSE)
+# catsams <- grep("cat_short_rmlinker_*", catsams)
+# for (i in 1:length(catsams)) {
+#   bwa_sam_converter(catsams[i])
+# }
+
+# #run  miRDeep2.pl
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/cat_bowtie2"
+# 
+# cat_FA <- dir(Dir, pattern="*.sam_collapsed.fa", full.names = TRUE)
+# 
+# for (i in 1:length(FA)) {
+#   mirdeep(FA[i])
+# }
+#  
+```
+
+##Run also using standard miRDeep2 method where all files are put together to run miRDeep2.pl, and a config.txt file is provided to assign ids; mapping was done by miRDeep2 method (Bowtie v1.2.2)
+
+```{r}
+#for cat config method, need to write config.txt file where I have the full file path to all files, then a 3 letter id 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped"
+# paths <- dir(Dir,pattern="*_short_rmlinker.fa",full.names = TRUE)
+# df <- as.data.frame(df)
+# df$id <- NA
+# df$paths <- as.character(df$paths)
+# temp <- strsplit(df$paths, "/")
+# mat  <- matrix(unlist(temp), ncol=9, byrow=TRUE)
+# df <- cbind(df, mat)
+# df <- df[,c(1:2, 11)]
+# col.names <- colnames(df)
+# col.names <- gsub("9", "sample", col.names)
+# df <- setNames(df, col.names)
+# df$sample <- as.character(df$sample)
+# df$sample <- gsub("BrdU_", "", df$sample)
+# temp <- strsplit(df$sample, "_")
+# mat  <- matrix(unlist(temp), ncol=6, byrow=TRUE)
+# mat <- mat[,1:4]
+# df <- cbind(df, mat)
+# col.names <- colnames(df)
+# col.names <- col.names[1:3]
+# col.names <- c(col.names, "ExpId", "Lysate", "Antibody", "ExpRep", "group")
+# df$group <- paste0(df$Lysate, df$Antibody)
+# df_group <- df %>% group_by(group)
+# df_group <-  arrange(df_group, ExpRep, .by_group = TRUE)
+# 
+# write.table(df_group, file = "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/check_order.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = TRUE)
+# df_group <- df_group %>% group_by(group) %>% mutate(id = row_number())
+# df_group$id <- sprintf("%02d" , df_group$id)
+# 
+# df_group$group_id <- NA
+# 
+# df_group$group_id[str_match(df_group$group, "Aag2Ago1")=="Aag2Ago1"] <- "A" 
+# df_group$group_id[str_match(df_group$group, "Aag2Ago2")=="Aag2Ago2"] <- "B"
+# df_group$group_id[str_match(df_group$group, "Aag2mIgG")=="Aag2mIgG"] <- "C"
+# df_group$group_id[str_match(df_group$group, "Aag2rIgG")=="Aag2rIgG"] <- "D"
+# df_group$group_id[str_match(df_group$group, "aegyptiAgo1")=="aegyptiAgo1"] <- "E"
+# df_group$group_id[str_match(df_group$group, "aegyptiAgo2")=="aegyptiAgo2"] <- "F"
+# df_group$group_id[str_match(df_group$group, "aegyptimIgG")=="aegyptimIgG"] <- "G"
+# df_group$group_id[str_match(df_group$group, "aegyptirIgG")=="aegyptirIgG"] <- "H"
+# 
+# is.na(df_group$group_id) #all FALSE
+# 
+# config <- df_group[,1:2]
+# 
+# write.table(config, file = "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/config.txt", quote = FALSE, sep = "\t", col.names = FALSE, row.names = FALSE)
+
+#cat all files together and map using mirdeep mapper script
+
+# mapper <- function(mFA){
+#   genome <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/AaegL5"
+#   config <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/config.txt"
+#   arf <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/cat.arf"
+#   fa <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/cat_collapsed.fa"
+#   cmd <- paste0("/rugpfs/fs0/home/krozen/mirdeep2/bin/mapper.pl ",
+#                 config," -c -d -j -m -l 18 -p ",
+#                 genome," -s ", fa, " -t ",
+#                 arf, " -v"
+#   )
+#   system(cmd,wait = T)
+  
+#run miRDeep2.pl on collapsed fa and arf that were generated
+# 
+# input <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/mirdeep_mapped/cat_collapsed.fa"
+# genome <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5_fixed.fa"
+#   files <- "/rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/aae_miRNAs_mature_fixed.fa /rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/dme_miRNAs_mature_fixed.fa /rugpfs/fs0/rice_lab/scratch/krozen/mirdeep_files/aae_hairpin_fixed.fa"
+#   arf <- gsub("_collapsed.fa",".arf",input)
+#   log <- gsub("_collapsed.fa","_report.log",input)
+#   cmd <- paste0("/rugpfs/fs0/home/krozen/mirdeep2/bin/miRDeep2.pl ",
+#                 input," ",
+#                 genome," ",
+#                 arf," ",
+#                 files," -v ",
+#                 "2>",log)
+#   system(cmd,wait = T)
+  
+  
+```
+
+##Get mirdeep results from each method and filter novel small RNAs discovered
+
+```{r}
+#individual samples, bowtie2
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/ind_bowtie2"
+csv <- dir(Dir, pattern="*.csv",full.names = TRUE)
+novel <- lapply(csv, fread, header=TRUE, sep="\t", skip = 26,strip.white = TRUE, data.table = FALSE)
+col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/ind_bowtie2/result_", "", csv)
+col.names<- gsub(".csv", "", col.names)
+col.names<- gsub("BrdU_", "", col.names)
+names(novel) <- col.names
+#remove "empties" with no novel, if novel is discovered column will read "provisional id", otherwise will read "tag id" and have only known miRNAs
+m <- lapply(novel, function(x) grep("provisional id", colnames(x), value=TRUE))
+t <- unlist(m) #81
+t <- names(t)
+sub <-  names(novel) %in%  t
+novel <- novel[sub]
+
+novel <- rbindlist(novel, idcol=TRUE)
+
+#format seeds in related species cols; mature miRNAs available from miRBase: http://www.mirbase.org/ftp.shtml
+#also available in my github for version control
+
+aga <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aga_miRNAs_mature.fa", format = "fasta", nrec = -1L)
+aga_seeds <- subseq(aga, start=2, end=NA, width=6)
+t <- novel$`consensus mature sequence`
+t <- gsub("u", "t", t)
+t <- toupper(t)
+t <- DNAStringSet(t)
+names(t) <- novel$`provisional id`
+t_seeds <- subseq(t, start=2, end=NA, width=6)
+novel$aga <- t_seeds %in% aga_seeds
+
+cqu <- readDNAStringSet("/Users/kathryn/mirdeep2_master/cqu_mature_fixed.fa", format = "fasta", nrec = -1L)
+cqu_seeds <- subseq(cqu, start=2, end=NA, width=6)
+novel$cqu <- t_seeds %in% cqu_seeds
+
+aae <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aae_miRNAs_mature_fixed.fa", format = "fasta", nrec = -1L)
+aae_seeds <- subseq(aae, start=2, end=NA, width=6)
+novel$aae <- t_seeds %in% aae_seeds
+
+## subset ones that are either score of above 0 and randfold sig, or with any matching seed in a related family
+
+novel_filtered <- subset(novel, novel$`significant randfold p-value`=="yes" & novel$`miRDeep2 score` > 0 | novel$`example miRBase miRNA with the same seed`!="-" | novel$aga==TRUE | novel$aae ==TRUE | novel$cqu == TRUE)
+
+#samples concatenated by Ab/lysate, bowtie2
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2"
+csv <- dir(Dir, pattern="*.csv",full.names = TRUE)
+novel <- lapply(csv, fread, header=TRUE, sep="\t", skip = 26,strip.white = TRUE, data.table = FALSE)
+col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2/result_", "", csv)
+col.names<- gsub(".csv", "", col.names)
+names(novel) <- col.names
+m <- lapply(novel, function(x) grep("provisional id", colnames(x), value=TRUE))
+t <- unlist(m) 
+t <- names(t)
+sub <-  names(novel) %in%  t
+novel <- novel[sub]
+
+novel <- rbindlist(novel, idcol=TRUE) 
+t <- novel$`consensus mature sequence`
+t <- gsub("u", "t", t)
+t <- toupper(t)
+t <- DNAStringSet(t)
+names(t) <- novel$`provisional id`
+t_seeds <- subseq(t, start=2, end=NA, width=6)
+
+novel$aga <- t_seeds %in% aga_seeds
+novel$cqu <- t_seeds %in% cqu_seeds
+novel$aae <- t_seeds %in% aae_seeds
+
+novel_filtered_cat <- subset(novel, novel$`significant randfold p-value`=="yes" & novel$`miRDeep2 score` > 0 | novel$`example miRBase miRNA with the same seed`!="-" | novel$aga==TRUE | novel$aae ==TRUE | novel$cqu == TRUE)
+
+#now all samples concatenated, run with miRDeep2 mapper.pl and config.txt file
+novel <- fread("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/mirdeep_mapped_cat_config/result_cat_mirdeep.csv", header=TRUE, sep="\t", skip = 26,strip.white = TRUE, data.table = FALSE)
+
+t <- novel$`consensus mature sequence`
+t <- gsub("u", "t", t)
+t <- toupper(t)
+t <- DNAStringSet(t)
+names(t) <- novel$`provisional id`
+t_seeds <- subseq(t, start=2, end=NA, width=6)
+novel$aga <- t_seeds %in% aga_seeds
+novel$cqu <- t_seeds %in% cqu_seeds
+novel$aae <- t_seeds %in% aae_seeds
+
+novel_filtered_mir <- subset(novel, novel$`significant randfold p-value`=="yes" & novel$`miRDeep2 score` > 0 | novel$`example miRBase miRNA with the same seed`!="-" | novel$aga==TRUE | novel$aae ==TRUE | novel$cqu == TRUE)
+
+novel_filtered_mir$.id <- paste0("cat_mirdeep")
+novel_filtered_mir <- novel_filtered_mir[,c(21, 1:20)]
+
+all_novel <- rbind(novel_filtered, novel_filtered_cat, novel_filtered_mir)
+
+#take unique novel and write to DNA stringset; add name of seq/sample coll where applicable 
+summary <- all_novel %>% group_by(`consensus mature sequence`) %>% summarise_each(funs(paste(., collapse = "; ")))
+summary$DNA_seq <-  gsub("u", "t", summary$`consensus mature sequence`)
+summary$DNA_seq <-  toupper(summary$DNA_seq)
+summary$type1 <- NA
+summary$type2 <- NA
+summary$type1[str_match(summary$.id, "Ago1")=="Ago1"] <- "Ago1"
+summary$type2[str_match(summary$.id, "Ago2")=="Ago2"] <- "Ago2"
+summary$discovery_type <- paste0(summary$type1, ":", summary$type2)
+
+summary$type1[str_match(summary$.id, "cat")=="cat"] <- "cat;TBD"
+summary$type1[str_match(summary$discovery_type, "Ago1:NA")=="Ago1:NA"] <- "Ago1"
+summary$type1[str_match(summary$discovery_type, "NA:Ago2")=="NA:Ago2"] <- "Ago2"
+summary$type1[str_match(summary$discovery_type, "Ago1:Ago2")=="Ago1:Ago2"] <- "both"
+
+#remove IgG only discoveries
+toremove <- subset(summary$DNA_seq, is.na(summary$type1))
+summary <- subset(summary, !is.na(summary$type1))
+
+
+#write.table(summary, file = "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/novel_mirdeep_filtered.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = TRUE)
+
+towrite <- summary$`consensus mature sequence`
+towrite <- gsub("u", "t", towrite)
+towrite <- toupper(towrite)
+towrite <- DNAStringSet(towrite, use.names = TRUE)
+names(towrite) <- towrite
+df <- as.data.frame(towrite)
+all_seqs <- c(aae, towrite)
+
+#writeXStringSet(all_seqs, "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/all_putative_known.fa", format="fasta")
+
+```
+
+##Make table for seeds of all putative novel small RNAs and known miRNAs 
+
+```{r}
+#make table of all seeds/target types for known and novel, unfiltered 
+all_sRNA <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/all_putative_known.fa", format = "fasta", nrec = -1L)
+sRNA_FLRC <- reverseComplement(all_sRNA)
+sRNA_FLRC_df <- as.data.frame(sRNA_FLRC)
+sRNA_FLRC_df <- setNames(sRNA_FLRC_df, "FL_target")
+
+all_seeds <- subseq(all_sRNA, start=2, end=NA, width=6)
+all_seeds_df <- as.data.frame(all_seeds)
+all_seeds_df <- setNames(all_seeds_df, "six_mer")
+
+all_seeds_RC <- reverseComplement(all_seeds)
+all_seeds_RC <- as.data.frame(all_seeds_RC)
+all_seeds_RC <- setNames(all_seeds_RC, "six_mer_target")
+
+all_seeds_df$seven_A1 <- paste0("T", all_seeds_df$six_mer)
+all_seeds_7A1 <- DNAStringSet(all_seeds_df$seven_A1)
+names(all_seeds_7A1) <- row.names(all_seeds_df)
+all_seeds_7A1 <- reverseComplement(all_seeds_7A1)
+all_seeds_7A1 <- as.data.frame(all_seeds_7A1)
+all_seeds_7A1 <- setNames(all_seeds_7A1, "seven_A1_target")
+
+all_seeds_7M8 <- subseq(all_sRNA, start=2, end=NA, width=7)
+all_seeds_7M8_df <- as.data.frame(all_seeds_7M8)
+all_seeds_7M8_df <- setNames(all_seeds_7M8_df, "seven_M8")
+
+all_seeds_7M8_RC <- reverseComplement(all_seeds_7M8)
+all_seeds_7M8_RC <- as.data.frame(all_seeds_7M8_RC)
+all_seeds_7M8_RC <- setNames(all_seeds_7M8_RC, "seven_M8_target")
+
+all_seeds_7M8_df$eight_mer <- paste0("T", all_seeds_7M8_df$seven_M8)
+all_seeds_8mer <- DNAStringSet(all_seeds_7M8_df$eight_mer)
+names(all_seeds_8mer) <- row.names(all_seeds_7M8_df)
+all_seeds_8mer_RC <- reverseComplement(all_seeds_8mer)
+all_seeds_8mer_RC <- as.data.frame(all_seeds_8mer_RC)
+all_seeds_8mer_RC <- setNames(all_seeds_8mer_RC, "eight_target")
+
+eight_alt <- subseq(all_sRNA, start=1, end=NA, width=8)
+eight_alt_df <- as.data.frame(eight_alt)
+eight_alt_df <- setNames(eight_alt_df, "eight_alt")
+
+eight_altRC <- reverseComplement(eight_alt)
+eight_altRCdf <- as.data.frame(eight_altRC)
+eight_altRCdf <- setNames(eight_altRCdf, c("eight_alt_target"))
+
+all_sRNA_df <- as.data.frame(all_sRNA)
+all_sRNA_df <- setNames(all_sRNA_df, "FL")
+
+all_sRNA_seeds_df <- merge(all_sRNA_df, all_seeds_df, by=0)
+all_sRNA_seeds_df <- merge(all_sRNA_seeds_df, all_seeds_7M8_df, by.x="Row.names", by.y=0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,eight_alt_df, by.x = "Row.names", by.y = 0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df, all_seeds_RC, by.x = "Row.names", by.y = 0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df, all_seeds_7A1, by.x = "Row.names", by.y = 0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df, all_seeds_7M8_RC, by.x = "Row.names", by.y = 0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,all_seeds_8mer_RC, by.x = "Row.names", by.y = 0)
+
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,eight_altRCdf, by.x = "Row.names", by.y = 0)
+all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,sRNA_FLRC_df, by.x = "Row.names", by.y = 0)
+
+#write.table(all_sRNA_seeds_df, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds2.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep ="\t")
+
+```
+
+##Now quantify all that met miRDeep2 filtering critera by reverse mapping small RNA reference sequences to short reads (18-30nt) with linker artifacts removed; mapping steps are shown below but commented out
+```{r}
+# bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",index)
+# ) {
+#   require(Rbowtie2)
+#   if(!dir.exists(sam)){
+#     bowtie2(bt2Index = index,
+#             samOutput = sam,
+#             seq1 = fq,"--threads 4 -f -L 18 -k 1000000")
+#     Rsamtools::asBam(sam,gsub("\\.sam","",sam))
+#   }
+#   
+# }
+# 
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/BCsplit"
+# ref <- dir(Dir,pattern="*short_rmlinker.fa$",full.names = TRUE)
+# ref <- gsub( ".fa", "", ref)
+# 
+# for (i in ref) {
+#   bowtie_align("/rugpfs/fs0/rice_lab/scratch/krozen/all_putative_known.fa", i)
+# }
+# 
+# 
+# template <- "/rugpfs/fs0/home/krozen/simple_kate.tmpl"
+# param <- BatchtoolsParam(workers=10000, cluster="slurm",template=template)
+# register(param)
+# 
+# bam <- dir(Dir,pattern="*.bam$",full.names = TRUE)
+# 
+# bamtobed <- function(file,filtDup=FALSE){
+#   require(GenomicAlignments)
+#   require(rtracklayer)
+#   temp <- readGAlignments(file,
+#                           param=ScanBamParam(what = "qname"))
+#   names(temp) <- mcols(temp)$qname
+#   temp <- granges(temp)
+#   
+#   if(filtDup) temp <- temp[!duplicated(temp),]
+#   export.bed(temp,
+#              con = gsub("\\.bam",".bed",file))
+# }
+# 
+# bplapply(bam, bamtobed)
+
+#read in bed and count reps 
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/sRNA_quant_revmap"
+beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
+test <- lapply(beds, read.delim, header = FALSE, sep = "")
+col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/sRNA_quant_revmap/", "", beds)
+col.names <- gsub("_short_rmlinker.bed", "", col.names)
+col.names <- gsub("Aedes", "aegypti", col.names)
+col.names <- gsub("_rmlinker.bed", "", col.names)
+col.names <- gsub("Ago2B", "Ago2", col.names)
+names(test) <- col.names
+
+
+mirdeep <- lapply(test, function(x) x %>% group_by(V4) %>% summarize(count=n()))
+names(mirdeep) <- col.names
+mirdeep <- Reduce(function(x, y) merge(x, y, by = "V4", all = TRUE), mirdeep)
+mirdeep[is.na(mirdeep)] <- 0 
+col.names <- c("miRNA", col.names)
+mirdeep <- setNames(mirdeep, col.names)
+
+#define groups
+Ago1 <- grep("Ago1", colnames(mirdeep), value=TRUE)
+Ago1_aegypti <- grep("aegypti",Ago1,value=TRUE )
+Ago1_Aag2<- Ago1[!Ago1%in%  Ago1_aegypti]
+
+Ago2 <- grep("Ago2", colnames(mirdeep), value=TRUE)
+Ago2_Aag2 <- grep("Aag2", Ago2, value=TRUE)
+Ago2_aegypti <- grep("Aag2", Ago2, value=TRUE, invert=TRUE)
+
+rIgG<- grep("rIgG", colnames(mirdeep), value=TRUE)
+rIgG_Aag2 <- grep("Aag2", rIgG, value=TRUE)
+rIgG_aegypti <- grep("Aag2", rIgG, value=TRUE, invert = TRUE)
+
+mIgG <- grep("mIgG", colnames(mirdeep), value=TRUE)
+mIgG_Aag2 <- grep("Aag2", mIgG, value=TRUE)
+mIgG_aegypti <- grep("Aag2", mIgG, value=TRUE, invert = TRUE)
+
+#get counts by group
+mirdeep$aegyptiAgo1_counts <- rowSums(mirdeep[Ago1_aegypti])
+mirdeep$aegyptiAgo2_counts <- rowSums(mirdeep[Ago2_aegypti])
+mirdeep$aegyptirIgG_counts <- rowSums(mirdeep[rIgG_aegypti])
+mirdeep$aegyptimIgG_counts <- rowSums(mirdeep[mIgG_aegypti])
+mirdeep$Aag2Ago1_counts <- rowSums(mirdeep[Ago1_Aag2])
+mirdeep$Aag2Ago2_counts <- rowSums(mirdeep[Ago2_Aag2])
+mirdeep$Aag2rIgG_counts <- rowSums(mirdeep[rIgG_Aag2])
+mirdeep$Aag2mIgG_counts <- rowSums(mirdeep[mIgG_Aag2])
+
+mirdeep$aegyptiAgo1_pseudocount <- rowSums(mirdeep[Ago1_aegypti]) + 1
+mirdeep$aegyptiAgo2_pseudocount<- rowSums(mirdeep[Ago2_aegypti])+1
+mirdeep$aegyptirIgG_pseudocount <- rowSums(mirdeep[rIgG_aegypti])+1
+mirdeep$aegyptimIgG_pseudocount <- rowSums(mirdeep[mIgG_aegypti])+1
+mirdeep$Aag2Ago1_pseudocount <- rowSums(mirdeep[Ago1_Aag2])+1
+mirdeep$Aag2Ago2_pseudocount <- rowSums(mirdeep[Ago2_Aag2])+1
+mirdeep$Aag2rIgG_pseudocount <- rowSums(mirdeep[rIgG_Aag2])+1
+mirdeep$Aag2mIgG_pseudocount <- rowSums(mirdeep[mIgG_Aag2])+1
+
+# #normalize to short_rmlinker reads; define file names to read in and get total reads by sample type
+# Dir <- "/rugpfs/fs0/rice_lab/scratch/krozen/BCsplit"
+# ref <- dir(Dir,pattern="*short_rmlinker.fa$",full.names = TRUE)
+# Ago1_short_rmlinker_fa <- grep("Ago1", ref, value=TRUE)
+# m <- grep("KRG081018_Aae", ref, value=TRUE)
+# Ago1_short_rmlinker_fa <- c(Ago1_short_rmlinker_fa, m)
+# 
+# m <- grep("KRG081018_Aag2", ref, value=TRUE)
+# Ago1_short_rmlinker_fa <- c(Ago1_short_rmlinker_fa, m)
+# Ago1_short_rmlinker_fa <- grep("IgG", Ago1_short_rmlinker_fa , value=TRUE, invert = TRUE)
+# 
+# Ago1_aegypti_short_rmlinker_fa <- grep("Aedes",Ago1_short_rmlinker_fa,value=TRUE )
+# m <- grep("Aae", Ago1_short_rmlinker_fa, value=TRUE)
+# Ago1_aegypti_short_rmlinker_fa <- c(Ago1_aegypti_short_rmlinker_fa, m)
+# 
+# Ago1_Aag2_short_rmlinker_fa <- Ago1_short_rmlinker_fa[!Ago1_short_rmlinker_fa %in%  Ago1_aegypti_short_rmlinker_fa]
+# 
+# Ago2_short_rmlinker_fa <- grep("Ago2", ref, value=TRUE)
+# Ago2_Aag2_short_rmlinker_fa <- grep("Aag2", Ago2_short_rmlinker_fa, value=TRUE)
+# Ago2_aegypti_short_rmlinker_fa <- Ago2_short_rmlinker_fa[!Ago2_short_rmlinker_fa %in%  Ago2_Aag2_short_rmlinker_fa]
+# 
+# rIgG_short_rmlinker_fa <- grep("rIgG", ref, value=TRUE)
+# rIgG_short_rmlinker_fa <- c(rIgG_short_rmlinker_fa , "/rugpfs/fs0/rice_lab/scratch/krozen/BCsplit/KRG081018_Aag2_IgG_minus_short_rmlinker.fa")
+# Aag2_rIgG_short_rmlinker_fa <- grep("Aag2", rIgG_short_rmlinker_fa, value=TRUE)
+# rIgG_aegypti_short_rmlinker_fa <- rIgG_short_rmlinker_fa[!rIgG_short_rmlinker_fa %in%  Aag2_rIgG_short_rmlinker_fa]
+# 
+# mIgG_short_rmlinker_fa <- grep("mIg", ref, value=TRUE)
+# Aag2_mIgG_short_rmlinker_fa <- grep("Aag2", mIgG_short_rmlinker_fa, value=TRUE)
+# mIgG_aegypti_short_rmlinker_fa <- mIgG_short_rmlinker_fa[!mIgG_short_rmlinker_fa %in%  Aag2_mIgG_short_rmlinker_fa]
+# 
+# fastaLength <- function(input) { 
+#   require(Biostrings)
+#   fa <- lapply(input, readDNAStringSet, format = "fasta", nrec = -1L) 
+#  t <- lapply(fa, length)
+#  t <- sum(unlist(t))
+#  print(t)
+# 
+# }
+# 
+# fastaLength(Ago1_aegypti_short_rmlinker_fa)
+# #4270728
+# fastaLength(rIgG_aegypti_short_rmlinker_fa)
+# #647502
+# 
+# fastaLength(Ago2_aegypti_short_rmlinker_fa)
+# #928064
+# fastaLength(mIgG_aegypti_short_rmlinker_fa )
+# #356597
+# 
+# 
+# fastaLength(Ago1_Aag2_short_rmlinker_fa)
+# #7340095
+# fastaLength(Aag2_rIgG_short_rmlinker_fa) 
+# #1640381
+# 
+# fastaLength(Ago2_Aag2_short_rmlinker_fa)
+# #4763515
+# fastaLength(Aag2_mIgG_short_rmlinker_fa) 
+# #1609376
+
+
+#normalize to fasta shortrmlinker input reads
+mirdeep$aegyptiAgo1_counts_norm <- ((mirdeep$aegyptiAgo1_pseudocount)/4270728)*1E6
+mirdeep$aegyptiAgo2_counts_norm <- ((mirdeep$aegyptiAgo2_pseudocount)/928064)*1E6
+mirdeep$aegyptirIgG_counts_norm <- ((mirdeep$aegyptirIgG_pseudocount)/647502)*1E6
+mirdeep$aegyptimIgG_counts_norm <- ((mirdeep$aegyptimIgG_pseudocount)/356597)*1E6
+mirdeep$Aag2Ago1_counts_norm <- ((mirdeep$Aag2Ago1_pseudocount)/7340095)*1E6
+mirdeep$Aag2Ago2_counts_norm <- ((mirdeep$Aag2Ago2_pseudocount)/4763515)*1E6
+mirdeep$Aag2rIgG_counts_norm <- ((mirdeep$Aag2rIgG_pseudocount)/1640381)*1E6
+mirdeep$Aag2mIgG_counts_norm <- ((mirdeep$Aag2mIgG_pseudocount)/1609376)*1E6
+
+mirdeep$log2aegyptiAgo1_counts_norm <- log2(mirdeep$aegyptiAgo1_counts_norm)
+mirdeep$log2aegyptiAgo2_counts_norm <- log2(mirdeep$aegyptiAgo2_counts_norm)
+mirdeep$log2aegyptirIgG_counts_norm <- log2(mirdeep$aegyptirIgG_counts_norm)
+mirdeep$log2aegyptimIgG_counts_norm <- log2(mirdeep$aegyptimIgG_counts_norm)
+mirdeep$log2Aag2Ago2_counts_norm <- log2(mirdeep$Aag2Ago2_counts_norm)
+mirdeep$log2Aag2Ago1_counts_norm <- log2(mirdeep$Aag2Ago1_counts_norm)
+mirdeep$log2Aag2rIgG_counts_norm <- log2(mirdeep$Aag2rIgG_counts_norm)
+mirdeep$log2Aag2mIgG_counts_norm <- log2(mirdeep$Aag2mIgG_counts_norm)
+
+mirdeep$log2FCAag2Ago1overAgo2 <- log2(mirdeep$Aag2Ago1_counts_norm) - log2(mirdeep$Aag2Ago2_counts_norm)
+mirdeep$log2FCaegyptiAgo1overAgo2 <- log2(mirdeep$aegyptiAgo1_counts_norm) - log2(mirdeep$aegyptiAgo2_counts_norm)
+
+mirdeep$Aag2_Ago1_nhipeaks <- apply(mirdeep[Ago1_Aag2], 1, function(x) length(which(x>=10)))
+mirdeep$Aag2_Ago2_nhipeaks <- apply(mirdeep[Ago2_Aag2], 1, function(x) length(which(x>=10)))
+mirdeep$Aag2_rIgG_nhipeaks <- apply(mirdeep[rIgG_Aag2], 1, function(x) length(which(x>=10)))
+mirdeep$Aag2_mIgG_nhipeaks <- apply(mirdeep[mIgG_Aag2], 1, function(x) length(which(x>=10)))
+mirdeep$aegypti_Ago1_nhipeaks <- apply(mirdeep[Ago1_aegypti], 1, function(x) length(which(x>=10)))
+mirdeep$aegypti_Ago2_nhipeaks <- apply(mirdeep[Ago2_aegypti], 1, function(x) length(which(x>=10)))
+mirdeep$aegypti_rIgG_nhipeaks <- apply(mirdeep[rIgG_aegypti], 1, function(x) length(which(x>=10)))
+mirdeep$aegypti_mIgG_nhipeaks <- apply(mirdeep[mIgG_aegypti], 1, function(x) length(which(x>=10)))
+
+mirdeep$aegypti_Ago1_BCsample <- apply(mirdeep[Ago1_aegypti], 1, function(x) length(which(x>0)))
+mirdeep$aegypti_Ago2_BCsample <- apply(mirdeep[Ago2_aegypti], 1, function(x) length(which(x>0)))
+mirdeep$aegypti_rIgG_BCsample <- apply(mirdeep[rIgG_aegypti], 1, function(x) length(which(x>0)))
+mirdeep$aegypti_mIgG_BCsample <- apply(mirdeep[mIgG_aegypti], 1, function(x) length(which(x>0)))
+mirdeep$Aag2_Ago1_BCsample <- apply(mirdeep[Ago1_Aag2], 1, function(x) length(which(x>0)))
+mirdeep$Aag2_Ago2_BCsample <- apply(mirdeep[Ago2_Aag2], 1, function(x) length(which(x>0)))
+mirdeep$Aag2_rIgG_BCsample <- apply(mirdeep[rIgG_Aag2], 1, function(x) length(which(x>0)))
+mirdeep$Aag2_mIgG_BCsample <- apply(mirdeep[mIgG_Aag2], 1, function(x) length(which(x>0)))
+
+mirdeep$aegypti_type <- ifelse(mirdeep$aegyptiAgo1_counts_norm > mirdeep$aegyptiAgo2_counts_norm, paste0("Ago1"), paste0("Ago2"))
+mirdeep$Aag2_type <- ifelse(mirdeep$Aag2Ago1_counts_norm > mirdeep$Aag2Ago2_counts_norm, paste0("Ago1"), paste0("Ago2"))
+mirdeep$aegypti_type[str_match(mirdeep$miRNA, "aae")=="aae"] <- "known"
+mirdeep$Aag2_type[str_match(mirdeep$miRNA, "aae")=="aae"] <- "known"
+mirdeep <- subset(mirdeep, !mirdeep$miRNA %in% toremove)
+
+sRNA_all_filtered <- subset(mirdeep, mirdeep$aegypti_Ago1_BCsample > 4 & mirdeep$aegypti_Ago1_nhipeaks > 1 | mirdeep$aegypti_Ago2_BCsample > 2 & mirdeep$aegypti_Ago2_nhipeaks > 1 | mirdeep$Aag2_Ago1_BCsample > 5 & mirdeep$Aag2_Ago1_nhipeaks > 1 | mirdeep$Aag2_Ago2_BCsample > 3 & mirdeep$Aag2_Ago2_nhipeaks > 1)
+
+m <- grep("aae", sRNA_all_filtered$miRNA, value = TRUE)
+
+known_filtered <- subset(sRNA_all_filtered, sRNA_all_filtered$miRNA %in% m)
+#write.table(known_filtered, file = "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
+
+sRNA_all_filtered <- subset(sRNA_all_filtered, sRNA_all_filtered$miRNA!="AAAAAAAAAAAAAAAAAAAAAAAAA") #this was found by miRDeep2 but is not informative, remove
+test <- subset(sRNA_all_filtered, !sRNA_all_filtered$miRNA %in% m)
+#write.table(test, file = "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
+```
+
+##Filter novel and known small RNAs by abundance criteria in my libraries and graph  Figure  3L and K
+
+```{r}
+#Tables available in my github
+known_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", sep = "\t", header = TRUE)
+
+novel_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", sep = "\t", header = TRUE)
+
+known_filtered <- known_filtered[,c(1:150)]
+
+sRNA_all_filtered <- rbind(known_filtered, novel_filtered)
+
+#final filtering: has to have reads in 1/3 of smaples and Ab is 10X above sample, nhi = 2 
+sRNA_Aag2nhi <- subset(sRNA_all_filtered, sRNA_all_filtered$Aag2_Ago1_BCsample > 5 & sRNA_all_filtered$Aag2_Ago1_nhipeaks > 1 | sRNA_all_filtered$Aag2_Ago2_BCsample > 3 & sRNA_all_filtered$Aag2_Ago2_nhipeaks > 1 )
+
+sRNA_aegyptinhi <- subset(sRNA_all_filtered, sRNA_all_filtered$aegypti_Ago1_BCsample > 4 & sRNA_all_filtered$aegypti_Ago1_nhipeaks > 1 | sRNA_all_filtered$aegypti_Ago2_BCsample > 2 & sRNA_all_filtered$aegypti_Ago2_nhipeaks > 1 )
+
+#write.table(sRNA_all_filtered, file = "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_miRNAs_final_cells_aegypti_for_scatter.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
+
+#write.table(sRNA_aegyptinhi, file = "/Users/kathryn/Reprocess_all_paper_datasets/all_miRNAs_final_aegypti_for_scatter.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
+
+#write.table(sRNA_Aag2nhi, file = "/Users/kathryn/Reprocess_all_paper_datasets/all_miRNAs_final_Aag2_for_scatter.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
+
+
+ggplot(aes(x=log2Aag2Ago1_counts_norm,y=log2Aag2Ago2_counts_norm), data=sRNA_Aag2nhi) + 
+  geom_point(aes(colour=log2FCAag2Ago1overAgo2, shape = Aag2_type), size=3, stroke=1) + scale_shape_manual(values = c(19,1,5)) +
+  scale_colour_gradient2(high="#1B0B80", mid ="gray", low="#8A0F09") +
+  theme_bw() + xlim(-3,15) + ylim(-3,15) +
+  coord_equal() +
+  geom_abline(intercept = 0, slope = 1, linetype="dashed") + geom_text_repel(data = sRNA_Aag2nhi[grepl("aae-miR-11894", sRNA_Aag2nhi$miRNA),], aes(label = miRNA), size=2, force=10, nudge_x = 5)
+
+ggplot(aes(x=log2aegyptiAgo1_counts_norm,y=log2aegyptiAgo2_counts_norm), data=sRNA_all_filtered) + 
+  geom_point(aes(colour=log2FCaegyptiAgo1overAgo2, shape = Aag2_type), size=3, stroke=1) + scale_shape_manual(values = c(19,1,5)) +
+  scale_colour_gradient2(high="#1B0B80", mid ="gray", low="#8A0F09") +
+  theme_bw() + xlim(-3,15) + ylim(-3,15) +
+  coord_equal() +
+  geom_abline(intercept = 0, slope = 1, linetype="dashed") + geom_text_repel(data = sRNA_all_filtered[grepl("miR-932", sRNA_all_filtered$miRNA),], aes(label = miRNA), size=2, force=10, nudge_x = 5)
+```
+
+##Get length distribution by type for Figures S3A and S3B
+
+```{r}
+##append  full length sequences for known to get length
+aae_df <- as.data.frame(aae)
+sRNA_all_filtered <- merge(sRNA_all_filtered, aae_df, by.x = "miRNA", by.y =0, all.x = TRUE)
+sRNA_all_filtered$x <- ifelse(is.na(sRNA_all_filtered$x), paste0(sRNA_all_filtered$miRNA), paste0(sRNA_all_filtered$x))
+
+sRNA_all_filtered$length <- nchar(sRNA_all_filtered$x)
+
+#update type columns to classify known miRNAs as Ago1- or Ago1-associated
+sRNA_all_filtered$aegypti_type <- ifelse(sRNA_all_filtered$log2FCaegyptiAgo1overAgo2 > 0 & sRNA_all_filtered$aegypti_type == "known", paste0(sRNA_all_filtered$aegypti_type, ":Ago1"), paste0(sRNA_all_filtered$aegypti_type))
+
+sRNA_all_filtered$aegypti_type <- ifelse(sRNA_all_filtered$aegypti_type == "known", paste0(sRNA_all_filtered$aegypti_type, ":Ago2"), paste0(sRNA_all_filtered$aegypti_type))
+
+sRNA_all_filtered$Aag2_type <- ifelse(sRNA_all_filtered$log2FCAag2Ago1overAgo2 > 0 & sRNA_all_filtered$Aag2_type == "known", paste0(sRNA_all_filtered$Aag2_type, ":Ago1"), paste0(sRNA_all_filtered$Aag2_type))
+
+sRNA_all_filtered$Aag2_type <- ifelse(sRNA_all_filtered$Aag2_type == "known", paste0(sRNA_all_filtered$Aag2_type, ":Ago2"), paste0(sRNA_all_filtered$Aag2_type))
+
+aegypti_stats <- sRNA_all_filtered[sRNA_all_filtered$miRNA %in% sRNA_aegyptinhi$miRNA,] %>% group_by(.dots=c("aegypti_type", "length")) %>% dplyr::select(group_cols()) %>% mutate(count = n()) 
+
+aegypti_stats <- unique(aegypti_stats)
+aegypti_statsf <- aegypti_stats %>% group_by(aegypti_type) %>% mutate(nrow = sum(count), percent=count/nrow)
+
+cell_stats <- sRNA_all_filtered[sRNA_all_filtered$miRNA %in% sRNA_Aag2nhi$miRNA,] %>% group_by(.dots=c("Aag2_type", "length")) %>% dplyr::select(group_cols()) %>% mutate(count = n()) 
+cell_stats <- unique(cell_stats)
+cell_statsf <- cell_stats %>% group_by(Aag2_type) %>% mutate(nrow = sum(count), percent=count/nrow)
+
+ggplot(aegypti_statsf, aes(x = length, y = percent, fill=aegypti_type, color=aegypti_type)) + geom_bar(stat = "identity", position=position_dodge(preserve = "single")) + xlim(17, 26) + scale_fill_manual(values = c("white", "white", "#3360A9", "#FA0F0C")) + scale_colour_manual(values = c("#3360A9", "#FA0F0C", "black", "black")) + theme_bw() 
+
+ggplot(cell_statsf, aes(x = length, y = percent, fill=Aag2_type, color=Aag2_type)) + geom_bar(stat = "identity", position=position_dodge(preserve = "single")) + xlim(17, 26) + scale_fill_manual(values = c("white", "white", "#1B0B80", "#8A0F09")) + scale_colour_manual(values = c("#1B0B80", "#8A0F09", "black", "black")) + theme_bw() 
+
+```
+
+##Classify known and novel RNAs detected in Aag2 cells compared to whole mosquitoes, Figures S3C and S3D
+
+```{r}
+#venn
+AeA1 <- unique(subset(sRNA_all_filtered$miRNA, sRNA_all_filtered$aegypti_type == "known:Ago1"))
+AeA1 <- AeA1[AeA1 %in% sRNA_aegyptinhi$miRNA]
+AeA1n <- unique(subset(sRNA_all_filtered$miRNA, sRNA_all_filtered$aegypti_type == "Ago1"))
+AeA1n <- AeA1n[AeA1n %in% sRNA_aegyptinhi$miRNA]
+AA1 <- unique(subset(sRNA_all_filtered$miRNA, sRNA_all_filtered$Aag2_type == "known:Ago1"))
+AA1 <- AA1[AA1 %in% sRNA_Aag2nhi$miRNA]
+AA1n <- unique(subset(sRNA_all_filtered$miRNA, sRNA_all_filtered$Aag2_type == "Ago1"))
+AA1n <- AA1n[AA1n %in% sRNA_Aag2nhi$miRNA]
+filt_known <- list(Aag2Ago1 = AA1, aegyptiAgo1 = AeA1)
+filt_novel <- list(Aag2Ago1n = AA1n, aegyptiAgo1n = AeA1n)
+plot(venn(filt_known))
+plot(venn(filt_novel))

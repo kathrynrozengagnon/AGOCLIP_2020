@@ -161,7 +161,7 @@ chimera_counts$log2FCaegyptiAgo1overAgo2_chimera <- log2(chimera_counts$aegyptiA
 #merge chimera counts and miRNA normalized counts together to make scatterplot
 
 ```{r}
-#take all filtered small RNAs (known and novel), make into 1 dataframe
+#take all filtered small RNAs (known and novel), make into 1 dataframe; available in my github
 sRNAs <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", header=TRUE, sep = "\t")
 miRNAs <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", header=TRUE, sep = "\t")
 x <- miRNAs[,c(1, 141:150, 123:124, 99:106)] 

@@ -85,7 +85,7 @@ lread_bind  <- as.data.frame(lread_bind)
 
 ```{r}
 #User can start here with data table provided in my github
-lread_bind <-read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/overlapping_read_counts.txt",  header = TRUE, stringsAsFactors = FALSE, sep= "\t")
+lread_bind <-read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/overlapping_read_counts.txt",  header = TRUE, stringsAsFactors = FALSE, sep= "\t")
 
 lread_noIgG <- lread_bind[!grepl("IgG", lread_bind$sample),]
 
@@ -107,8 +107,8 @@ ggplot(lread_Aag2, aes(log10length_nosense, colour = sample)) + stat_ecdf() + sc
 
 ggplot(lread_aegypti, aes(log10length_nosense, colour = sample)) + stat_ecdf() + scale_colour_manual(values=c("#3360A9", "#FA0F0C")) + theme_bw() + geom_vline(xintercept =vert, linetype="dashed") + xlim(0, 7)
 
-ks.test(subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago1.bed"), subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago2.bed"),alternative = c("less"))
+wilcox.test(subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago1.bed"), subset(lread_Aag2$log10length_nosense, lread_Aag2$sample=="cat_Aag2Ago2.bed"),alternative = c("g"))
 
-ks.test(subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo1.bed"), subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo2.bed"),alternative = c("less"))
+wilcox.test(subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo1.bed"), subset(lread_aegypti$log10length_nosense, lread_aegypti$sample=="cat_aegyptiAgo2.bed"),alternative = c("g"))
 
 ```

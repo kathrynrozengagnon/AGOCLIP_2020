@@ -182,9 +182,12 @@ test989<- test989[grepl("mean|av", colnames(test989))]
 test989<- melt(test989)
 ggplot(test989, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test989$value, test989$variable=="Fe_Ov_O_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater")) # 0.1657
 
-ks.test(subset(test989$value, test989$variable=="Fe_Ov_SF_av"), subset(test989$value, test989$variable=="Fe_mean"), alternative = c("greater")) #0.04621
+wilcox.test(subset(test989$value, test989$variable=="Fe_Ov_O_av") , subset(test989$value, test989$variable=="Fe_mean"),
+            alternative = c("l"))
+
+wilcox.test(subset(test989$value, test989$variable=="Fe_Ov_SF_av") , subset(test989$value, test989$variable=="Fe_mean"),
+            alternative = c("l"))
 
 
 ##miR-996
@@ -193,9 +196,11 @@ test996<- test996[grepl("mean|av", colnames(test996))]
 test996<- melt(test996)
 ggplot(test996, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test996$value, test996$variable=="Fe_Ov_O_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater")) #0.01493
+wilcox.test(subset(test996$value, test996$variable=="Fe_Ov_O_av") , subset(test996$value, test996$variable=="Fe_mean"),
+            alternative = c("l"))
 
-ks.test(subset(test996$value, test996$variable=="Fe_Ov_SF_av"), subset(test996$value, test996$variable=="Fe_mean"), alternative = c("greater")) #0.01493
+wilcox.test(subset(test996$value, test996$variable=="Fe_Ov_SF_av") , subset(test996$value, test996$variable=="Fe_mean"),
+            alternative = c("l"))
 
 ##miR-2946
 test2946 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_2946,]
@@ -203,9 +208,14 @@ test2946<- test2946[grepl("mean|av", colnames(test2946))]
 test2946<- melt(test2946)
 ggplot(test2946, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test2946$value, test2946$variable=="Fe_Ov_SF_av"), subset(test2946$value, test2946$variable=="Fe_mean"), alternative = c("greater"))
 
-ks.test(subset(test2946$value, test2946$variable=="Fe_Ov_O_av"), subset(test2946$value, test2946$variable=="Fe_mean"), alternative = c("greater"))
+wilcox.test(subset(test2946$value, test2946$variable=="Fe_Ov_O_av") , subset(test2946$value, test2946$variable=="Fe_mean"),
+            alternative = c("l"))
+
+wilcox.test(subset(test2946$value, test2946$variable=="Fe_Ov_SF_av") , subset(test2946$value, test2946$variable=="Fe_mean"),
+            alternative = c("l"))
+
+
 
 ###control miRNAs (low in ovary)
 ##miR-7
@@ -214,9 +224,9 @@ test7<- test7[grepl("mean|av", colnames(test7))]
 test7<- melt(test7)
 ggplot(test7, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test7$value, test7$variable=="Fe_Ov_O_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater")) #0.4103
+wilcox.test(subset(test7$value, test7$variable=="Fe_Ov_O_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("l"))
 
-ks.test(subset(test7$value, test7$variable=="Fe_Ov_SF_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("greater"))
+wilcox.test(subset(test7$value, test7$variable=="Fe_Ov_SF_av"), subset(test7$value, test7$variable=="Fe_mean"), alternative = c("l"))
 
 #miR-981
 test981 <- myCountstest[row.names(myCountstest) %in% Ago1setList$all_3UTR_981,]
@@ -224,9 +234,9 @@ test981<- test981[grepl("mean|av", colnames(test981))]
 test981<- melt(test981)
 ggplot(test981, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("plum", "lightslateblue","gray")) + theme_bw() 
 
-ks.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater")) #0.6546
+wilcox.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("l")) 
 
-ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("greater")) #0.7625
+ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("l")) 
 
 ```
 
@@ -401,14 +411,14 @@ ggplot(Ago2_cdf[grepl("Ov_O", Ago2_cdf$variable),], aes(value, colour = variable
 
 ggplot(Ago2_cdf[grepl("Ov_SF", Ago2_cdf$variable),], aes(value, colour = variable)) + stat_ecdf(geom = "point", size=1) + scale_colour_manual(values=c("gray","lightpink", "red4", "red2", "hotpink" )) + theme_bw()
 
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.003556
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.1392
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("g")) #0.02057
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("greater")) #0.001372
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("l")) #0.01023
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("l")) #0.1747
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("l")) #0.03799
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_SF"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_SF"),alternative = c("l")) #0.00934
 
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.006739
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.1516
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) # 0.1609
-ks.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("greater")) #0.001138
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2perf_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("l")) #0.001305
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2six_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("l")) #0.2492
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2eight_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("l")) # 0.1278
+wilcox.test(subset(Ago2_cdf$value,Ago2_cdf$variable=="log2chim_Ov_O"), subset(Ago2_cdf$value, Ago2_cdf$variable=="log2nonUTR_Ov_O"),alternative = c("l")) #0.01105
 
 ```

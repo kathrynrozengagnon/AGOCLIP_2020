@@ -236,7 +236,7 @@ ggplot(test981, aes(log2(value), colour = variable)) + stat_ecdf(geom = "point",
 
 wilcox.test(subset(test981$value, test981$variable=="Fe_Ov_O_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("l")) 
 
-ks.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("l")) 
+wilcox.test(subset(test981$value, test981$variable=="Fe_Ov_SF_av"), subset(test981$value, test981$variable=="Fe_mean"), alternative = c("l")) 
 
 ```
 

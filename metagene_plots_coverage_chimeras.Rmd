@@ -19,7 +19,8 @@ library(magrittr)
 ##Get read coverage over all 3'UTRs; commented out because very slow with big files
 
 ```{r}
-# #test threeUTRs
+# get threeUTRs
+# gtf available at: https://www.vectorbase.org/downloads
 # gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
 # TxDb <- makeTxDbFromGFF(gtffile)
 # threeUTRs <- unique(unlist(threeUTRsByTranscript(TxDb,use.names=T)))
@@ -80,7 +81,7 @@ library(magrittr)
 ##Graph Figure 4E and Figure S4G
 
 ```{r}
-#plot coverage over 3UTR; have provided Rdata in my github so the user can start from here
+#plot coverage over 3UTR; have provided Rdata in my github so the user can start from here; see corresponding Rmd file in my github to see how coverage was calculated
 cov_UTR <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/read_cov_3UTR.df", header = TRUE, sep = "\t")
 
 Ago1_cov_UTR <- cov_UTR[grepl("Ago1", cov_UTR$Sample),]
@@ -125,17 +126,18 @@ ggplot(Ago2_cov_UTR_graph, aes(x = xIndex, y = value)) +
 
 ```{r}
 #all 6mer pattern matches 
+#genome fasta available at: https://www.vectorbase.org/downloads
 # fasta <- "/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5_fixed.fa"
 # genome <- Rsamtools::getSeq(Rsamtools:::FaFile(fasta))
-# pattern <-  "/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_unique_filt_seeds.fa"                        
+# pattern <-  "/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqsall_unique_filt_seeds_rn3.fa"                        
 # motifSeq <- readDNAStringSet(pattern)
 # pattern <- as.character(motifSeq)
 # 
-# loop_test <- vector("list", length(pattern[1:4]))
-# for(i in 1:length(pattern[1:4])){
+# loop_test <- vector("list", length(pattern))
+# for(i in 1:length(pattern)){
 #   message("Search for ",DNAString(pattern[i]))
 #   loop_test[i] <- vmatchPattern(pattern=DNAString(pattern[i]),subject=genome) %>% unlist()}
-# names(loop_test) <- names(pattern[1:4])
+# names(loop_test) <- names(pattern)
 # loop <- lapply( loop_test , as.data.frame)
 # loop_df <- rbindlist(loop, idcol=TRUE)
 # loop_GR <-  GRanges(seqnames = loop_df$names, strand = rep("+", nrow(loop_df)), IRanges(start = loop_df$start, width =loop_df$width ))
@@ -165,7 +167,7 @@ ggplot(Ago2_cov_UTR_graph, aes(x = xIndex, y = value)) +
 # pmatch_genome <- plotRegion(myToPlotpats,outliers = 0.001,groupBy = "Sample")
 # pmatch_genomedf <- pmatch_genome$data
 # 
-# ##chimeras
+# ##chimeras; see chimera processing Rmd to see how input bigwigs were generated
 # Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 # chim <- dir(Dir,full.names = TRUE,pattern="*chimera_remap.bw")
 # 
@@ -220,7 +222,7 @@ ggplot(Ago2_cov_UTR_graph, aes(x = xIndex, y = value)) +
 ##Graph Figure 4F and S4H
 
 ```{r}
-##plot chimera and predicted 6mer matches over 3UTR; have provided Rdata in my github so the user can start from here
+##plot chimera and predicted 6mer matches over 3UTR; have provided data tables in my github so the user can start from here; see corresponding Rmd file in my github to see how chimera/predicted pattern frequencies were calculated
 pmatch_genomedf <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/predicted_6mer_cov_3UTR.df", header = TRUE, sep = "\t")
 chim_UTR <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/chim_cov_3UTR.df", header = TRUE, sep = "\t")
 

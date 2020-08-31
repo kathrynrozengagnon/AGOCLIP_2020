@@ -307,11 +307,11 @@ ggplot(Ago2_cov_UTR_graph, aes(x = xIndex, y = value)) +
 # motifSeq &lt;- readDNAStringSet(pattern)
 # pattern &lt;- as.character(motifSeq)
 # 
-# loop_test &lt;- vector(&quot;list&quot;, length(pattern[1:4]))
-# for(i in 1:length(pattern[1:4])){
+# loop_test &lt;- vector(&quot;list&quot;, length(pattern))
+# for(i in 1:length(pattern)){
 #   message(&quot;Search for &quot;,DNAString(pattern[i]))
 #   loop_test[i] &lt;- vmatchPattern(pattern=DNAString(pattern[i]),subject=genome) %&gt;% unlist()}
-# names(loop_test) &lt;- names(pattern[1:4])
+# names(loop_test) &lt;- names(pattern)
 # loop &lt;- lapply( loop_test , as.data.frame)
 # loop_df &lt;- rbindlist(loop, idcol=TRUE)
 # loop_GR &lt;-  GRanges(seqnames = loop_df$names, strand = rep(&quot;+&quot;, nrow(loop_df)), IRanges(start = loop_df$start, width =loop_df$width ))

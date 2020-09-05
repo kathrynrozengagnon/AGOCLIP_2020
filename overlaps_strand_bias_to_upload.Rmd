@@ -41,7 +41,7 @@ overlapping_r <- c(overlapping@listData$pos_all,overlapping@listData$neg_all)
 overlapping_rf <- GenomicRanges::reduce(overlapping_r, ignore.strand=TRUE) #just giving region with overlap
 nonoverlapping <- allGR[allGR %outside% overlapping_rf]
 
-#read in all mapped reads, concatenated by antibody/lysate; data are too large to upload to gtihub; available upon request or raw unprocessed reads can be obtained at GEO: ###
+#read in all mapped reads, concatenated by antibody/lysate; data are too large to upload to github; available upon request or raw unprocessed reads can be obtained at GEO accesiioin GSE157168
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped/cat_beds"
 all_reads <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 all_reads <- grep("cat", all_reads, value = TRUE)

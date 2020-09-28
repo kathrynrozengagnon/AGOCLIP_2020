@@ -17,7 +17,7 @@ library(eulerr)
 library(Biostrings)
 ```
 
-## Prepare files for miRDeep2, which takes uncollapsed short fastqs normally; processing steps are commented out
+## Prepare files for miRDeep2, which takes uncollapsed short fastqs
 
 ```{r}
 # 
@@ -193,11 +193,12 @@ library(Biostrings)
 
 ```
 
-##Align uncollapsed files split by sample to genome using bowtie2
+##Align uncollapsed files split by sample to genome using Rbowtie2
 
+"Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa" was used to make index and is available for download at [Vectorbase](https://vectorbase.org/vectorbase/app/downloads/)
+
+Input miRDeep fastas "aae_miRNAs_mature_fixed.fa", "dme_miRNAs_mature_fixed.fa", and "aae_hairpin_fixed.fa" were downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and are available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
 ```{r}
-#genome fasta used to make index available at: https://www.vectorbase.org/downloads
-
 # bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",fq)
 # ) {
 #   require(Rbowtie2)
@@ -258,11 +259,10 @@ library(Biostrings)
 # for (i in 1:length(FA)) {
 #   mirdeep(FA[i])
 # }
-
-
 ```
+output miRDeep2 csv files "ind_bowtie2_csv.zip" are provided in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
 
-##concatenate uncollapsed, processed reads by sample type (Ab/lysate) and map to genome using bowtie2
+##Concatenate uncollapsed, processed reads by sample type (Ab/lysate) and map to genome using Rbowtie2
 
 ```{r}
 #define file groups
@@ -348,8 +348,9 @@ library(Biostrings)
 # }
 #  
 ```
+output miRDeep2 csv files "cat_bowtie2_csv.zip" are provided in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
 
-##Run also using standard miRDeep2 method where all files are put together to run miRDeep2.pl, and a config.txt file is provided to assign ids; mapping was done by miRDeep2 method (Bowtie v1.2.2)
+##Also used standard miRDeep2 method where all files are put together to run miRDeep2.pl, and a config.txt file is provided to assign ids; mapping was done by miRDeep2 method (Bowtie v1.2.2)
 
 ```{r}
 #for cat config method, need to write config.txt file where I have the full file path to all files, then a 3 letter id 
@@ -427,14 +428,16 @@ library(Biostrings)
 #                 files," -v ",
 #                 "2>",log)
 #   system(cmd,wait = T)
-  
-  
 ```
+output "config.txt" file is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)  
+output miRDeep2 csv file "result_cat_mirdeep.csv" is also provided in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
 
-##Get mirdeep results from each method and filter novel small RNAs discovered
+##Get miRDeep2 results from each method and filter novel small RNAs discovered
 
+see chunks above for all miRDeep2 csv outputs, which are read in and filtered in the following chunks  
+Additional fastas with miRNAs from related species "aga_miRNAs_mature.fa" (*Anopheles gambiae*) and "cqu_mature_fixed.fa" (*Culex quinquefasciatus*) were downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and are available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
 ```{r}
-#individual samples, bowtie2
+#individual samples, Rbowtie2
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/ind_bowtie2"
 csv <- dir(Dir, pattern="*.csv",full.names = TRUE)
 novel <- lapply(csv, fread, header=TRUE, sep="\t", skip = 26,strip.white = TRUE, data.table = FALSE)
@@ -451,8 +454,7 @@ novel <- novel[sub]
 
 novel <- rbindlist(novel, idcol=TRUE)
 
-#format seeds in related species cols; mature miRNAs available from miRBase: http://www.mirbase.org/ftp.shtml
-#also available in my github for version control
+#format seeds in related species cols
 
 aga <- readDNAStringSet("/Users/kathryn/mirdeep2_master/aga_miRNAs_mature.fa", format = "fasta", nrec = -1L)
 aga_seeds <- subseq(aga, start=2, end=NA, width=6)
@@ -476,11 +478,11 @@ novel$aae <- t_seeds %in% aae_seeds
 
 novel_filtered <- subset(novel, novel$`significant randfold p-value`=="yes" & novel$`miRDeep2 score` > 0 | novel$`example miRBase miRNA with the same seed`!="-" | novel$aga==TRUE | novel$aae ==TRUE | novel$cqu == TRUE)
 
-#samples concatenated by Ab/lysate, bowtie2
-Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2"
+#samples concatenated by Ab/lysate, Rbowtie2
+Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2_csv"
 csv <- dir(Dir, pattern="*.csv",full.names = TRUE)
 novel <- lapply(csv, fread, header=TRUE, sep="\t", skip = 26,strip.white = TRUE, data.table = FALSE)
-col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2/result_", "", csv)
+col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/cat_bowtie2_csv/result_", "", csv)
 col.names<- gsub(".csv", "", col.names)
 names(novel) <- col.names
 m <- lapply(novel, function(x) grep("provisional id", colnames(x), value=TRUE))
@@ -556,9 +558,11 @@ all_seqs <- c(aae, towrite)
 #writeXStringSet(all_seqs, "/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/all_putative_known.fa", format="fasta")
 
 ```
+output "all_putative_known.fa" is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
 
 ##Make table for seeds of all putative novel small RNAs and known miRNAs 
 
+see chunk above for "all_putative_known.fa" input file
 ```{r}
 #make table of all seeds/target types for known and novel, unfiltered 
 all_sRNA <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/mirdeep_results/all_putative_known.fa", format = "fasta", nrec = -1L)
@@ -619,10 +623,11 @@ all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,eight_altRCdf, by.x = "Row.names", b
 all_sRNA_seeds_df<- merge(all_sRNA_seeds_df,sRNA_FLRC_df, by.x = "Row.names", by.y = 0)
 
 #write.table(all_sRNA_seeds_df, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds2.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep ="\t")
-
 ```
+output file "all_putative_known_sRNA_seeds2.txt" is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
 
-##Now quantify all that met miRDeep2 filtering critera by reverse mapping small RNA reference sequences to short reads (18-30nt) with linker artifacts removed; mapping steps are shown below but commented out
+##Now quantify all that met miRDeep2 filtering critera by reverse mapping small RNA reference sequences to short reads (18-30nt) with linker artifacts removed
+
 ```{r}
 # bowtie_align <- function(fq,index,sam=gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",index)
 # ) {
@@ -839,11 +844,12 @@ sRNA_all_filtered <- subset(sRNA_all_filtered, sRNA_all_filtered$miRNA!="AAAAAAA
 test <- subset(sRNA_all_filtered, !sRNA_all_filtered$miRNA %in% m)
 #write.table(test, file = "/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", quote = FALSE, sep = "\t", col.names = TRUE, row.names = FALSE)
 ```
+output files "novel_miRNAs_filtered_counts_all_info.txt" and "known_miRNAs_allcols.txt" are available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
 
-##Filter novel and known small RNAs by abundance criteria in my libraries and graph  Figure  3L and K
+##Filter novel and known small RNAs by abundance criteria in my libraries and graph  Figure  3a,b
 
+see chunk above for "novel_miRNAs_filtered_counts_all_info.txt" and "known_miRNAs_allcols.txt" input files
 ```{r}
-#Tables available in my github
 known_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", sep = "\t", header = TRUE)
 
 novel_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", sep = "\t", header = TRUE)
@@ -879,7 +885,7 @@ ggplot(aes(x=log2aegyptiAgo1_counts_norm,y=log2aegyptiAgo2_counts_norm), data=sR
   geom_abline(intercept = 0, slope = 1, linetype="dashed") + geom_text_repel(data = sRNA_all_filtered[grepl("miR-932", sRNA_all_filtered$miRNA),], aes(label = miRNA), size=2, force=10, nudge_x = 5)
 ```
 
-##Get length distribution by type for Figures S3A and S3B
+##Get length distribution by type for Supplementary Figure 2a,b
 
 ```{r}
 ##append  full length sequences for known to get length
@@ -913,7 +919,7 @@ ggplot(cell_statsf, aes(x = length, y = percent, fill=Aag2_type, color=Aag2_type
 
 ```
 
-##Classify known and novel RNAs detected in Aag2 cells compared to whole mosquitoes, Figures S3C and S3D
+##Classify known and novel RNAs detected in Aag2 cells compared to whole mosquitoes, Supplementary Figure 2c,d
 
 ```{r}
 #venn

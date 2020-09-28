@@ -1,0 +1,372 @@
+miRDeep2 score	novel miRNAs reported by miRDeep2	novel miRNAs, estimated false positives	novel miRNAs, estimated true positives	known miRNAs in species	known miRNAs in data	known miRNAs detected by miRDeep2	estimated signal-to-noise	excision gearing
+10	86	90 +/- 10	2 +/- 4 (3 +/- 5%)	164	124	87 (70%)	1.7	33
+9	88	91 +/- 10	3 +/- 5 (3 +/- 5%)	164	124	87 (70%)	1.7	33
+8	92	91 +/- 10	4 +/- 6 (5 +/- 6%)	164	124	87 (70%)	1.7	33
+7	93	92 +/- 10	5 +/- 6 (5 +/- 6%)	164	124	87 (70%)	1.7	33
+6	93	93 +/- 10	4 +/- 6 (5 +/- 6%)	164	124	87 (70%)	1.7	33
+5	94	93 +/- 10	4 +/- 6 (5 +/- 6%)	164	124	90 (73%)	1.7	33
+4	100	94 +/- 10	8 +/- 8 (8 +/- 8%)	164	124	99 (80%)	1.9	33
+3	101	109 +/- 11	1 +/- 3 (1 +/- 3%)	164	124	101 (81%)	1.6	33
+2	105	118 +/- 12	1 +/- 2 (1 +/- 2%)	164	124	101 (81%)	1.5	33
+1	158	126 +/- 12	32 +/- 12 (21 +/- 8%)	164	124	109 (88%)	1.9	33
+0	197	193 +/- 13	7 +/- 9 (4 +/- 4%)	164	124	110 (89%)	1.5	33
+-1	236	358 +/- 16	0 +/- 0 (0 +/- 0%)	164	124	110 (89%)	0.9	33
+-2	271	525 +/- 18	0 +/- 0 (0 +/- 0%)	164	124	110 (89%)	0.7	33
+-3	355	708 +/- 20	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.6	33
+-4	506	862 +/- 23	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.7	33
+-5	686	1006 +/- 25	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.8	33
+-6	813	1127 +/- 26	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.8	33
+-7	927	1250 +/- 28	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.8	33
+-8	1051	1347 +/- 30	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.8	33
+-9	1173	1445 +/- 31	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.9	33
+-10	1271	1539 +/- 31	0 +/- 0 (0 +/- 0%)	164	124	112 (90%)	0.9	33
+
+
+
+novel miRNAs predicted by miRDeep2
+provisional id	miRDeep2 score	estimated probability that the miRNA candidate is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+3_27946	12810.1	3 +/- 5%	-	25125	24089	0	1036	yes	-	-	-	-	guaggccggcggaaacuacuugc	agggguuucuuucggccuccag	agggguuucuuucggccuccagcggcauuagauaguuguaggccggcggaaacuacuugc	3:6069685..6069745:-
+3_21130	2827	3 +/- 5%	-	5568	5538	0	30	no	-	dme-miR-927-5p	-	-	guuagaauuacagcgcuu	cguuuugauucauauuacgga	guuagaauuacagcgcuuaugguaccguuuugauucauauuacgga	3:94565640..94565686:+
+1_36288	1598.7	3 +/- 5%	-	3162	3161	0	1	no	-	-	-	-	aauaaucuugcauggaac	uacuaugauggucccuuc	aauaaucuugcauggaaccauacuaaaaacauaaaaucaugguuacuaugauggucccuuc	1:44863769..44863830:+
+2_8036	1003.6	3 +/- 5%	-	1986	1732	248	6	no	-	-	-	-	auuuuaaacuguuuugagccguuuu	aagcuguuuugagccguuuc	auuuuaaacuguuuugagccguuuuaagccauuuuaagccauuuuaagcuguuuugagccguuuc	2:435695533..435695598:+
+3_23311	889.7	3 +/- 5%	-	1742	1739	0	3	yes	-	-	-	-	auaccauguugaaaacaa	uguuuucaacaugguaugau	uguuuucaacaugguaugauuguugaccguugcuugcuugcauaccauguugaaaacaa	3:192815588..192815647:+
+2_16944	824.6	3 +/- 5%	-	1629	1439	186	4	no	-	-	-	-	auuuucuaucgaucggcaac	agccgucucaaaugaugau	auuuucuaucgaucggcaacaacaaguggcuuugguucaagccaaugaguaguuucggcugagcucuuuugaagcuuuuaauagguagccgucucaaaugaugau	2:372344132..372344237:-
+2_18828	824.6	3 +/- 5%	-	1629	1439	186	4	no	-	-	-	-	auuuucuaucgaucggcaac	agccgucucaaaugaugau	auuuucuaucgaucggcaacaacaaguggcuuugguucaagccaaugaguaguuucggcugagcucuuuugaagcuuuuaauagguagccgucucaaaugaugau	2:461346594..461346699:-
+3_31900	824.6	3 +/- 5%	-	1629	1439	186	4	no	-	-	-	-	auuuucuaucgaucggcaac	agccgucucaaaugaugau	auuuucuaucgaucggcaacaacaaguggcuuugguucaagccaaugaguaguuucggcugagcucuuuugaagcuuuuaauagguagccgucucaaaugaugau	3:213747836..213747941:-
+1_36459	824.6	3 +/- 5%	-	1629	1439	186	4	no	-	-	-	-	auuuucuaucgaucggcaac	agccgucucaaaugaugau	auuuucuaucgaucggcaacaacaaguggcuuugguucaagccaaugaguaguuucggcugagcucuuuugaagcuuuuaauagguagccgucucaaaugaugau	1:58021961..58022066:+
+2_12253	480.5	3 +/- 5%	-	955	954	0	1	no	-	-	-	-	auugcgugaaaguuugguucgc	ggcucagacuuucccaauu	auugcgugaaaguuugguucgcgucuggcucagacuuucccaauu	2:169933891..169933936:-
+3_20310	438.2	3 +/- 5%	-	923	907	11	5	no	-	-	-	-	gcugauuuguacaggcaa	gcugucuacuccaucacc	gcugauuuguacaggcaaacugcgauacaauacggaucauucuauaucacaucaacaucaugcugucuacuccaucacc	3:53594748..53594827:+
+2_18193	438.2	3 +/- 5%	-	923	907	11	5	no	-	-	-	-	gcugauuuguacaggcaa	gcugucuacuccaucacc	gcugauuuguacaggcaaacugcgauacaauacggaucauucuauaucacaucaacaucaugcugucuacuccaucacc	2:446176400..446176479:-
+NIGP01000767_47035	334.9	3 +/- 5%	-	683	677	5	1	no	-	-	-	-	accuaguugauauguugau	aaauacauauuuggaucg	accuaguugauauguugauaguugauuagcacuaacggaauucuuauauugucaaauacauauuuggaucg	NIGP01000767:49414..49485:-
+2_11924	252.6	3 +/- 5%	-	494	471	2	21	yes	-	-	-	-	ugauacagccauaccguggaa	uccacgcuaugccugaaucag	uccacgcuaugccugaaucaguaaaauuugaaaaucgaaugugcauucgauuuuuaaaauccacugauacagccauaccguggaa	2:154129244..154129329:-
+1_43705	210.5	3 +/- 5%	-	412	411	0	1	yes	-	-	-	-	uugggaugguuugcauacaagag	ucuuguauggaaaccauccga	uugggaugguuugcauacaagaggcauauucaaugaugcagaugacuuaaccucuuguauggaaaccauccga	1:154850159..154850232:-
+2_16288	188.9	3 +/- 5%	-	384	356	0	28	no	-	-	-	-	aagcauugcgacuuuggaccagauc	ucgguccaaacgacucauaagc	ucgguccaaacgacucauaagcuuuuuccaccuucaauucgauuaagcauugcgacuuuggaccagauc	2:334353018..334353087:-
+3_35259	171.7	3 +/- 5%	-	335	299	0	36	yes	-	-	-	-	uucacuaauaccacuaucaggau	ucugauagugguguuaguuu	uucacuaauaccacuaucaggauacgcuaacauugaucguucugauagugguguuaguuu	3:390185748..390185808:-
+3_34931	167.3	3 +/- 5%	-	326	324	0	2	yes	-	-	-	-	cagcuucuacugagaagcuuu	agcuucuccugagaagcuu	cagcuucuacugagaagcuuuccagcuucuccugagaagcuu	3:373408558..373408600:-
+2_7650	163.9	3 +/- 5%	-	321	320	0	1	yes	-	-	-	-	aucaggaaggucgacggguacu	caacuggcgaccuuccaagau	aucaggaaggucgacggguacucuucuucaaauuuggcaacuggcgaccuuccaagau	2:404325201..404325259:+
+3_30637	123.8	3 +/- 5%	-	258	257	0	1	no	-	-	-	-	uaagugauaguaauuguagagugu	auuuagugcaauuauauuuauugagu	uaagugauaguaauuguagaguguaauuuagugcaauuauauuuauugagu	3:155736618..155736669:-
+3_27707	115.2	3 +/- 5%	-	226	181	0	45	yes	-	-	-	-	ucuguucuaguuguuauaaccu	auugucgcaacaagaauaggag	ucuguucuaguuguuauaaccuguuguugcggaauaagauugucgcaacaagaauaggag	3:404471513..404471573:+
+2_13256	108.6	3 +/- 5%	-	227	82	143	2	no	-	-	-	-	aaaaugaucuaauagugacauug	agggucgccaugucgucuaaauaguuu	agggucgccaugucgucuaaauaguuuauagucuuguaaaugaacugauaaaccuaauggcuaguuaguauucgaacgaggagaacuaaaaugaucuaauagugacauug	2:214799297..214799407:-
+NIGP01000463_47641	108	3 +/- 5%	-	253	252	0	1	no	-	-	-	-	aaugagugacaaucggugau	ugauguguauuaugaaagu	ugauguguauuaugaaaguuaaugagugacaaucggugau	NIGP01000463:20803..20843:-
+3_30663	101.6	3 +/- 5%	-	190	151	0	39	yes	-	dme-miR-277-3p	-	-	uaaaugcauguuagucccaugu	caugggacaaucaugcguuuau	uaaaugcauguuagucccauguuugcuggauucccuauucacaugggacaaucaugcguuuau	3:156708447..156708510:-
+3_28567	97.9	3 +/- 5%	-	203	136	0	67	no	-	-	-	-	guguggcuuugugaggccccucggu	ugaugccauuauuacagacuacauua	guguggcuuugugaggccccucggugugugugucgcuccguguauacguuuugaugccauuauuacagacuacauua	3:37462791..37462868:-
+3_34694	93.2	3 +/- 5%	-	196	195	0	1	no	-	-	-	-	augaagauucgucaucggugucgu	auaaugaagacaaggaaaau	auaaugaagacaaggaaaauagcccaccaucgcuaacagacgagaggggagaugaagauucgucaucggugucgu	3:363695037..363695112:-
+3_23050	93.1	3 +/- 5%	-	235	109	125	1	no	-	-	-	-	uuguuacaaccaauguagggau	aucugcaagguaauaaaugcuc	uuguuacaaccaauguagggauuauuaaauuaggcuguagaaaaugauauaauaucugcaagguaauaaaugcuc	3:184204510..184204585:+
+NIGP01001566_47518	90.7	3 +/- 5%	-	190	184	2	4	no	-	-	-	-	ggaugagauuagcuguacc	acagaaggaaaaucucuacagu	acagaaggaaaaucucuacaguagcaacgauagcaaugugaucauucuggaugagauuagcuguacc	NIGP01001566:36761..36828:-
+3_20697	90.7	3 +/- 5%	-	190	184	2	4	no	-	-	-	-	ggaugagauuagcuguacc	acagaaggaaaaucucuacagu	acagaaggaaaaucucuacaguagcaacgauagcaaugugaucauucuggaugagauuagcuguacc	3:80083504..80083571:+
+2_3902	78.6	3 +/- 5%	-	176	174	0	2	no	-	-	-	-	uaucaagaguccaggugcu	acuuguucauuaggguug	uaucaagaguccaggugcucuuucagagauacuuguucauuaggguug	2:200706324..200706372:+
+2_13260	75.4	3 +/- 5%	-	172	166	0	6	no	-	-	-	-	agauugcauccuagcgcugaaguc	uuugcgugagugccauuuccc	uuugcgugagugccauuucccaaacagauugcauccuagcgcugaaguc	2:214815126..214815175:-
+3_32467	72.2	3 +/- 5%	-	187	186	0	1	no	-	dme-miR-968-5p	-	-	aaaguagugaauccauucaaaguc	uauuuaaaaggaaaaaaa	aaaguagugaauccauucaaagucagagauagcuacauuaaaucguaaguguuuuauauuuaaaaggaaaaaaa	3:237022514..237022588:-
+1_38279	69.5	3 +/- 5%	-	147	146	0	1	no	-	-	-	-	uauuacaaagcguuagggaaau	uaucugugacaguuguagu	uaucugugacaguuguaguaaaauuuguugaggguugggacacguuuuauuacaaagcguuagggaaau	1:160259647..160259716:+
+1_36310	62.4	3 +/- 5%	-	136	81	54	1	no	-	-	-	-	uuuuugcaacgacuugugcccuag	aaagcaaaaaaaaagucg	uuuuugcaacgacuugugcccuaggucucagugagcgacgacgaucugaagaaagcaaaaaaaaagucg	1:46962569..46962638:+
+NIGP01000792_48902	62.4	3 +/- 5%	-	136	81	54	1	no	-	-	-	-	uuuuugcaacgacuugugcccuag	aaagcaaaaaaaaagucg	uuuuugcaacgacuugugcccuaggucucagugagcgacgacgaucugaagaaagcaaaaaaaaagucg	NIGP01000792:8205..8274:+
+2_257	61.9	3 +/- 5%	-	145	144	0	1	no	-	-	-	-	auggcuuaccaccagagauauaacc	auuguagcuuuuggggga	auuguagcuuuugggggaagaaaguguguuuuugugauccaaaaugauggcuuaccaccagagauauaacc	2:12165644..12165715:+
+1_37617	60.6	3 +/- 5%	-	140	138	0	2	no	-	-	-	-	cugugagaucuaagacua	ucauagcaucagagcagacauuu	ucauagcaucagagcagacauuucugugagaucuaagacua	1:140440917..140440958:+
+3_25798	56.9	3 +/- 5%	-	136	134	0	2	no	-	-	-	-	acuaguguguuaacugugc	aaagcuaauagcuagagaag	acuaguguguuaacugugcauuuaguaaagcuaauagcuagagaag	3:305724838..305724884:+
+3_33653	56.9	3 +/- 5%	-	136	134	0	2	no	-	-	-	-	acuaguguguuaacugugc	aaagcuaauagcuagagaag	acuaguguguuaacugugcauuuaguaaagcuaauagcuagagaag	3:305663622..305663668:-
+3_23651	53.9	3 +/- 5%	-	119	118	0	1	no	-	-	-	-	gccgugaaugcugaacuugugguuu	uuaugcgaguaugggcagu	uuaugcgaguaugggcaguuuauaaaauauauuaauauugccgugaaugcugaacuugugguuu	3:205874612..205874676:+
+3_25902	52.9	3 +/- 5%	-	114	112	1	1	no	-	-	-	-	cauccguugcggugagucguccggc	uuuucgguuuacgggcgaggagaaaccgcu	cauccguugcggugagucguccggcaaauuuuguuaaucauuuuuaguuuuucgguuuacgggcgaggagaaaccgcu	3:310532228..310532306:+
+3_20673	50.2	3 +/- 5%	-	120	119	0	1	no	-	-	-	-	aaggaauucagagagcuguac	uucagaaacuuugcacaaaccuuc	uucagaaacuuugcacaaaccuucaacaaggcuaucgcuacacuugauaaggaauucagagagcuguac	3:77705877..77705946:+
+3_23950	49.9	3 +/- 5%	-	112	110	0	2	no	-	-	-	-	uucagugauuaugauggugaucuca	agaaaaccuuuguagugacuaggauugu	uucagugauuaugauggugaucucaaaucaaauuagaaaaccuuuguagugacuaggauugu	3:218644408..218644470:+
+2_14857	47.4	3 +/- 5%	-	116	112	0	4	no	-	-	-	-	guuugaaugugaauauagc	auuuucauuguuuuugauagu	guuugaaugugaauauagcaucaacaagcguuauuuucauuguuuuugauagu	2:283347813..283347866:-
+2_18055	45.9	3 +/- 5%	-	116	108	3	5	no	-	-	-	-	aaggugaagcgaaacauuguucuua	gaugauaaacgauugccgguacc	aaggugaagcgaaacauuguucuuaaaaaguacgacgacauuauugaaaaguucuacgucugaugauaaacgauugccgguacc	2:437114417..437114501:-
+3_26326	45.3	3 +/- 5%	-	104	103	0	1	no	-	-	-	-	uaaacgagguguugcugaauu	auucgacuagcgauuuucgguuuuuuuuug	uaaacgagguguugcugaauuauuauucgacuagcgauuuucgguuuuuuuuug	3:319957485..319957539:+
+2_2874	44.3	3 +/- 5%	-	105	71	0	34	no	-	-	-	-	uuuagaaaaaaaaaaaaca	ugagaaaguuuucugaaag	ugagaaaguuuucugaaaguuuuagaaaaaaaaaaaaca	2:144281563..144281602:+
+2_17884	40.2	3 +/- 5%	-	90	61	0	29	no	-	-	-	-	uucuuguucuuuuccccucugug	acagaguggacaccgcgagcucucauac	acagaguggacaccgcgagcucucauacgguuguguuuuauuuucuuguucuuuuccccucugug	2:426550805..426550870:-
+1_36751	38.6	3 +/- 5%	-	108	96	0	12	no	-	-	-	-	aaaugaguucaaauuuuggga	caauuauuuacgagccgacug	aaaugaguucaaauuuugggaggacacuucacuucugcuccacuuucaauuauuuacgagccgacug	1:78919468..78919535:+
+2_7307	38.5	3 +/- 5%	-	109	108	0	1	no	-	-	-	-	auaguguguaggaaggcaauga	cugcuucgccucacagaag	cugcuucgccucacagaaggagucagagagaaucauaguguguaggaaggcaauga	2:376421038..376421094:+
+3_26357	37	3 +/- 5%	-	82	81	0	1	no	-	-	-	-	auauagauguuuuagcgaaaaugc	cgucgucguuauucuuuugu	cgucgucguuauucuuuuguguaaucuauauauagauguuuuagcgaaaaugc	3:322160454..322160507:+
+3_23099	34.9	3 +/- 5%	-	88	87	0	1	no	-	-	-	-	aauguauuugguuacguaacaaagg	ucuucuacaaggccaucuuuac	ucuucuacaaggccaucuuuacguuacgcagaauuauuuugcguuuuacucuaauguauuugguuacguaacaaagg	3:186197516..186197593:+
+2_6291	33.8	3 +/- 5%	-	75	74	0	1	no	-	-	-	-	ucaaaguucuuguauaccacau	agggugcaguugggaacuucgaagu	agggugcaguugggaacuucgaaguauucgccgcacucgcggaaguagguaucaaaguucuuguauaccacau	2:309550581..309550654:+
+2_14507	33	3 +/- 5%	-	101	100	0	1	no	-	-	-	-	ucauacaguagauuaucuc	aguaucacgaucccuaugac	ucauacaguagauuaucucaacggauuaguaucaccgaguaucacgaucccuaugac	2:268278337..268278394:-
+2_9833	29.5	3 +/- 5%	-	75	72	0	3	no	-	dme-miR-9372-5p	-	-	uaaaagcaauacgauuugac	aaaugguuguuuucgcauaaaa	uaaaagcaauacgauuugacaaucaaaugguuguuuucgcauaaaa	2:48332057..48332103:-
+2_1573	29.4	3 +/- 5%	-	97	94	1	2	no	-	-	-	-	acguucuugggaucugaugu	auuaaauaccaauauauauugcaa	auuaaauaccaauauauauugcaauguggagaucaagcaaauuaauaguugcauauuguuuccuuguacguucuugggaucugaugu	2:79928348..79928435:+
+1_45419	28.6	3 +/- 5%	-	63	61	0	2	no	-	-	-	-	cucgguaccgaaccuacgauggaac	cgccaguuggggaugugccgaguauc	cucgguaccgaaccuacgauggaacgugcaauaauccgaugccggagcgcgccaguuggggaugugccgaguauc	1:235841980..235842055:-
+2_5227	25.5	3 +/- 5%	-	64	63	0	1	no	-	-	-	-	caagauggaaacgaaaacuu	agguucguaaccauuuugacag	agguucguaaccauuuugacagcugucaucaggggaaaagugccaucaagauggaaacgaaaacuu	2:258543018..258543084:+
+2_12724	25.3	3 +/- 5%	-	57	51	0	6	no	-	-	-	-	cugcaaugugaccuacucccga	aggggcaggugcagauggagag	aggggcaggugcagauggagaggcuaucacuaguuaggugacucugcaaugugaccuacucccga	2:192515302..192515367:-
+2_16703	25	3 +/- 5%	-	67	66	0	1	no	-	-	-	-	ucgcaaauuucaaugugacaugcu	ucgggucauguagauugcaaauau	ucgcaaauuucaaugugacaugcuacuacaaauguuucgggucauguagauugcaaauau	2:355429351..355429411:-
+1_35752	24.9	3 +/- 5%	-	59	58	0	1	no	-	-	-	-	uuuuaccuugaaaugguauaauuac	gauugagcgaugauggcgaaaaau	uuuuaccuugaaaugguauaauuacauguuugucacaaguggcgcacagugauugagcgaugauggcgaaaaau	1:11207186..11207260:+
+1_46157	24.2	3 +/- 5%	-	103	100	2	1	no	-	-	-	-	uuaaaguauucagugaac	aucauccaugcuaucaaaagu	uuaaaguauucagugaacaccauaugacgaauuucuuagccggcaguguaucauccaugcuaucaaaagu	1:286790102..286790172:-
+2_4364	23.6	3 +/- 5%	-	47	46	0	1	yes	-	-	-	-	augucguuugugcugaaaauuaaac	aaauuuucagugcgaaugaaugu	augucguuugugcugaaaauuaaacucgcugguggugacaaaucgaucaaucaaauuuucagugcgaaugaaugu	2:226183412..226183487:+
+2_11535	23.5	3 +/- 5%	-	75	51	23	1	no	-	-	-	-	aauuaagcgaaagauuuggagu	uuuugauuuaucucuagaugcauuuca	aauuaagcgaaagauuuggaguuuuacuauauucauaacggaaguauuagaaacuuuuugauuuaucucuagaugcauuuca	2:135655628..135655710:-
+3_32103	22.5	3 +/- 5%	-	43	42	0	1	yes	-	-	-	-	aguugggcaggcucaaaaua	aagaaggguuugcuccacgc	aguugggcaggcucaaaauaugaaagaaggguuugcuccacgc	3:220123035..220123078:-
+3_19369	22.2	3 +/- 5%	-	56	43	0	13	yes	-	-	-	-	uuaccuguaugacuaauuguag	guaaauuagugauauggaaaagaaaau	guaaauuagugauauggaaaagaaaaugaauacuuaccuguaugacuaauuguag	3:5615355..5615410:+
+1_36135	21.5	3 +/- 5%	-	57	56	0	1	no	-	dme-miR-4943-5p	-	-	uuuauuuuccaaaaaaaa	uuuucagaaauaccucacuga	uuuucagaaauaccucacugauuuauuuuccaaaaaaaa	1:31375107..31375146:+
+3_29205	20.6	3 +/- 5%	-	61	60	0	1	yes	-	-	-	-	auguacaucuauuuagaaau	guaaaguaaauguacaaac	auguacaucuauuuagaaauacaaaacaaaguaaaguaaauguacaaac	3:80741555..80741604:-
+2_10801	20.5	3 +/- 5%	-	51	49	0	2	no	-	-	-	-	cagugaagauuccaacgaau	uuguguucggaaacugugacaaa	cagugaagauuccaacgaauaauuuuguguucggaaacugugacaaa	2:103962640..103962687:-
+2_3323	19.8	3 +/- 5%	-	51	50	0	1	no	-	-	-	-	gcuaaacggagaggugccu	gggaccgcgcggauaucu	gggaccgcgcggauaucuacaugcuaaacggagaggugccu	2:172966604..172966645:+
+1_37891	17.8	3 +/- 5%	-	63	62	0	1	no	-	-	-	-	gugcgaguaguaagagacaag	auuuuuuauuauuguguuaagacuccu	auuuuuuauuauuguguuaagacuccugugcgaguaguaagagacaag	1:145717260..145717308:+
+2_14184	17.7	3 +/- 5%	-	80	74	1	5	no	-	-	-	-	caguucaguuuccucugacau	agucaagagugcaaaucuaacuuuaac	agucaagagugcaaaucuaacuuuaacaaagguauaauaaaguaauauuucaguucaguuuccucugacau	2:255912189..255912260:-
+3_29853	17.4	3 +/- 5%	-	115	114	0	1	no	-	-	-	-	uugaugagaauugaauug	uugaacuaaauuaugaau	uugaugagaauugaauugaaauugaacuaaauuaugaau	3:109608877..109608916:-
+3_23687	16.5	3 +/- 5%	-	58	57	0	1	no	-	-	-	-	auaaaugacauaagcgccaauuuu	ugauugacuuaugugaua	ugauugacuuaugugauaaaaguaaccgcauaaaugacauaagcgccaauuuu	3:207551958..207552011:+
+3_32239	16.1	3 +/- 5%	-	52	44	4	4	no	-	-	-	-	ucuaaauucggggaaauagca	aaugguacauucggggua	ucuaaauucggggaaauagcauucggggugauggaauucgggguaaugguacauucggggua	3:230433977..230434039:-
+3_28813	16	3 +/- 5%	-	49	48	0	1	no	-	-	-	-	agaaaaggggguuuaacuuc	aacuuuugaaucucaaagagacuu	agaaaaggggguuuaacuucauuugaaacuuuugaaucucaaagagacuu	3:51835753..51835803:-
+1_36925	15.4	3 +/- 5%	-	47	40	0	7	no	-	-	-	-	uuuagugggggaauuuuuggga	cuuggaagaaucacuggagca	cuuggaagaaucacuggagcauuucgugaaaagaucaauguauaguuuguuguaugauuuuuugaaaaauuuagugggggaauuuuuggga	1:90500373..90500464:+
+NIGP01001630_48018	14.8	3 +/- 5%	-	52	48	2	2	no	-	-	-	-	auaaaagcguagaaugaacu	guuuauauccccgauaccuuuauuu	guuuauauccccgauaccuuuauuuauaauuuauucgacaauagaauagauaaaagcguagaaugaacu	NIGP01001630:19933..20002:-
+3_30176	14.8	3 +/- 5%	-	52	48	2	2	no	-	-	-	-	auaaaagcguagaaugaacu	guuuauauccccgauaccuuuauuu	guuuauauccccgauaccuuuauuuauaauuuauucgacaauagaauagauaaaagcguagaaugaacu	3:129677018..129677087:-
+2_7367	14.5	3 +/- 5%	-	35	34	0	1	yes	-	-	-	-	auugcgaggaaugaugaagagaug	ucucggguaauucauuac	ucucggguaauucauuacugguaucggguuaaaagggcuauugcgaggaaugaugaagagaug	2:382384252..382384315:+
+2_17499	14.3	3 +/- 5%	-	41	39	0	2	no	-	-	-	-	cuuugguguucuaccuuauga	auaaagcuagaccaucacugc	cuuugguguucuaccuuaugauuaucguguguacaaaaucauaaagcuagaccaucacugc	2:402152944..402153005:-
+1_39687	14.1	3 +/- 5%	-	35	34	0	1	yes	-	-	-	-	auugcgaggaaugaugaagagaug	ucucggguaauucauuac	ucucggguaauucauuacugguaucggguaaaaagggcuauugcgaggaaugaugaagagaug	1:236917166..236917229:+
+2_2198	12	3 +/- 5%	-	48	46	0	2	no	-	-	-	-	aucaaaaccucggagcauuu	cuguucccuguuuggucu	aucaaaaccucggagcauuuucuguucccuguuuggucu	2:110610628..110610667:+
+1_39081	11	3 +/- 5%	-	65	64	0	1	no	-	-	-	-	uaaagaaaucagcggagu	uuggaagaauuauuuagaaag	uuggaagaauuauuuagaaaguucgugcaaaaucucaaaacgaacucuuaaagaaaucagcggagu	1:212157944..212158010:+
+2_9070	10.5	3 +/- 5%	-	38	37	0	1	no	-	-	-	-	aagacgagcucaaaaugcu	auuggagcaauucuuacagc	auuggagcaauucuuacagcuucucaguugugcaccugcagaaguccaagacgagcucaaaaugcu	2:14874141..14874207:-
+2_17238	10.3	3 +/- 5%	-	35	34	0	1	no	-	-	-	-	auugcgaggaaugaugaagagaug	ucucggguaauucauuac	ucucggguaauucauuacugguaucggguaaaaagggcuauugcgaggaaugaugaagagaug	2:388764282..388764345:-
+3_25862	9.7	3 +/- 5%	-	46	43	2	1	no	-	-	-	-	aaacagggagaacaauuuu	agucuguuccacuuauuuu	aaacagggagaacaauuuuguaauauccuucaauagaauguuuaaauaaagucuguuccacuuauuuu	3:308082167..308082235:+
+1_35837	9.1	3 +/- 5%	-	50	48	0	2	no	-	-	-	-	guaggaguuguuauuuuucgauuac	uauccaaaauuuaagacaauuaucu	uauccaaaauuuaagacaauuaucuacaaaucauccauacaagucuuuuuuguaggaguuguuauuuuucgauuac	1:16275830..16275906:+
+2_12770	8.8	5 +/- 6%	-	36	35	0	1	no	-	-	-	-	acgcguaacgucaaaauc	gaugacgauaagcacgcuuucu	gaugacgauaagcacgcuuucuacgcguaacgucaaaauc	2:194779765..194779805:-
+NIGP01000527_48250	8.8	5 +/- 6%	-	36	35	0	1	no	-	-	-	-	acgcguaacgucaaaauc	gaugacgauaagcacgcuuucu	gaugacgauaagcacgcuuucuacgcguaacgucaaaauc	NIGP01000527:15317..15357:-
+1_37463	8.7	5 +/- 6%	-	35	34	0	1	no	-	-	-	-	auugcgaggaaugaugaagagaug	ucucggguaauucauuac	ucucggguaauucauuacugguaucggguaaaaagggcuauugcgaggaaugaugaagagaug	1:130627544..130627607:+
+3_25864	8.1	5 +/- 6%	-	46	43	2	1	no	-	-	-	-	aaacagggagaacaauuuu	agucuguuccacuuauuuu	aaacagggagaacaauuuuguaauauccuucaauagaauguuuaaauaaagucuguuccacuuauuuu	3:308084896..308084964:+
+3_29328	7.8	5 +/- 6%	-	35	34	0	1	no	-	-	-	-	auugcgaggaaugaugaagagaug	ucucggguaauucauuac	ucucggguaauucauuacugguaucggguuaaaagggcuauugcgaggaaugaugaagagaug	3:90060611..90060674:-
+3_20773	5.2	5 +/- 6%	-	17472	17472	0	0	yes	-	dme-miR-971-3p	-	-	uugguguuauaucuuacagugag	ggcuguaaguauuacagcaagc	ggcuguaaguauuacagcaagcuugcuauucgaaaggcgcuugguguuauaucuuacagugag	3:82678953..82679016:+
+2_7173	4.9	8 +/- 8%	-	68	68	0	0	yes	-	dme-miR-973-3p	-	-	ccuguucaggauuugaacac	aacaggauccuguucaggau	aacaggauccuguucaggauucaaacagaguccuguucaggauuugaacac	2:371242994..371243045:+
+3_19942	4.6	8 +/- 8%	-	42	42	0	0	yes	-	dme-miR-9377-3p	-	-	auugauggaaagacagcccuacac	guagaggagcuacuuuccaucgacgg	auugauggaaagacagcccuacacuuugcugccagccaaagcugcuaccuugagauuguagaggagcuacuuuccaucgacgg	3:36887324..36887407:+
+3_19940	4.6	8 +/- 8%	-	42	42	0	0	yes	-	dme-miR-9377-3p	-	-	auugauggaaagacagcccuacac	guagaggagcuacuuuccaucgacgg	auugauggaaagacagcccuacacuuugcugccagccaaagcugcuaccuugagauuguagaggagcuacuuuccaucgacgg	3:36822690..36822773:+
+2_3641	4.4	8 +/- 8%	-	49	49	0	0	yes	-	dme-miR-978-3p	-	-	aguccaguauuugaugaacuuac	aaggacauacugaaugcugggggcu	aaggacauacugaaugcugggggcucuagggcccaacuuaguccaguauuugaugaacuuac	2:190004571..190004633:+
+1_40936	4.2	8 +/- 8%	-	2891	2888	0	3	yes	-	dme-miR-iab-8-5p	-	-	uuacguauacugaagguauacc	aggauacauucaguauacguucau	uuacguauacugaagguauaccggauagauagcacucaggauacauucaguauacguucau	1:308965424..308965485:+
+1_43786	4	8 +/- 8%	-	188	188	0	0	yes	-	dme-miR-184-5p	-	-	acuuaucauaguauauuuacag	guaaguauacuaucacaguau	guaaguauacuaucacaguauacuuacuuaguauacuuaucauaguauauuuacag	1:158676111..158676167:-
+3_22606	3.8	1 +/- 3%	-	75	73	2	0	yes	-	dme-miR-9377-3p	-	-	uuugauggagagaucaacgacu	acguugaucuucagaucuucaagc	uuugauggagagaucaacgacuuauuuguugaugacaugaacaauuucgauguugugaacguugaucuucagaucuucaagc	3:161695091..161695173:+
+2_8012	2.8	1 +/- 2%	-	147	147	0	0	yes	-	dme-miR-4943-5p	-	-	auuuauuuaucguagugaguaacuu	uuuacucacuuuugaguaaaugu	auuuauuuaucguagugaguaacuuucugcucuguuguucuagauuuuaguuuuacucacuuuugaguaaaugu	2:434219653..434219727:+
+2_5202	2.4	1 +/- 2%	-	81	80	1	0	yes	-	-	-	-	uauaaugaaugccaggaau	uccuugcauucauuauaaa	uauaaugaaugccaggaauauuauugccauaauugguuuguaccaauuauggcaauaauauuccuugcauucauuauaaa	2:257265490..257265570:+
+1_35909	2.3	1 +/- 2%	-	110	108	0	2	yes	-	-	-	-	uuuauaaaauguugagauu	ucaaaauuuuauaaaacau	ucaaaauuuuauaaaacaugauuaagugcuuaucuuauucauguuuuauaaaauguugagauu	1:18404074..18404137:+
+2_7369	2.2	1 +/- 2%	-	548	476	0	72	yes	-	-	-	-	ucuuaugcagcgcaaauaguga	uugcgcuguauaagaacagcgg	ucuuaugcagcgcaaauagugacgucauuauuugcgcuguauaagaacagcgg	2:382622923..382622976:+
+NIGP01001777_48184	1.9	21 +/- 8%	-	329	324	4	1	yes	-	-	-	-	cagcuucuacugagaagcuuu	cuuuccagcuucugcugagaa	cuuuccagcuucugcugagaaguuuuccagcuucugcugagaagcuuuccagcuucuacugagaagcuuu	NIGP01001777:5063..5133:-
+1_46063	1.9	21 +/- 8%	-	248	243	2	3	yes	-	-	-	-	acacuguccauacucgcauaacaau	acuguuaugcgaguaugggcag	acacuguccauacucgcauaacaaucccauucauauaggaaaucccauauaauaugggacuguuaugcgaguaugggcag	1:281273811..281273891:-
+3_19953	1.9	21 +/- 8%	-	329	324	4	1	yes	-	-	-	-	cagcuucuacugagaagcuuu	cuuuccagcuucugcugagaa	cuuuccagcuucugcugagaaguuuuccagcuucugcugagaagcuuuccagcuucuacugagaagcuuu	3:37344094..37344164:+
+3_32475	1.8	21 +/- 8%	-	1423	1403	15	5	yes	-	-	-	-	ccaaacauccguuuaagcuga	caaacggguguucgguucucc	ccaaacauccguuuaagcugaaaacuuuaucguuuggucacuagcugguggugaccaaucgauuaaauuuuccgcucaaacggguguucgguucucc	3:237601069..237601166:-
+2_1554	1.8	21 +/- 8%	-	619	442	26	151	yes	-	-	-	-	ugggacaauuaugcguuuauggg	uaaaugcauguuagucccaugu	uaaaugcauguuagucccauguuugcuggauuuccuauucacaugggacaauuaugcguuuauggg	2:79115693..79115759:+
+2_12133	1.8	21 +/- 8%	-	43	39	0	4	no	-	-	-	-	cuagaaauaaucuaacuau	aauugacuuguuuagggguauc	cuagaaauaaucuaacuauaacgccaauauuuguaauugacuuguuuagggguauc	2:165409050..165409106:-
+2_15417	1.7	21 +/- 8%	-	207	202	0	5	yes	-	-	-	-	aaacgcaugugagucccauguu	ugggacaauaaugcauuuaugg	aaacgcaugugagucccauguuugcugaauauucuauucacaugggacaauaaugcauuuaugg	2:302072436..302072500:-
+1_36824	1.7	21 +/- 8%	-	43	43	0	0	yes	-	-	-	-	caaggauggccaaccguugaacau	ggacgaugguggcgaucugacca	caaggauggccaaccguugaacaugauccuggacgaugguggcgaucugacca	1:82001922..82001975:+
+3_21050	1.7	21 +/- 8%	-	49	49	0	0	yes	-	-	-	-	gcugaugguggcucccgg	uggaguggacaacaacggcgg	gcugaugguggcucccgggauggaguggacaacaacggcgg	3:90661953..90661994:+
+1_36011	1.7	21 +/- 8%	-	56	56	0	0	yes	-	-	-	-	uucccggagccggaggcg	ccuccgguucgggcagc	ccuccgguucgggcagcaguugcguucccggagccggaggcg	1:24374493..24374535:+
+3_26594	1.7	21 +/- 8%	-	63	63	0	0	yes	-	-	-	-	gcucaucucgggaaccugggugcu	ccccagaguuugcaggacgguga	gcucaucucgggaaccugggugcucuuccugccggaaaccaacggcaaaccgaugccccagaguuugcaggacgguga	3:334501058..334501136:+
+2_1135	1.6	21 +/- 8%	-	9605	9557	0	48	yes	-	-	-	-	uuuaccauuucaagacgacc	ggucaucuugaaaugguaaaga	ggucaucuugaaaugguaaagaugaugauugacacucuuuaccauuucaagacgacc	2:58785160..58785217:+
+3_23955	1.6	21 +/- 8%	-	838	829	0	9	yes	-	-	-	-	caccuguccagcgaauugggag	uucccaauucgauagacaugcggcug	uucccaauucgauagacaugcggcugcgguaguugguaacgcaccuguccagcgaauugggag	3:218717122..218717185:+
+2_1139	1.6	21 +/- 8%	-	9605	9557	0	48	yes	-	-	-	-	uuuaccauuucaagacgacc	ggucaucuugaaaugguaaaga	ggucaucuugaaaugguaaagaugaugauugacacucuuuaccauuucaagacgacc	2:58786286..58786343:+
+3_28010	1.6	21 +/- 8%	-	137	137	0	0	yes	-	-	-	-	gucaucauuccggccggaguuc	gcucuggccaaugccgacau	gcucuggccaaugccgacaucgucaucauuccggccggaguuc	3:10090695..10090738:-
+1_40413	1.6	21 +/- 8%	-	64	62	2	0	yes	-	-	-	-	ugcaggcuccagcuccug	gguuuggagcuugcaua	gguuuggagcuugcauaaauguuugcuccaucauauuaggggcugugcggucugcaggcuccagcuccug	1:277901620..277901690:+
+3_29211	1.6	21 +/- 8%	-	301	301	0	0	yes	-	-	-	-	aagaugccucggaaaagguuc	gcugucgagggauuugga	aagaugccucggaaaagguucaaggagcgcugaccauuugcgccggggcugucgagggauuugga	3:80970245..80970310:-
+1_38269	1.5	21 +/- 8%	-	55	55	0	0	yes	-	-	-	-	aaauauaguuguuuaugauccu	gaucaaaaacaaucauauauuu	gaucaaaaacaaucauauauuucuuauucuauucuauaaagaaaaaauauaguuguuuaugauccu	1:160180533..160180599:+
+1_36749	1.5	21 +/- 8%	-	54	54	0	0	yes	-	-	-	-	aaaaggaauuacuggagg	cccaaagaauuccuggaag	cccaaagaauuccuggaagcauccaggaauuauucuuggaugaaccuaaaaggaauuacuggagg	1:78368842..78368907:+
+3_25465	1.5	21 +/- 8%	-	73	72	1	0	yes	-	-	-	-	gaaagguagcagagguggcc	ucaguccgcgcugcguuucgc	ucaguccgcgcugcguuucgcccgucuccguauggaaaagcgucacaauuacguccgaaagguagcagagguggcc	3:290744490..290744566:+
+2_11779	1.5	21 +/- 8%	-	106	106	0	0	yes	-	-	-	-	uuaguggcagaagaagugaaaacc	ggaggacuuguuuugcgcgcggaugau	uuaguggcagaagaagugaaaaccgaugcggcgcgcgcgcguauuggaggacuuguuuugcgcgcggaugau	2:147966035..147966107:-
+1_46411	1.5	21 +/- 8%	-	600	600	0	0	yes	-	-	-	-	agaauccguagagggauucua	gaauccgcagagcgauucuugc	agaauccguagagggauucuagcagaauccgcgagggauucuugcagaauccgcagagcgauucuugc	1:304365898..304365966:-
+1_45328	1.5	21 +/- 8%	-	50	50	0	0	yes	-	-	-	-	cuaucuggaugcggaccggggcaac	gauucugagcugcugccgaaagau	gauucugagcugcugccgaaagauaucuucguacacuugaacgauaucuaucuggaugcggaccggggcaac	1:234089833..234089905:-
+2_2032	1.5	21 +/- 8%	-	61	60	1	0	yes	-	-	-	-	uugggccgacggaacggaucu	uucauuucgucguuucggga	uugggccgacggaacggaucugugucgguccggggggaaauuggcugcuggauuugugcguuucauuucgucguuucggga	2:101763478..101763559:+
+1_42840	1.5	21 +/- 8%	-	340	340	0	0	yes	-	-	-	-	uugcuggagugguucccaaac	uuggguugaagcuucgcgaga	uuggguugaagcuucgcgagaagaagacgucuucuugcuggagugguucccaaac	1:102197731..102197786:-
+3_28340	1.5	21 +/- 8%	-	141	141	0	0	yes	-	-	-	-	augauagguaaugaaguuu	aguucaauuauuauuu	augauagguaaugaaguuuacaguucaauuauuauuu	3:25440406..25440443:-
+2_15640	1.4	21 +/- 8%	-	39	39	0	0	yes	-	-	-	-	agauuaucaccagaaaccguacgau	ugcagggucugaugaugaucugc	ugcagggucugaugaugaucugcuuucagaggauuuuagugauccuaacuaaaauccacccaaaucagauuaucaccagaaaccguacgau	2:307575108..307575199:-
+1_46412	1.4	21 +/- 8%	-	600	600	0	0	yes	-	-	-	-	agaauccguagagggauucua	gaauccacagagggauucuag	gaauccacagagggauucuagcagaauccguagagggauucua	1:304365945..304365988:-
+1_38448	1.4	21 +/- 8%	-	68	68	0	0	yes	-	-	-	-	aaaaauuucuguugaggaaa	uccuuaaaaaauauuuguag	aaaaauuucuguugaggaaaucuuucaggcauccaagaaaaaaugccuggaugccuggaggauuuccuuaaaaaauauuuguag	1:173336031..173336115:+
+1_43634	1.4	21 +/- 8%	-	1591	1588	0	3	yes	-	-	-	-	ggauuguucaugcacgagauguuga	gcaacggauaucgugugugg	gcaacggauaucguguguggcaucccgaggagaagcggauuguucaugcacgagauguuga	1:151074381..151074442:-
+3_19875	1.4	21 +/- 8%	-	147	147	0	0	yes	-	-	-	-	aaucauucccaacuucugcugu	agcaguaguugugaaugauuga	agcaguaguugugaaugauugauuuuagauuuauacucaaucauucccaacuucugcugu	3:30232281..30232341:+
+2_1141	1.4	21 +/- 8%	-	9605	9557	0	48	yes	-	-	-	-	uuuaccauuucaagacgacc	ggucaucuugaaaugguaaaga	ggucaucuugaaaugguaaagaugaugauugacacucuuuaccauuucaagacgacc	2:58787428..58787485:+
+3_32478	1.4	21 +/- 8%	-	125	125	0	0	yes	-	-	-	-	uggccaaauuauacgcguaa	acgaguacauaauuuugccauu	acgaguacauaauuuugccauuuacggcaaaaucaaaugaaaguggccaaauuauacgcguaa	3:237611319..237611382:-
+NIGP01000997_48946	1.4	21 +/- 8%	-	68	68	0	0	yes	-	-	-	-	aaaaauuucuguugaggaaa	uccuuaaaaaauauuuguag	aaaaauuucuguugaggaaaucuuucaggcauccaagaaaaaaugccuggaugccuggaggauuuccuuaaaaaauauuuguag	NIGP01000997:8491..8575:+
+3_26077	1.4	21 +/- 8%	-	87	84	0	3	yes	-	-	-	-	uggggcaucguggauuccca	aggaaguccauggugucguu	aggaaguccauggugucguuguagguggauauuugcuuguggggcaucguggauuccca	3:314180240..314180299:+
+1_39191	1.3	21 +/- 8%	-	39	38	0	1	yes	-	-	-	-	ggauccucuuguuuuauucuggau	ggaugcuaggauuccauugu	ggaugcuaggauuccauuguggauccucugggauugcaauguggauccucuuguuuuauucuggau	1:214862902..214862968:+
+3_20042	1.3	21 +/- 8%	-	54	54	0	0	yes	-	-	-	-	uucuugaaaaaaaaacca	guuuuuuuuucagaaac	uucuugaaaaaaaaaccaaguuuuuuuuucagaaac	3:44056585..44056621:+
+2_3207	1.3	21 +/- 8%	-	304	302	0	2	yes	-	-	-	-	gagcacuaaaguuaauaccggaa	ucucggauuaaccuuagugcuc	ucucggauuaaccuuagugcuccaaaaucggagcacuaaaguuaauaccggaa	2:165520362..165520415:+
+2_4770	1.3	21 +/- 8%	-	44	42	0	2	yes	-	-	-	-	acuuugauuuuuuagauuguuaugu	augagggacuugaaaauug	acuuugauuuuuuagauuguuauguauuaaguaugagggacuugaaaauug	2:240831228..240831279:+
+3_34160	1.3	21 +/- 8%	-	60	60	0	0	yes	-	-	-	-	augaaaccgaaggucgucguacu	agagaucgacacuucgguugucaugc	agagaucgacacuucgguugucaugccacuuaugaaaccgaaggucgucguacu	3:326600717..326600771:-
+2_1143	1.2	21 +/- 8%	-	9605	9557	0	48	yes	-	-	-	-	uuuaccauuucaagacgacc	ggucaucuugaaaugguaaaga	ggucaucuugaaaugguaaagaugaugauugacacucuuuaccauuucaagacgacc	2:58787950..58788007:+
+2_7461	1.2	21 +/- 8%	-	42	42	0	0	yes	-	-	-	-	augaaugcagcacugugcg	agcagugccgauucaaug	agcagugccgauucaauguauuucuuacauuuaugaaugcagcacugugcg	2:389809745..389809796:+
+1_36880	1.2	21 +/- 8%	-	47	47	0	0	yes	-	-	-	-	augauguaaucgcaaaac	ugaucguuacguuaacc	augauguaaucgcaaaacggcugaaggcagaaggguuacuugagccguugaucguuacguuaacc	1:86551192..86551257:+
+1_39199	1.1	21 +/- 8%	-	43	43	0	0	yes	-	-	-	-	gugaugaagaauguggggagaugua	cauuauccggcuuguuucgcauggcua	cauuauccggcuuguuucgcauggcuacucuggacaaguugcggaagauguggugcaguguagugaugaagaauguggggagaugua	1:215748791..215748878:+
+1_38993	1.1	21 +/- 8%	-	304	302	0	2	yes	-	-	-	-	gagcacuaaaguuaauaccggaa	ucucggauuaaccuuagugcuc	ucucggauuaaccuuagugcuccaaaaucggagcacuaaaguuaauaccggaa	1:208815287..208815340:+
+3_32240	1.1	21 +/- 8%	-	46	44	1	1	yes	-	-	-	-	ucuaaauucggggaaauagca	accccgaauuccaauauc	accccgaauuccaauaucaugggaaaaugccaucaauaucaucaugucacgauaauucuaaauucggggaaauagca	3:230434018..230434095:-
+2_1137	1.1	21 +/- 8%	-	9605	9557	0	48	yes	-	-	-	-	uuuaccauuucaagacgacc	ggucaucuugaaaugguaaaga	ggucaucuugaaaugguaaagaugaugauugacacucuuuaccauuucaagacgacc	2:58785852..58785909:+
+1_37453	1.1	21 +/- 8%	-	62	58	3	1	yes	-	-	-	-	aagcuucuccaacagcagcaca	gcaguugguggccauggag	gcaguugguggccauggagccuccugguggacuuccaccggauaaagauggacauaagcuucuccaacagcagcaca	1:129529114..129529191:+
+1_46072	1.1	21 +/- 8%	-	67	67	0	0	yes	-	-	-	-	gaaauccuccuaggauuuc	gauuucuggagaaauucuc	gauuucuggagaaauucucccgugauuucuggagaaauccuccuaggauuuc	1:283545731..283545783:-
+3_22540	1	21 +/- 8%	-	82	82	0	0	yes	-	-	-	-	uaaucacaguaagaaaagacuuc	ccucuccauuucuugcuggguuggu	uaaucacaguaagaaaagacuucccuggaacggaggccuacuuggccugauguuccucuccauuucuugcuggguuggu	3:159433470..159433549:+
+2_13782	1	21 +/- 8%	-	134	133	1	0	yes	-	-	-	-	uuucagcuugaaccauugucugg	agacagcgauuuuagcugaaaac	agacagcgauuuuagcugaaaacguccaaucgaucaaguuuucagcuugaaccauugucugg	2:238481772..238481834:-
+NIGP01001589_48300	1	21 +/- 8%	-	134	133	1	0	yes	-	-	-	-	uuucagcuugaaccauugucugg	agacagcgauuuuagcugaaaac	agacagcgauuuuagcugaaaacguccaaucgaucaaguuuucagcuugaaccauugucugg	NIGP01001589:32173..32235:-
+2_17580	1	21 +/- 8%	-	65	65	0	0	yes	-	-	-	-	gcugugacggugcaaagucc	uuuuggcaccgaucgcagcgc	uuuuggcaccgaucgcagcgcgacacuaucgcuccguauuucugcugugacggugcaaagucc	2:405870327..405870390:-
+3_32813	0.9	4 +/- 4%	-	103	103	0	0	yes	-	-	-	-	aacuggugaaaacaacua	guucaaauuucgaccguguucu	aacuggugaaaacaacuaugaaguucaaauuucgaccguguucu	3:265030748..265030792:-
+2_16317	0.9	4 +/- 4%	-	651	651	0	0	yes	-	-	-	-	aaucuggacccgcucuaguguca	accgagcugguuuaguacac	aaucuggacccgcucuagugucaaaauucuucgaccgagcugguuuaguacac	2:335523849..335523902:-
+3_21653	0.9	4 +/- 4%	-	36	36	0	0	yes	-	-	-	-	uugaggauaacuaaccaucuguc	cagcucgaaaguuauuuucugcu	cagcucgaaaguuauuuucugcucccgugaguuugaggauaacuaaccaucuguc	3:122874350..122874405:+
+1_35931	0.9	4 +/- 4%	-	117	117	0	0	yes	-	-	-	-	auagggaauucugagaggaucccug	gggauuuuauagaaaauuccuggag	gggauuuuauagaaaauuccuggagggaauuaugaggagauuccuauagggaauucugagaggaucccug	1:20584767..20584837:+
+3_25654	0.9	4 +/- 4%	-	84	83	0	1	yes	-	-	-	-	guggaaccgaugaguggcuuc	aguguuuggucuagcgccaaac	guggaaccgaugaguggcuucaacaugcagcagguaaggaagucaguguuuggucuagcgccaaac	3:296804150..296804216:+
+3_25502	0.9	4 +/- 4%	-	43	43	0	0	yes	-	-	-	-	ucgucgaaaaaucucuccucca	guaggagcgacaauggcucgacuucg	ucgucgaaaaaucucuccuccagugccgguaggagcgacaauggcucgacuucg	3:291377040..291377094:+
+2_5705	0.9	4 +/- 4%	-	253	253	0	0	yes	-	-	-	-	aagugcugcaagcuagcgcagaaac	aacuugcagcuuggguacaucg	aacuugcagcuuggguacaucgaccgaacaagugcugcaagcuagcgcagaaac	2:285451576..285451630:+
+2_17112	0.9	4 +/- 4%	-	183	183	0	0	yes	-	-	-	-	uugcguugauuuuuaggagcc	cuuuuucugacuugaacguuucg	cuuuuucugacuugaacguuucguugauucguugacguuaauuguaacgaucaacgaauuuugcguugauuuuuaggagcc	2:381857603..381857684:-
+1_42127	0.7	4 +/- 4%	-	157	157	0	0	yes	-	-	-	-	aaacaugcacggaagggcc	cccuuuuaugaccaguuag	aaacaugcacggaagggccaaucugaauuugauggaaauuuucaguuaggcccuuuuaugaccaguuag	1:57178664..57178733:-
+2_1924	0.6	4 +/- 4%	-	35	35	0	0	yes	-	-	-	-	ucggccuauuucccuacgga	cgcugggaaaugugcggaag	ucggccuauuucccuacggagugacacuccgcgcgacgcugggaaaugugcggaag	2:95911082..95911138:+
+3_21143	0.6	4 +/- 4%	-	41	40	1	0	yes	-	-	-	-	aagaagagucacaaacauagc	gguggagaaggauucuucaaaa	gguggagaaggauucuucaaaaaagaaaaagaagaagagcaaaaagaagagucacaaacauagc	3:95794530..95794594:+
+3_34480	0.6	4 +/- 4%	-	231	231	0	0	yes	-	-	-	-	uccuagaaccaggcuucguuac	agcggugcuuaguucuguuggagg	agcggugcuuaguucuguuggaggcaauugugaaaccuccuagaaccaggcuucguuac	3:345033490..345033549:-
+1_36921	0.6	4 +/- 4%	-	56	56	0	0	yes	-	-	-	-	uuggaguugacaaaaucgggaaa	ucccgaauucgucagccccaugc	ucccgaauucgucagccccaugcugcauuuggaguugacaaaaucgggaaa	1:90311595..90311646:+
+3_29350	0.5	4 +/- 4%	-	142	142	0	0	yes	-	-	-	-	ugagaaucuuuugaaaguuacucuu	gaaaaccuuuugagauuuuuucgga	gaaaaccuuuugagauuuuuucggaauuuuucugagaaucuuuugaaaguuacucuu	3:92661453..92661510:-
+1_40167	0.5	4 +/- 4%	-	93	93	0	0	yes	-	-	-	-	gauuuuaugaggguggcaauc	uuguccccacaugaggugag	uuguccccacaugaggugaggagugucauuaucuguuucgacgaccgcccaccugauuuuaugaggguggcaauc	1:260112465..260112540:+
+2_10709	0.5	4 +/- 4%	-	51	51	0	0	yes	-	-	-	-	agcgcucacaaagcgugugacguc	ugcaacgauuuggggugcgau	agcgcucacaaagcgugugacgucaaaacuaucagcaucuaaagcugugauucaauuuaauuuggaugcgaugcaacgauuuggggugcgau	2:99020862..99020954:-
+3_33183	0.5	4 +/- 4%	-	72	72	0	0	yes	-	-	-	-	uauaacguuguaaagccuaacggau	caaaggcuuucacaaugcgucgug	uauaacguuguaaagccuaacggauugaagaugauuuggcauaaagucaacauuccuucaaaggcuuucacaaugcgucgug	3:286839768..286839850:-
+3_34329	0.5	4 +/- 4%	-	61	61	0	0	yes	-	-	-	-	gcgcuuaaguguaucuucc	gagauauacauugaacgcaa	gcgcuuaaguguaucuuccauguucaugggcaucgugcccguguugacgaucgaaaaguuuuggagauauacauugaacgcaa	3:339026113..339026196:-
+3_22467	0.4	4 +/- 4%	-	989	984	5	0	no	-	dme-miR-137-3p	-	-	gauugcuuaccgauuacgguugguu	aagaucuucauaaacaggggggcgacgg	aagaucuucauaaacaggggggcgacgguguguuaucaagauaagcuuguagugugcugauugcuuaccgauuacgguugguu	3:157231426..157231509:+
+2_4346	0.4	4 +/- 4%	-	68	68	0	0	yes	-	-	-	-	ugguugcugaauaguugc	aacgaaauucaagcggcuaau	ugguugcugaauaguugcacggugaagaauccguccgaggauacuuuccgaaacgaaauucaagcggcuaau	2:225062392..225062464:+
+1_35932	0.3	4 +/- 4%	-	117	117	0	0	yes	-	-	-	-	auagggaauucugagaggaucccug	gaaaucuugagaauauuccugaag	auagggaauucugagaggaucccugaaguuaaucuugaaaagauugcugaaagaaaucuugagaauauuccugaag	1:20584812..20584888:+
+1_45744	0.3	4 +/- 4%	-	39	39	0	0	yes	-	-	-	-	aaugcuucuaaaaugagu	uuggaagugcgcc	uuggaagugcgccaaacucucgaguggagcaaagaagaacuccaaccgagaauuccagggccaaaugcuucuaaaaugagu	1:257911215..257911296:-
+3_25073	0.3	4 +/- 4%	-	45	45	0	0	yes	-	-	-	-	uuuggaauucauugaggaac	ucugggaugaauucuaagag	ucugggaugaauucuaagagaauaucgugguguggucccaggagaaauuuuuggaauucauugaggaac	3:268416149..268416218:+
+2_7986	0.3	4 +/- 4%	-	75	75	0	0	yes	-	-	-	-	gugagggaaaaucgcaaucggcaac	ugccaaugagauuucgauuaccucaauc	gugagggaaaaucgcaaucggcaacauuaaaauuacuuuuugaacaugccaaugagauuucgauuaccucaauc	2:432763255..432763329:+
+2_14546	0.3	4 +/- 4%	-	42	41	0	1	yes	-	-	-	-	augcaguaagccgugggcaauguau	aauuacugucuguaccgu	aauuacugucuguaccguauacaagcuuuagacaaaguguauauaacgcaugcaguaagccgugggcaauguau	2:269811131..269811205:-
+1_36750	0.2	4 +/- 4%	-	54	54	0	0	yes	-	-	-	-	aaaaggaauuacuggagg	uuaaguaauucuugaagg	aaaaggaauuacuggaggaauccuuaaguaauucuugaagg	1:78368889..78368930:+
+2_1442	0.2	4 +/- 4%	-	64	64	0	0	yes	-	-	-	-	uacucaguuuagguacaaaac	aaugucccucaacacgaguucc	uacucaguuuagguacaaaacaaaaaugucccucaacacgaguucc	2:74673340..74673386:+
+2_8009	0.2	4 +/- 4%	-	84	84	0	0	yes	-	-	-	-	augaaguaaaacgugagca	cucaauguuaucucucauaa	cucaauguuaucucucauaagaaugaaguaaaacgugagca	2:433931972..433932013:+
+2_14695	0.1	4 +/- 4%	-	1524	1524	0	0	yes	-	-	-	-	augacaauuaacacguuuuuc	agagcugucacugggucguga	augacaauuaacacguuuuucauuagauuagagcugucacugggucguga	2:274640817..274640867:-
+1_38035	0.1	4 +/- 4%	-	198	192	0	6	yes	-	-	-	-	aacuccgugcugguugcguggaucu	uuuaugcgaaaaccuacaggaaccu	uuuaugcgaaaaccuacaggaaccuaucaugugcagguaugcacuacaacuccgugcugguugcguggaucu	1:150889241..150889313:+
+3_25543	0.1	4 +/- 4%	-	58	58	0	0	yes	-	-	-	-	aaaaauuucucagggaau	ucuuccaaggaaucaauaa	ucuuccaaggaaucaauaaugaucucauuaaaaauuucucagggaau	3:292699920..292699967:+
+1_41841	0	4 +/- 4%	-	9916	9916	0	0	yes	-	-	-	-	auuucagucacuuccagc	uggaguaugagaaca	auuucagucacuuccagcugguuuugacacgaacacgaucagcuggaguaugagaaca	1:38205616..38205674:-
+3_34553	0	4 +/- 4%	-	47	47	0	0	yes	-	-	-	-	uaagguaaguggcuauagauagac	guaucuuuuuuccgaccuuaucuuaau	uaagguaaguggcuauagauagacauguaucuuuuuuccgaccuuaucuuaau	3:349962709..349962762:-
+3_27409	0	4 +/- 4%	-	58	52	6	0	yes	-	-	-	-	auaggaauuucucaaaggauu	ucccuucugggccuaaaa	ucccuucugggccuaaaaaaaguuccuccagggauucucccuugaauuauuuuauaggaauuucucaaaggauu	3:385771625..385771699:+
+2_5679	0	4 +/- 4%	-	61	61	0	0	yes	-	-	-	-	aauacagaguaacggacgaauuuu	aaaguccguuuaucauaauuga	aaaguccguuuaucauaauugacaaaauacagaguaacggacgaauuuu	2:285047956..285048005:+
+3_19869	0	4 +/- 4%	-	205	205	0	0	yes	-	-	-	-	ucucaggauguugaggaaaaucuu	gaacuucucucaaaauuucgaggga	gaacuucucucaaaauuucgagggaaauccucucaggaugucgagguaaauccucucaggauguugaggaaaaucuu	3:30185903..30185980:+
+3_31864	0	4 +/- 4%	-	72	72	0	0	yes	-	-	-	-	ucuaccaaucaaugcacguuuguau	acaaauauguauugguagcgucuauu	acaaauauguauugguagcgucuauuuccuguccugccaucuguaaugaauacaggucaaacagcucucuaccaaucaaugcacguuuguau	3:212548868..212548960:-
+2_5332	0	4 +/- 4%	-	45	45	0	0	no	-	dme-miR-959-5p	-	-	guaguacuagucaaggccaac	cggucgugagugaucgucuaccg	guaguacuagucaaggccaacagccggucgugagugaucgucuaccg	2:262986539..262986586:+
+2_4153	0	4 +/- 4%	-	58	58	0	0	yes	-	-	-	-	aaaaauuucucagggaau	uccuucgggaauuuucuc	uccuucgggaauuuucuccaaaaauuucucagggaau	2:215771797..215771834:+
+
+
+
+mature miRBase miRNAs detected by miRDeep2
+tag id	miRDeep2 score	estimated probability that the miRNA is a true positive	rfam alert	total read count	mature read count	loop read count	star read count	significant randfold p-value	mature miRBase miRNA	example miRBase miRNA with the same seed	UCSC browser	NCBI blastn	consensus mature sequence	consensus star sequence	consensus precursor sequence	precursor coordinate
+1_46451	2830651.3	3 +/- 5%	-	5552192	5551640	9	543	yes	aae-miR-283	dme-miR-283-5p	-	-	caauaucagcugguaauucuggg	cggaauuccaacugauauccac	caauaucagcugguaauucugggcuuaccccaccguuauacgcuucccggaauuccaacugauauccac	1:305625600..305625669:-
+1_46366	1433408.8	3 +/- 5%	-	2811561	2810811	2	748	yes	aae-miR-277-5p	dme-miR-277-3p	-	-	uaaaugcacuaucugguacgaca	cgugucagaagugcauuuaca	cgugucagaagugcauuuacauagguauuucccguuuagcaguauuuguaaaugcacuaucugguacgaca	1:302603812..302603883:-
+1_46445	1328023.3	3 +/- 5%	-	2604853	2604357	1	495	yes	aae-miR-12-5p	dme-miR-12-5p	-	-	ugaguauuacaucagguacuggu	ccaguacuuauguuaugcucucu	ugaguauuacaucagguacuggugucgauauucgaaucaccaacgaaucggguuccuuugauuaacuuaccaguacuuauguuaugcucucu	1:305613548..305613640:-
+2_10894	653279.6	3 +/- 5%	-	1281371	1280391	0	980	yes	aae-miR-2a-5p	dme-miR-2a-3p	-	-	uaucacagccagcuuugaagagcg	acucucaaagugguugugaaaug	acucucaaagugguugugaaaugaguuacucuugaacgaucucauaucacagccagcuuugaagagcg	2:107237501..107237569:-
+2_17440	638476.7	3 +/- 5%	-	1252337	1252176	0	161	yes	aae-miR-1	dme-miR-1-3p	-	-	uggaauguaaagaaguauggag	ccaugcuuccuugcauucaaua	ccaugcuuccuugcauucaauagugauucugaaagcauauggaauguaaagaaguauggag	2:399501023..399501084:-
+3_35404	504549.6	3 +/- 5%	-	989644	988389	1	1254	yes	aae-miR-308-5p	dme-miR-2a-3p	-	-	aaucacaggaguauacugugag	cgcgguauauucuuguggcuug	cgcgguauauucuuguggcuugaugcauuugaaaaaucucaaaucacaggaguauacugugag	3:403338483..403338546:-
+2_6216	446473.9	3 +/- 5%	-	875733	875539	0	194	yes	aae-miR-305-5p	dme-miR-305-5p	-	-	auuguacuucaucaggugcucugg	cggcacauguuggaguacacuu	auuguacuucaucaggugcucugguuguuuucgauacccggcacauguuggaguacacuu	2:307145445..307145505:+
+2_17742	414902.9	3 +/- 5%	-	813806	813763	0	43	yes	aae-miR-184	dme-miR-184-3p	-	-	uggacggagaacugauaagggc	ccuuaucauucuugcgccccgu	ccuuaucauucuugcgccccguguuauauuguuggcgacuggacggagaacugauaagggc	2:417599380..417599441:-
+2_10892	219531.2	3 +/- 5%	-	430592	429460	0	1132	yes	aae-miR-2c	dme-miR-2a-3p	-	-	uaucacagccagcuuugaugagcu	acucucaaaguggcugugaaaug	acucucaaaguggcugugaaaugguuugauuuugcucauaucacagccagcuuugaugagcu	2:107235884..107235946:-
+3_22973	216598.6	3 +/- 5%	-	424851	424229	3	619	no	aae-bantam-5p	dme-bantam-3p	-	-	ugagaucauuuugaaagcugauu	ccgguuuucauuuucgaucugacu	ccgguuuucauuuucgaucugacuuauuugauuuaacaagagugagaucauuuugaaagcugauu	3:178082830..178082895:+
+2_10665	195887.6	3 +/- 5%	-	384217	343372	0	40845	yes	aae-miR-281-5p	dme-miR-281-2-5p	-	-	aagagagcuauccgucgacagu	ugucauggaauugcucucuuua	aagagagcuauccgucgacaguagggauaugauucacugucauggaauugcucucuuua	2:96469361..96469420:-
+3_26471	181668	3 +/- 5%	-	356327	353739	0	2588	yes	aae-miR-8-5p	dme-miR-8-3p	-	-	uaauacugucagguaaagauguc	caucuuaccgggcagcauuaga	caucuuaccgggcagcauuagauauuuuugaaauacuucuaauacugucagguaaagauguc	3:328527955..328528017:+
+2_15990	135117.8	3 +/- 5%	-	265026	265021	0	5	yes	aae-miR-11895	-	-	-	uucaugcauucacuucugcuga	agcaggagugaaugcaugaguu	agcaggagugaaugcaugaguuugacaucugaaacuaauucaugcauucacuucugcuga	2:324949494..324949554:-
+2_10056	129619.6	3 +/- 5%	-	254241	254187	0	54	yes	aae-miR-11894b	-	-	-	uuuaccauuucaauaugaccua	ggucguauugaaaugguaaaga	ggucguauugaaaugguaaagagugucaaucaucaucuuuaccauuucaauaugaccua	2:58784590..58784649:-
+1_44069	113193.9	3 +/- 5%	-	222018	211374	0	10644	yes	aae-miR-252-5p	dme-miR-252-5p	-	-	cuaaguacuagugccgcaggag	ccugcugcccaagugcuuaucg	cuaaguacuagugccgcaggagagauuugaaccccugcugcccaagugcuuaucg	1:175818157..175818212:-
+1_38971	93480.2	3 +/- 5%	-	183349	183275	3	71	yes	aae-miR-996	dme-miR-279-3p	-	-	ugacuagauuacaugcucgucu	gcgugcaugaaucuggugcacgg	gcgugcaugaaucuggugcacgguuuuccaguuguaauaucgcuucgugacuagauuacaugcucgucu	1:207012536..207012605:+
+2_10896	91602	3 +/- 5%	-	179665	176580	2	3083	yes	aae-miR-13-5p	dme-miR-2a-3p	-	-	uaucacagccauuuugacgaguu	ucguaaaaaugguugugcugu	ucguaaaaaugguugugcuguguuguuacgcucgaaauucauaucacagccauuuugacgaguu	2:107237649..107237713:-
+2_6213	90780.3	3 +/- 5%	-	178053	177866	0	187	yes	aae-miR-275-5p	dme-miR-275-3p	-	-	ucagguaccugaaguagcgcgcg	cgcgcuaagcaggaaccgagacu	cgcgcuaagcaggaaccgagacuuugucauuugcuagcagucagguaccugaaguagcgcgcg	2:307135668..307135731:+
+3_29126	79261	3 +/- 5%	-	155458	154593	0	865	yes	aae-miR-11-5p	dme-miR-2a-3p	-	-	caucacagucugaguucuugcu	cgagaacuccggcugugaccug	cgagaacuccggcugugaccuguguacacuuuauccaaaucacaucacagucugaguucuugcu	3:75489864..75489928:-
+2_9847	65025.1	3 +/- 5%	-	127536	127101	0	435	yes	aae-miR-190	dme-miR-190-5p	-	-	agauauguuugauauucuugguug	cccaggaaucaaacauauuauua	agauauguuugauauucuugguuguuaaauuuuauauuaucacccaggaaucaaacauauuauua	2:48811877..48811942:-
+2_10901	60817	3 +/- 5%	-	119288	90012	0	29276	yes	aae-miR-71-5p	-	-	-	agaaagacauggguagugagau	ucucacuaccuugucuuucaug	agaaagacauggguagugagauaguuucacccuauugcacugggaucucacuaccuugucuuucaug	2:107238287..107238354:-
+2_10364	60174.4	3 +/- 5%	-	118021	102963	3	15055	yes	aae-miR-276-5p	dme-miR-276a-3p	-	-	uaggaacuucauaccgugcucu	agcgagguauagaguuccuacg	agcgagguauagaguuccuacguugcgugugcgaaauugguaggaacuucauaccgugcucu	2:73120452..73120514:-
+1_46516	55388.3	3 +/- 5%	-	108634	101976	0	6658	yes	aae-miR-1175-5p	dme-miR-958-3p	-	-	ugagauucuacuucuccgacuuaa	aaguggaguaguggucucaucgcu	aaguggaguaguggucucaucgcuuaguauuagaaaagugagauucuacuucuccgacuuaa	1:307010044..307010106:-
+2_10388	52857.5	3 +/- 5%	-	103669	102875	0	794	yes	aae-miR-276-3p	dme-miR-276a-3p	-	-	uaggaacuucauaccgugcucu	agcgagguauagaguuccua	agcgagguauagaguuccuaugcguucggauaaaauauuccauaggaacuucauaccgugcucu	2:73509399..73509463:-
+3_29360	49605.7	3 +/- 5%	-	97291	97232	3	56	yes	aae-miR-92b-3p	dme-miR-92a-3p	-	-	aauugcacuugucccggccugc	aggucgugacuugugcccauuu	aggucgugacuugugcccauuugcugaauuuuaauggucaaauugcacuugucccggccugc	3:93418515..93418577:-
+2_10671	47747.9	3 +/- 5%	-	93647	91732	7	1908	yes	aae-miR-282-5p	dme-miR-282-5p	-	-	uagccucuccuaggcuuugucu	acauagccugacagagguuagg	uagccucuccuaggcuuugucuguuaccuuccuugggaauuccacuagccagacauagccugacagagguuagg	2:96911966..96912040:-
+3_32530	37666.9	3 +/- 5%	-	73873	73793	0	80	yes	aae-miR-278-5p	dme-miR-278-3p	-	-	ucggugggacuuucguccguuu	acggacgauagucuucagcggcc	acggacgauagucuucagcggccgugcauuugauagaaguggucggugggacuuucguccguuu	3:243123888..243123952:-
+1_38969	37601	3 +/- 5%	-	73745	73428	0	317	yes	aae-miR-279	dme-miR-279-3p	-	-	ugacuagauccacacucauuaa	gaugggugugaaucuaguguuucac	gaugggugugaaucuaguguuucacaugauuuucgauagccugugacuagauccacacucauuaa	1:207007788..207007853:+
+2_6757	37589.7	3 +/- 5%	-	73723	73371	2	350	yes	aae-miR-14	dme-miR-14-3p	-	-	ucagucuuuuucucucuccuau	gggagcgagauuaaggcuugcu	gggagcgagauuaaggcuugcuggucauuuauuacacucgaagucagucuuuuucucucuccuau	2:344767572..344767637:+
+2_7243	32673.9	3 +/- 5%	-	64080	64065	0	15	yes	aae-miR-2945-5p	dme-miR-279-3p	-	-	ugacuagaggcagacucguuua	agcggguccguuucuaguguca	agcggguccguuucuagugucaugugcuguauucgaauaucaugacuagaggcagacucguuua	2:374947142..374947206:+
+3_29124	20768.2	3 +/- 5%	-	40727	40595	0	132	yes	aae-miR-998	dme-miR-285-3p	-	-	uagcaccaugagauucagcuc	acugaacucucgugggucugc	acugaacucucgugggucugcaguugauauuucgaaagcuuguagcaccaugagauucagcuc	3:75489589..75489652:-
+1_42033	20145.1	3 +/- 5%	-	39505	38592	0	913	yes	aae-miR-33	dme-miR-33-5p	-	-	gugcauuguaguugcauugca	caauacuucugcaaugcaagcc	gugcauuguaguugcauugcacuuuugcguucgauaacacggugcaauacuucugcaaugcaagcc	1:50888880..50888946:-
+2_2124	19495.3	3 +/- 5%	-	38232	36787	0	1445	yes	aae-miR-9a	dme-miR-9a-5p	-	-	ucuuugguuaucuagcuguauga	uaaagcuagcauaccgaaguua	ucuuugguuaucuagcuguaugagugaauuuagaacaucauaaagcuagcauaccgaaguua	2:108461947..108462009:+
+2_16333	18709.1	3 +/- 5%	-	36689	36478	0	211	yes	aae-miR-9b	dme-miR-9a-5p	-	-	ucuuuggugauuuuagcuguaug	uauagcuuuaucaccaaaaacc	ucuuuggugauuuuagcuguaugcugauacguuucugauugcauauagcuuuaucaccaaaaacc	2:335780574..335780639:-
+2_16779	18123	3 +/- 5%	-	35547	32133	0	3414	yes	aae-miR-1891	-	-	-	ugaggaguuaauuugcguguuu	acacguccauuaacucugguac	ugaggaguuaauuugcguguuuuuguauuugauuaaacacguccauuaacucugguac	2:360084867..360084925:-
+2_7256	17141.3	3 +/- 5%	-	33614	33494	0	120	yes	aae-let-7	dme-let-7-5p	-	-	ugagguaguugguuguauagu	cuaugcaaucugcuagcuugucg	ugagguaguugguuguauaguagugacugauuaaauaucugcuaugcaaucugcuagcuugucg	2:375131497..375131561:+
+2_16339	16950.2	3 +/- 5%	-	33239	24745	14	8480	yes	aae-miR-9c-5p	dme-miR-9a-5p	-	-	ucuuugguauucuagcuguaga	uaaagcuuuaguaccagagguc	ucuuugguauucuagcuguagaauguugagcuuugugauaugguaucuucuaaagcuuuaguaccagagguc	2:335810364..335810436:-
+3_24496	12473.3	3 +/- 5%	-	24457	13800	0	10657	yes	aae-miR-307	dme-miR-307a-5p	-	-	acucacucaaccugggugugau	ucacaaccuccuugagugagcga	acucacucaaccugggugugaugcuuauuugaaucaucacaaccuccuugagugagcga	3:244794376..244794435:+
+3_29372	10711.4	3 +/- 5%	-	21002	20991	1	10	yes	aae-miR-92a-5p	dme-miR-92a-3p	-	-	uauugcacuugucccggccuau	cgguacggacaggggcaacauug	cgguacggacaggggcaacauugugacauuugaaagcuaauauugcacuugucccggccuau	3:93477596..93477658:-
+3_27882	10372.2	3 +/- 5%	-	20336	20327	0	9	yes	aae-miR-980-5p	dme-miR-980-3p	-	-	uagcugccuagugaagggcaau	cggccguucauugggucauc	cggccguucauugggucaucuagcucguguuggaaacaguuagcugccuagugaagggcaau	3:1054523..1054585:-
+3_29519	9789.8	3 +/- 5%	-	19201	19191	0	10	yes	aae-miR-2765	-	-	-	ugguaacuccaccaccguuggc	caaugggagcuggaguucccgcg	ugguaacuccaccaccguuggcgauauuugacagccaaugggagcuggaguucccgcg	3:101895454..101895512:-
+3_35482	8844.5	3 +/- 5%	-	17342	17283	0	59	yes	aae-miR-285	dme-miR-285-3p	-	-	uagcaccauucgaaaucaguac	acuggcuuccaaaggugaguag	acuggcuuccaaaggugaguagauggcauucgauacacucuagcaccauucgaaaucaguac	3:406875046..406875108:-
+1_38181	8710.4	3 +/- 5%	-	17077	16960	0	117	yes	aae-miR-970	dme-miR-970-3p	-	-	ucauaagacacacgcggcuau	agcuugcguuugucuuagcug	agcuugcguuugucuuagcugguauugaaugugauagguaucauaagacacacgcggcuau	1:157238423..157238484:+
+NIGP01000533_47692	8710.4	3 +/- 5%	-	17077	16960	0	117	yes	aae-miR-970	dme-miR-970-3p	-	-	ucauaagacacacgcggcuau	agcuugcguuugucuuagcug	agcuugcguuugucuuagcugguauugaaugugauagguaucauaagacacacgcggcuau	NIGP01000533:10107..10168:-
+1_38822	7896.2	3 +/- 5%	-	15479	15434	0	45	yes	aae-miR-929	dme-miR-929-5p	-	-	aaauugacucuaguagggagucc	acucccuaacggagucagauuga	aaauugacucuaguagggaguccuuguguacgagugacucccuaacggagucagauuga	1:198495526..198495585:+
+2_16336	6724.8	3 +/- 5%	-	13182	12960	0	222	yes	aae-miR-79-5p	dme-miR-4-3p	-	-	auaaagcuagauuaccaaagcau	cuuuggcgcuuuagcuguauga	cuuuggcgcuuuagcuguaugauagaauuuaauauuucauaaagcuagauuaccaaagcau	2:335780884..335780945:-
+1_42506	4421.7	3 +/- 5%	-	8665	8142	0	523	yes	aae-miR-87	dme-miR-87-3p	-	-	gugagcaaauuuucaggugugu	cagccugaaauuugcuaaaccu	cagccugaaauuugcuaaaccuguguguauuugauucaaacaaucaaggugagcaaauuuucaggugugu	1:80682401..80682471:-
+2_4560	3767.4	3 +/- 5%	-	7382	7190	0	192	yes	aae-miR-932-5p	dme-miR-932-5p	-	-	ucaauuccguagugcauugcag	ugcaagcaauguggaagugaag	ucaauuccguagugcauugcagugugcuuuagacgaacugcaagcaauguggaagugaag	2:231381156..231381216:+
+2_120	3739.8	3 +/- 5%	-	7328	7327	0	1	yes	aae-miR-219	dme-miR-219-5p	-	-	ugauuguccaaacgcaauucuu	agaguugugacuggacauccgu	ugauuguccaaacgcaauucuuguuuuauucgaauaugauauccaagaguugugacuggacauccgu	2:3715261..3715328:+
+2_7254	2540.2	3 +/- 5%	-	4974	4673	0	301	yes	aae-miR-100	dme-miR-100-5p	-	-	aacccguagauccgaacuugug	caagaacggauguaugggauuc	aacccguagauccgaacuugugcugccguuucacauguuacaagaacggauguaugggauuc	2:375117351..375117413:+
+3_34011	1269.7	3 +/- 5%	-	2482	1990	1	491	yes	aae-miR-10365	dme-miR-927-5p	-	-	auuagaauguggaaucuguuuuu	aaaaguuuucauauucuugcgg	auuagaauguggaaucuguuuuuguacaucaaguguuacgaaacgaagcaaaaaaguuuucauauucuugcgg	3:320775621..320775694:-
+NIGP01001634_47755	1269.7	3 +/- 5%	-	2482	1990	1	491	yes	aae-miR-10365	dme-miR-927-5p	-	-	auuagaauguggaaucuguuuuu	aaaaguuuucauauucuugcgg	auuagaauguggaaucuguuuuuguacaucaaguguuacgaaacgaagcaaaaaaguuuucauauucuugcgg	NIGP01001634:30709..30782:-
+NIGP01001012_48272	1067.2	3 +/- 5%	-	2084	2082	0	2	yes	aae-miR-957	dme-miR-957-3p	-	-	ugaaaccguccaaaacugaggc	guuaguuuugggcggguuuuagu	guuaguuuugggcggguuuuaguguauuucgauuagaguaucaauugaaaccguccaaaacugaggc	NIGP01001012:27490..27557:-
+3_27555	1067	3 +/- 5%	-	2084	2082	0	2	yes	aae-miR-957	dme-miR-957-3p	-	-	ugaaaccguccaaaacugaggc	guuaguuuugggcggguuuuagu	guuaguuuugggcggguuuuaguguauuucgauuagaguaucaauugaaaccguccaaaacugaggc	3:398466624..398466691:+
+1_46569	1021.3	3 +/- 5%	-	1996	1957	0	39	yes	aae-miR-iab-4-5p	dme-miR-iab-4-5p	-	-	acguauacugaauguauccuga	cgguauaccuucaguauacguaac	acguauacugaauguauccugagugcuaucuauccgguauaccuucaguauacguaac	1:308965423..308965481:-
+1_39339	981.5	3 +/- 5%	-	1927	1854	0	73	yes	aae-miR-11900	-	-	-	auuuuuuugacuguaauuuuauag	guaaaauuacguugaaaaaucgu	guaaaauuacguugaaaaaucgucucccucaaaaaaugaaaccugagacuaacaggagauuuuuuugacuguaauuuuauag	1:223944070..223944152:+
+2_14520	936.7	3 +/- 5%	-	1836	1827	0	9	yes	aae-miR-2946	-	-	-	uaguacggaaaagauaugggga	gccauauuuuuaccgcuacugc	gccauauuuuuaccgcuacugcauuucauuguaauaauuguaguacggaaaagauaugggga	2:268456441..268456503:-
+2_14516	932.6	3 +/- 5%	-	1829	1828	0	1	yes	aae-miR-2941	-	-	-	uaguacggcuagaacuccacgga	cgugguguuuagacguauuacau	cgugguguuuagacguauuacaugauuuuuugaacauaacuguaguacggcuagaacuccacgga	2:268456010..268456075:-
+3_27038	825.7	3 +/- 5%	-	1621	1402	0	219	yes	aae-miR-193	-	-	-	ugggauuuuguggaccagaag	uacuggccuacuaagucccaac	ugggauuuuguggaccagaagauuuccuccauucgauaauagcuacuggccuacuaagucccaac	3:360501795..360501860:+
+NIGP01000443_47609	809	3 +/- 5%	-	1598	1588	0	10	no	aae-miR-11893	-	-	-	uuccugacuuauacgcuuaccu	guaaguagauaaaucagaaag	guaaguagauaaaucagaaagacguuuauaucguuucuuccugacuuauacgcuuaccu	NIGP01000443:52102..52161:+
+2_5223	809	3 +/- 5%	-	1598	1588	0	10	no	aae-miR-11893	-	-	-	uuccugacuuauacgcuuaccu	guaaguagauaaaucagaaag	guaaguagauaaaucagaaagacguuuauaucguuucuuccugacuuauacgcuuaccu	2:257889040..257889099:+
+1_40964	449.3	3 +/- 5%	-	873	858	0	15	yes	aae-miR-10	dme-miR-10-5p	-	-	acccuguagauccgaauuuguu	caaauucgguucuagagagguuu	acccuguagauccgaauuuguuugaauauuuaacaagcgacaaauucgguucuagagagguuu	1:310530475..310530538:+
+2_3631	347.4	3 +/- 5%	-	674	669	0	5	yes	aae-miR-137	dme-miR-137-3p	-	-	uauugcuugagaauacacguag	acgcguauucuuggguuauuaac	acgcguauucuuggguuauuaacacacuguuuauguuguuauugcuugagaauacacguag	2:189612067..189612128:+
+2_6665	292.2	3 +/- 5%	-	574	567	0	7	no	aae-miR-375	dme-miR-375-3p	-	-	uuuguucguuuggcucgaguuau	acuuaagcccaacguacagaaa	acuuaagcccaacguacagaaacuugaaucugaaugccguucuagauuggcuugcuagaaguuuguucguuuggcucgaguuau	2:337876532..337876616:+
+1_46576	187	3 +/- 5%	-	359	253	0	106	yes	aae-miR-993	dme-miR-993-3p	-	-	gaagcucguuucuauagaggu	ccuguaguuccgggcuuuu	ccuguaguuccgggcuuuugugguuucuuuuauuguuaauuaucagaagcucguuucuauagaggu	1:310672024..310672090:-
+2_17497	22.1	3 +/- 5%	-	36	16	0	20	yes	aae-miR-2944b-5p	dme-miR-2a-3p	-	-	uaucacagcaguaguuaccugaua	gaaggaacucccggugugauau	gaaggaacucccggugugauauaugacucgauuauaucacagcaguaguuaccugaua	2:402152794..402152852:-
+1_39979	5.4	5 +/- 6%	-	19894	19894	0	0	yes	aae-miR-999	dme-miR-999-3p	-	-	uguuaacuguaagacugugucu	acgcggucgugcaggaaauuauu	acgcggucgugcaggaaauuauuuggcauuagauucaaauguuaacuguaagacugugucu	1:252222293..252222354:+
+2_1881	5.3	5 +/- 6%	-	9888	9684	0	204	yes	aae-miR-988-5p	dme-miR-988-3p	-	-	ccccuuguugcaaaccucacgcuu	gugugcuuugugacaaugagau	gugugcuuugugacaaugagauucgguucgauaucauccccuuguugcaaaccucacgcuu	2:93351380..93351441:+
+2_10900	5.1	5 +/- 6%	-	268085	268074	0	11	yes	aae-miR-2c	dme-miR-2a-3p	-	-	uaucacagccagcuuugauga	gcaucaaauuugguuguuuua	gcaucaaauuugguuguuuuaguacgaccucuuugaaaccccuaucacagccagcuuugauga	2:107237998..107238061:-
+2_7927	4.9	8 +/- 8%	-	25287	25137	0	150	yes	aae-miR-965	dme-miR-965-3p	-	-	uaagcguauagcuuuucccau	gggggaaauccuguacgcuguaug	gggggaaauccuguacgcuguauguuguauuugaauaauccauaagcguauagcuuuucccau	2:429778749..429778812:+
+2_7119	4.8	8 +/- 8%	-	29379	29378	0	1	yes	aae-miR-124	dme-miR-124-3p	-	-	uaaggcacgcggugaaugccaa	uauccacugccggccuauaugu	uauccacugccggccuauauguccuauuucgguacucauaaggcacgcggugaaugccaa	2:369307281..369307341:+
+2_1882	4.8	8 +/- 8%	-	9685	9684	0	1	yes	aae-miR-988-3p	dme-miR-988-3p	-	-	ccccuuguugcaaaccucacgcuu	guaggggcaaugggggcaau	ccccuuguugcaaaccucacgcuugcgguagguuccacaacugcugagagguggcagguaggggcaaugggggcaau	2:93351417..93351494:+
+2_6553	4.6	8 +/- 8%	-	36350	36318	0	32	yes	aae-miR-133	dme-miR-133-3p	-	-	uugguccccuucaaccagcugu	gguugacuucgggucaaau	gguugacuucgggucaaaucgucaaauauuugcaaagauauuuccucagugaaauuauuugguccccuucaaccagcugu	2:330417069..330417149:+
+2_7258	4.6	8 +/- 8%	-	34224	34224	0	0	yes	aae-miR-125-5p	dme-miR-125-5p	-	-	ucccugagacccuaacuuguga	acaaguuuugaucuccgguauu	ucccugagacccuaacuugugacuauaguugaaguuucacaaguuuugaucuccgguauu	2:375131781..375131841:+
+3_29097	4.5	8 +/- 8%	-	1049	1047	0	2	yes	aae-miR-1000	dme-miR-1000-5p	-	-	auauuguccugucacagcagua	uacuguuguuucgggacauuuac	auauuguccugucacagcaguacuguuacaaauuuacuguuguuucgggacauuuac	3:74204062..74204119:-
+2_11895	4.5	8 +/- 8%	-	38758	38757	0	1	yes	aae-miR-263b-5p	dme-miR-263b-5p	-	-	cuuggcacugggagaauucacag	ggaucuuuucgugccaucguu	cuuggcacugggagaauucacaggcgcuauuugcuaucauucuguggaucuuuucgugccaucguu	2:153371130..153371196:-
+3_19338	4	8 +/- 8%	-	377	377	0	0	yes	aae-miR-315-5p	dme-miR-315-5p	-	-	uuuugauuguugcucagaaagcc	cuuucgagcaguaaucaaaguc	uuuugauuguugcucagaaagccgugcauuugaaacgggucgcuuucgagcaguaaucaaaguc	3:3444767..3444831:+
+3_21868	3.8	1 +/- 3%	-	292649	291314	0	1335	yes	aae-miR-31	dme-miR-31b-5p	-	-	uggcaagauguuggcauagcug	agcuauucaacuucuugucuau	uggcaagauguuggcauagcugaaaguuuugaguuuagcuauucaacuucuugucuau	3:136174150..136174208:+
+2_4330	3.7	1 +/- 3%	-	93344	93338	0	6	yes	aae-miR-7	dme-miR-7-5p	-	-	uggaagacuagugauuuuguuguu	caauaaaucucaagucuuucua	uggaagacuagugauuuuguuguuuugcuuacgauaauaacaauaaaucucaagucuuucua	2:222802544..222802606:+
+2_16460	1.6	21 +/- 8%	-	142	142	0	0	yes	aae-miR-11916	-	-	-	gaugccucguaaagcaacugga	caguugcuuuccgagcguagcac	caguugcuuuccgagcguagcacaguuuggaugcgggcccgugcaucguccacggugaugccucguaaagcaacugga	2:344991982..344992060:-
+2_17676	1.4	21 +/- 8%	-	54176	54174	0	2	yes	aae-miR-1890	-	-	-	ugaaaucuuugauuaggucugg	agcuaauuggagaguucuuga	agcuaauuggagaguucuugaauaguguugugaaccuucaugaaaucuuugauuaggucugg	2:413654961..413655023:-
+2_947	1.4	21 +/- 8%	-	47	47	0	0	yes	aae-miR-11897a	-	-	-	uaguaaaccuugauuuuguagc	uacagaaucgaggcucacgaug	uacagaaucgaggcucacgaugauuuccaaucauaguaaaccuugauuuuguagc	2:46313963..46314018:+
+1_46378	1.3	21 +/- 8%	-	908850	908840	0	10	no	aae-miR-317	dme-miR-317-3p	-	-	ugaacacagcuggugguaucuc	gggauacacccugugcucgcu	gggauacacccugugcucgcuuugcauucgaaacuagugaacacagcuggugguaucuc	1:302667132..302667191:-
+1_38657	1.1	21 +/- 8%	-	50	50	0	0	yes	aae-miR-11920	-	-	-	agcauuucagacauugguggac	ccaucaacugcugaacuguuuu	ccaucaacugcugaacuguuuuaggcuucguacgaaagcauuucagacauugguggac	1:188056488..188056546:+
+2_7797	1.1	21 +/- 8%	-	50	50	0	0	yes	aae-miR-11920	-	-	-	agcauuucagacauugguggac	ccaucaacugcugaacuguuuu	ccaucaacugcugaacuguuuuaggcuucguacgaaagcauuucagacauugguggac	2:417927549..417927607:+
+2_12492	1.1	21 +/- 8%	-	487	487	0	0	yes	aae-miR-11899	-	-	-	uaugaccgauuuaauauauggcu	ccauguaugauuucggucaugua	ccauguaugauuucggucauguaugcaguugaaaauaauuauaugaccgauuuaauauauggcu	2:182319041..182319105:-
+3_29142	1.1	21 +/- 8%	-	50	50	0	0	yes	aae-miR-11920	-	-	-	agcauuucagacauugguggac	ccaucaacugcugaacuguuuu	ccaucaacugcugaacuguuuuaggcuucguacgaaagcauuucagacauugguggac	3:77430380..77430438:-
+2_16527	1	21 +/- 8%	-	27362	27355	0	7	no	aae-miR-263a-5p	dme-miR-263a-5p	-	-	aauggcacuggaagaauucacg	cguguucuggcaguggcauccc	aauggcacuggaagaauucacggguauauuuugaaauccccguguucuggcaguggcauccc	2:348784448..348784510:-
+2_14518	0.7	4 +/- 4%	-	1798	1797	0	1	yes	aae-miR-2941	-	-	-	uaguacggcuagaacuccacgga	ugaagcucagcugcauuaca	ugaagcucagcugcauuacacgauauggaauacgguuuguaguacggcuagaacuccacgga	2:268456314..268456376:-
+3_33686	0.2	4 +/- 4%	-	770	770	0	0	yes	aae-miR-309a	-	-	-	acugggcaaaguuugucgc	gacuaacuucguucaguuu	gacuaacuucguucaguuuggugucauacgaagguuuccaguuucaucacugggcaaaguuugucgc	3:309335452..309335519:-
+2_6214	-0.5	0 +/- 0%	-	177866	177866	0	0	no	aae-miR-275-3p	dme-miR-275-3p	-	-	ucagguaccugaaguagcgcgcg	ucaucaagcgacaacagaggcgugaaa	ucagguaccugaaguagcgcgcgugaucaaacaggaagcgucaucaagcgacaacagaggcgugaaa	2:307135708..307135775:+
+2_3102	-2.1	0 +/- 0%	-	83	83	0	0	no	aae-miR-2943	dme-miR-1002-5p	-	-	uuaaguaggcacuugcaggcaa	gacugcuuuuuccuacuuuaca	uuaaguaggcacuugcaggcaaauuuguagcuuuaauaugauugacugcuuuuuccuacuuuaca	2:158469002..158469067:+
+2_11362	-2.2	0 +/- 0%	-	145	145	0	0	no	aae-miR-11919	-	-	-	uagcuagguugcggugcacugc	aguguacucugccuggccggc	aguguacucugccuggccggcgcugcugcgagucuagcuagguugcggugcacugc	2:129145074..129145130:-
+2_10666	-2.3	0 +/- 0%	-	343372	343372	0	0	no	aae-miR-281-5p	dme-miR-281-2-5p	-	-	aagagagcuauccgucgacagu	cguugacgugggauuuuuuug	cguugacgugggauuuuuuuguucauuuuguucuuucgcugguuucgaauaugaaaauaaagagagcuauccgucgacagu	2:96469398..96469479:-
+2_7255	-7.7	0 +/- 0%	-	33494	33494	0	0	no	aae-let-7	dme-let-7-5p	-	-	ugagguaguugguuguauagu	auuacaguacugcuucuuc	auuacaguacugcuucuuccacguugagguaguugguuguauagu	2:375131473..375131518:+
+
+#miRBase miRNAs not detected by miRDeep2
+miRBase precursor id	total read count	mature read count(s)	star read count	remaining reads	UCSC browser	NCBI blastn	miRBase mature sequence(s)	miRBase star sequence(s)	miRBase precursor sequence
+975100	975031	0	69	-	-	caaccacuauccgcccugccgcc	uggcagugugguuagcugguug	-	caaggcaauacgcuauggcagugugguuagcugguuguguagaacuuuggggggcuuccguggcguucgcgcgcacacgggggcucagauucacaaccacuauccgcccugccgccgcgaggugccagg	
+539264	539072	0	192	-	-	cacguuacagauugggguuucc	uaaucucaaauuguaacagugg	-	gagguaaucucaaauuguaacaguggguugauuuuccuggugaaucccggccuuguccuccgucacaagugugacaagugucucgaaaacguguucgcuauacccacguuacagauugggguuucccc	
+284898	284898	0	0	-	-	ucagguacugagugacucucag	gagagcaccucgguaucuaagc	-	cauucgcaauuucaccgguucagguacugagugacucucagaugugcauuucucaagcaaucucguccucaggaccugagguugaaaaacccugagagcaccucgguaucuaagccaguguugcgaaaa	
+272611	272606	0	5	-	-	uuuaccauuucaagaugaccua	-	gauggguugucuugaaaugguaaagagugucaaccaucaucuuuaccauuucaagaugaccuauu	
+280838	280720	0	118	-	-	ugguuuaucuuaucugucgaggc	gucgacagggagauaaaucacu	-	cauugguuuaucuuaucugucgaggcaaguuauuuuaccggauaguguuucuuuucgugagcaaucaccacuauccagcucuucuugucgacagggagauaaaucacug	
+75209	75206	0	3	-	-	ugucuuuuuccgcuuacugccg	-	ccaacauuuugauugauuugucuuuuuccgcuuacugccgguggcauuugaaauucucgacagcaaaccgaaaaaggcgccucaaucaauu	
+73275	72907	0	368	-	-	cuugugcgugugacaacgg	-	cucauugcagcugcugaccacugcacaagauuagauuaugacucuugugcgugugacaacggcuauug	
+57284	57121	0	163	-	-	ugugaugugacguagugguac	-	uucaucauacggucaugggggaccgccgcuaccucgcuuucacuugguaccgauuucccauaauccaugugaugugacguagugguaccuucccuuggcuauuacaacacuuccu	
+1172	1172	0	0	-	-	uucguugucgacgaaaccugca	-	aaaccuugccuggaucggguuucgcggcgaacgggcuuccaccaugaugaauagcaguucguugucgacgaaaccugcacauugcaaggca	
+2184	855	0	1329	-	-	caaagcguuuggguucugaaac	-	gguuugcuuuagaauuccuacgcuuuaccgugauuuguugaaaguuuggcaaagcguuuggguucugaaacgaaac	
+919	574	0	345	-	-	cugaaaacuuaaucgauugguc	-	uaaccugaaaacuuaaucgauuggucacuagcugcgcggugaccaaucgauuaaguuuucagcuua	
+901	573	0	328	-	-	ucagaucuacuuaauacccau	-	acuccaauucuggguauuuuagauccuuggcauaguuacgugauugaaugcacuguucuucuuugguuuacccaguaucgaacacgcgucaaucugucagaucuacuuaauacccaua	
+280	253	0	27	-	-	aaaugggacugauaugcgaguau	-	ccauucucgcauaacaguaccauauucuugggauuucucauauaaaugggacugauaugcgaguaugg	
+49	48	0	1	-	-	uaguaagcauugauuuuguagc	-	augcuacagaaucgaggcuuacuaugauuuccaaucauaguaagcauugauuuuguagcau	
+50	47	0	3	-	-	ugacuagaccgaacacucgcguccu	-	aucguuauuuggggcgauugucggacuagucgcugcguacaaaacggaacuauuucaacuagugacuagaccgaacacucgcguccuaaagcacgau	
+52	46	0	6	-	-	caucacagaauuguuuuuacug	-	aaacaucacagaauuguuuuuacugauaaggaacuauguguaaaaauaauucuguaaaguuu	
+97	39	0	58	-	-	gugugugaaccguuggcggc	-	agcagugugugaaccguuggcggcgcaacgccugaugguauugaugcugcu	
+27	24	0	3	-	-	caugaacgacgacgugacgccg	-	uauaagucccgucgucgccuucaugugcgguggucacaugccacacaugaacgacgacgugacgccgc	
+33	24	0	9	-	-	cacaaggccggauugaucaaga	-	accucggucaauccggaacuguuggcucggcacaaaagcgaccacaaggccggauugaucaagagu	
+19	17	0	2	-	-	caaaagaucuggcuacacuga	-	uucagugaugucagaucuuuugucggaauagaagcagauuccuccuucuauucagacaaaagaucuggcuacacugaa	
+16	16	0	0	-	-	uaucacaguaguuguacuuuaa	gaaggaacuucugcugugaucuga	-	cguugaaggaacuucugcugugaucugaguuagauacauaucacaguaguuguacuuuaaug	
+29	13	0	16	-	-	ucacuuuuuagugacuugguc	-	caagucacuuuuuagugacuuggucacuuuuuucaaucuggucacuaaaaagucacuau	
+12	11	0	1	-	-	uauucgagacuucacgaguuaau	-	aauguuaucaauucgcuguggucucgaacguaccuacauuggauauuuuugguauucgagacuucacgaguuaauucccauu	
+11	11	0	0	-	-	acaacggcagccggaacgaucu	-	uaucucguuccgucguccguaggucgguuuagccaaugcgacaacggcagccggaacgaucug	
+11	10	0	1	-	-	agcauuuuuacaccucaggac	-	ucagcauuuuuacaccucaggacguaagauugcaucgcugccuggagucuugaaguaaaacaaugcuaa	
+103	10	0	93	-	-	uuggacuggcaugcguuuaugg	-	cccauaaacgcauaauugucccaugugaauagaaaauccagccacauuggacuggcaugcguuuauggg	
+9	9	0	0	-	-	cgucaaacuccguucaguuggug	ucacugggcauaguuugucgca	-	uuaugcgucaaacuccguucaguugguggagucauuuuccaagucaucacugggcauaguuugucgcauaa	
+13	8	0	5	-	-	accguuacgcgcauauaauuug	-	gcagaccguuacgcgcauauaauuuggccauuuacggcauaauccaauggaaguggccaaacuauauuauaucgcucagu	
+9	8	0	1	-	-	aacguuacaaaucguaaggcgag	-	agcaacguuacaaaucguaaggcgaguuauauguuuuuugaaacucaccauaugauuuguaacugugcu	
+20	6	0	14	-	-	aauguuggacaacugcaaggu	-	auaaaauguuggacaacugcaagguacuucaagguuuuuauuucgucuuuaauacaggguaucugcagugaucgauuuucucu	
+7	6	0	1	-	-	uagaaccugguagaauucggca	-	uuucucggauuuguccucguuucgggugcguuuuuuauuugcguucgacuugcaucguagaaccugguagaauucggcaaa	
+5	5	0	0	-	-	auaaguggggcaaagacaccaa	-	auuuaguguuaucaccgcacuuauucagcauaagaugacgaauaaguggggcaaagacaccaaa	
+5	5	0	0	-	-	uuuuaggaggucaaaaucgcgu	-	gaacgcgguuuuggccuccuaaaaccgugcccauggagguuuuaggaggucaaaaucgcguuc	
+5	4	0	1	-	-	ugaacaagaaugcugagaggau	-	gauucugaacaagaaugcugagaggauucugaacgaaaaucuucucaguauuuuugucagaaucc	
+4	1	0	3	-	-	uucaggagaucaucgagguagc	-	uggcuaucucgaugguccccugaacuacaguugcaacaaaacaaguguucaggagaucaucgagguagcca	
+10	1	0	9	-	-	aguugauccaaguagucuugccu	-	aauaguugauccaaguagucuugccuuuguaagaagacgagugcuuggaucaucaaua	
+3	1	0	2	-	-	cgccauaugauuuguaacucu	-	acagagucacaauucguaugguaaguuacacaauuuauguaacucgccauaugauuuguaacucugc	
+68	1	0	67	-	-	uuccgaaguugggugucucgc	-	ugcaagauacccuacuucggaaguagggcgcauuagagcgcauccggaugcgaaucgaaugcaccacuuccgaaguugggugucucgca	
+35	0	0	35	-	-	cgagauacggagagauugcgaca	-	cagucgccucuucacaucucgauaucgaagggaccaucgagauacggagagauugcgacaa	
+
+
+
+
+3	0	0	3	-	-	cugucgagccgguugaaccac	-	ccacugucgagccgguugaaccaccaagccccccauguaaauaaguuccauacaguagcagguaauguuuuucguucccauucguagugc	
+

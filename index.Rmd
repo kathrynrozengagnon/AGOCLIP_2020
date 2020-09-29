@@ -57,5 +57,5 @@ Selection and normalized expression of mosquito ovarian miRNA targets (Figures 6
 Selection of targets by type for abundant novel mosquito esiRNAs or Ago2-associated known miRNAs, their relative expression in all individual mosquito tissues from Matthews et al., 2016 (Supplementary Figure 7d), or their normalized expression in ovaries compared to all tissues (Figures 6e,f)
 
 Click [link](reprocess_reanalyze_smallRNA_seq_Akbari_to_upload.html) to see:
-Reprocessing of small RNA-seq data from [Akbari et al., 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3755910/) to quantify novel esiRNA expression in ovaries (Figure 6d)
-
+Reprocessing of small RNA-seq data from [Akbari et al., 2013](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3755910/) to quantify novel esiRNA expression in ovaries (Figure 6d)  
+  

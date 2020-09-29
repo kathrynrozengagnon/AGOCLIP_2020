@@ -29,7 +29,7 @@ Abundance of high-confidence known miRNAs and novel small RNAs in Ago1 and Ago2 
 Length distribution of high-confidence novel small RNAs and known miRNAs associated with Ago1 or Ago2, in cells or whole mosquitoes (Supplementary Figure 2a,b)  
 Venn diagrams showing presence of Ago1-associated high-confidence known (Supplementary Figure 2c) or novel (Supplementary Figure 2d) miRNAs in cells compared to whole mosquitoes   
 
-Chimera processing to identify reads containing small RNAs and targets can be seen on my github (there are no graphical outputs): [link](https://github.com/kathrynrozengagnon/AgoCLIP_2020/blob/master/chimera_process_to_upload.Rmd)
+Chimera processing to identify reads containing small RNAs and targets can be seen on my github (there are no graphical outputs): [link](chimera_process_to_upload.html)
 
 Click [link](smallRNA_abundance_scatterplots_to_upload.html) to see:  
 Quantification of chimera abundance, and comparison of high-confidence known miRNAs and novel small RNAs by overall abundance, or by chimera abundance (Figures 5a-d)   

@@ -19,7 +19,7 @@ library(dplyr)
 
 ##Use chimeras remapped to AaegL5 to count # of each small RNA by sample, group by antibody/lysate, and normalize for visualization 
 
-chimera bedfiles remapped to the AaegL5 genome, "chimera_beds.zip", were generated in the *chimera_process_to_upload* script and are available on my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020) 
+chimera bedfiles remapped to the AaegL5 genome, "chimera_beds.zip", were generated in the *chimera_process_to_upload* script and are available on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020) 
 ```{r}
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
@@ -156,9 +156,9 @@ chimera_counts$log2FCaegyptiAgo1overAgo2_chimera <- log2(chimera_counts$aegyptiA
 #merge chimera counts and miRNA normalized counts together to make scatterplot
 
 need raw miRNA counts to normalize with a pseudocount of 1 for log2 visualization: "novel_miRNAs_filtered_counts_all_info.txt", "known_miRNAs_allcols.txt", and "all_putative_known_sRNA_seeds2.txt" files were generated in the *mirdeep2_processing_filtering_to_upload* script
-All these input files are available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
+All these input files are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
 
-Input fasta "aae_miRNAs_mature_fixed.fa" was downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
+Input fasta "aae_miRNAs_mature_fixed.fa" was downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and is available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
 ```{r}
 sRNAs <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", header=TRUE, sep = "\t")
 miRNAs <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", header=TRUE, sep = "\t")
@@ -308,7 +308,7 @@ StatSmoothFunc <- ggproto("StatSmooth", Stat,
 )
 ```
 
-##Visualize,  Figure 5a,b
+##Visualize,  Figures 5D and S4F
 
 ```{r}
 #filter on BC, remove Ago2 specific sRNAs
@@ -346,7 +346,7 @@ cor.test(subset(Ago1_chim_merge$log2Aag2Ago1_norm, Ago1_chim_merge$Aag2_type!="A
 #p-value < 2.2e-16
 ```
 
-##Figure 5c,d
+##Figures S5E and S5F
 
 ```{r}
 
@@ -384,11 +384,11 @@ stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
 cor.test(subset(Ago2_chim_merge$log2Aag2Ago2_norm, Ago2_chim_merge$Aag2_type!="Ago1"),subset(Ago2_chim_merge$log2Aag2Ago2_norm_chimera, Ago2_chim_merge$Aag2_type!="Ago1" ), alternative = "t", method = c("pearson")) #4.137e-14
 ```
 
-##Format Supplementary Table 3
+##Format Table S3
 
-Input file "novel_mirdeep_filtered.txt" file was generated in the *mirdeep2_processing_filtering_to_upload* script and is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)  
+Input file "novel_mirdeep_filtered.txt" file was generated in the *mirdeep2_processing_filtering_to_upload* script and is available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)  
   
-miRNAs fastas "aae_miRNAs_mature_fixed.fa", "aga_miRNAs_mature.fa" (*Anopheles gambiae*), "cqu_mature_fixed.fa" (*Culex quinquefasciatus*), and "dme_miRNAs_mature.fa" (*Drosophila melanogaster*) were downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and are available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
+miRNAs fastas "aae_miRNAs_mature_fixed.fa", "aga_miRNAs_mature.fa" (*Anopheles gambiae*), "cqu_mature_fixed.fa" (*Culex quinquefasciatus*), and "dme_miRNAs_mature.fa" (*Drosophila melanogaster*) were downloaded from [miRBase](http://www.mirbase.org/ftp.shtml) and are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
 
 ```{r}
 #delete individual sample raw chimera counts
@@ -788,13 +788,13 @@ allfa <- DNAStringSet(TS6$sequence)
 names(allfa) <- TS6$smallRNA
 #writeXStringSet(allfa, "/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/FINAL/all_unique_filt_sRNAs_rn.fa", format = "fasta")
 ```
-output files "all_unique_filt_sRNAs_rn.fa" and "all_unique_filt_seeds_rn3.fa" are available on my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
+output files "all_unique_filt_sRNAs_rn.fa" and "all_unique_filt_seeds_rn3.fa" are available on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
 
-Supplementary Table 3, "Table_S3_Resource_paper.txt", is available on my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)  
+Table S3, "Table_S3_Resource_paper.txt", is available on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)  
 
 ##rename fastas with final namess
 
-these are the input fastas provided on my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020/tree/master/renamed_smallRNA_fastas)
+these are the input fastas provided on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
 ```{r}
 #finally, rewrite DNAstringsets renamed
 Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload"

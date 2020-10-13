@@ -1,0 +1,264 @@
+---
+title: "metagene_plots_coverage_chimeras"
+author: "KRG"
+date: "2/14/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(rtracklayer)
+library(dplyr)
+library(soGGi)
+library(GenomicRanges)
+library(data.table)
+library(ggplot2)
+library(magrittr)
+```
+
+##Get read coverage over all 3'UTRs
+
+"Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa" genome fasta and gtf used to be available for download at [Vectorbase](https://vectorbase.org/vectorbase/app/downloads/)
+However, I am unsure if the gtf file is still available there; it is too large to upload to Github, but is available upon request
+
+These bigwig files are too large for upload but are available upon request; alternatively, data tables used to make the figures throughout this script are available on my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
+```{r}
+# gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
+# TxDb <- makeTxDbFromGFF(gtffile)
+# threeUTRs <- unique(unlist(threeUTRsByTranscript(TxDb,use.names=T)))
+# names(threeUTRs) <- NULL
+# threeUTR_ctrl <- GenomicRanges::shift(threeUTRs, 4000)
+#
+# Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/AaegL5_mapped"
+# bws <- dir(Dir,full.names = TRUE,pattern="cat_*")
+# bws <- grep("Pos|Neg", bws, value = TRUE, invert=TRUE)
+# bws <- grep("bed", bws, value = TRUE, invert=TRUE)
+# 
+# myToPlot <- bplapply(bws,regionPlot,testRanges=threeUTRs,format="bigwig", style = "percentOfRegion")
+# names(myToPlot) <- gsub("cat_|.bw",
+#                         "",
+#                         basename(bws))
+# require(magrittr)
+# require(purrr)
+# nonFiltered_common <- lapply(myToPlot,function(x) as.vector(mcols(x)$giID)) %>% 
+#   purrr::reduce(intersect)
+# 
+# 
+# for(i in 1:length(myToPlot)){
+#   rownames(myToPlot[[i]]) <- NULL
+# }
+# 
+# myToPlot2 <- lapply(myToPlot,function(x) x[match(nonFiltered_common,as.vector(mcols(x)$giID))]) 
+# 
+# toPlot_3UTR <- c(myToPlot2$Aag2Ago1,myToPlot2$Aag2Ago2, myToPlot2$Aag2rIgG, myToPlot2$Aag2mIgG, myToPlot2$aegyptiAgo1,myToPlot2$aegyptiAgo2, myToPlot2$aegyptirIgG, myToPlot2$aegyptimIgG)
+# f <- plotRegion(toPlot_genes  , outliers = 0.05,groupBy = "Sample")
+# df <- f$data
+# 
+# myToPlot <- bplapply(bws,regionPlot,testRanges=threeUTR_ctrl,format="bigwig", style = "percentOfRegion")
+# names(myToPlot) <- gsub("cat_|.bw",
+#                         "",
+#                         basename(bws))
+# require(magrittr)
+# require(purrr)
+# nonFiltered_common <- lapply(myToPlot,function(x) as.vector(mcols(x)$giID)) %>% 
+#   purrr::reduce(intersect)
+# 
+# 
+# for(i in 1:length(myToPlot)){
+#   rownames(myToPlot[[i]]) <- NULL
+# }
+# 
+# myToPlot2 <- lapply(myToPlot,function(x) x[match(nonFiltered_common,as.vector(mcols(x)$giID))]) 
+# 
+# toPlot_3UTR_ctrl <- c(myToPlot2$Aag2Ago1,myToPlot2$Aag2Ago2, myToPlot2$Aag2rIgG, myToPlot2$Aag2mIgG, myToPlot2$aegyptiAgo1,myToPlot2$aegyptiAgo2, myToPlot2$aegyptirIgG, myToPlot2$aegyptimIgG)
+# f <- plotRegion(toPlot_3UTR_ctrl, outliers = 0.05,groupBy = "Sample")
+# df_3UTR_ctrl <- f$data
+# df_3UTR_ctrl$Sample <- gsub(".bw", "ctrl_genes", df_3UTR_ctrl$Sample)
+# cov_UTR <- rbind(df, df_3UTR_ctrl)
+# 
+# #write.table(cov_UTR, "/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/read_cov_3UTR.txt", col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+```
+output file "read_cov_3UTR.txt" is available in my [Github](https://github.com/kathrynrozengagnon/AgoCLIP_2020)
+
+##Graph Figures 5E and S4G
+
+```{r}
+cov_UTR <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/read_cov_3UTR.txt", header = TRUE, sep = "\t")
+
+Ago1_cov_UTR <- cov_UTR[grepl("Ago1", cov_UTR$Sample),]
+aegyptiAgo1_cov_UTR  <- Ago1_cov_UTR [grepl("aegypti", Ago1_cov_UTR $Sample),]
+
+ggplot(aegyptiAgo1_cov_UTR , aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + 
+  scale_color_manual(values = c("#3360A9", "gray")) + theme_bw()
+
+Aag2Ago1_cov_UTR <- Ago1_cov_UTR[grepl("Aag2", Ago1_cov_UTR$Sample),]
+
+ggplot(Aag2Ago1_cov_UTR, aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + 
+  scale_color_manual(values = c("#1B0B80", "gray")) + theme_bw()
+
+```
+
+##Graph Figure 6A
+
+```{r}
+#Ago2 coverage
+Ago2_cov_UTR <- cov_UTR[grepl("Ago2", cov_UTR$Sample),]
+
+Ago2_cov_UTR_w <- dcast(Ago2_cov_UTR, xIndex ~ Sample, value.var="Score")
+Ago2_cov_UTR_w <- Ago2_cov_UTR_w %>% mutate(aegypti_Ago2_minus_ctrl  = cat_aegyptiAgo2.bw-cat_aegyptiAgo2ctrl_genes)
+Ago2_cov_UTR_w <- Ago2_cov_UTR_w %>% mutate(Aag2_Ago2_minus_ctrl  = cat_Aag2Ago2.bw-cat_Aag2Ago2ctrl_genes)
+Ago2_cov_UTR <- melt(Ago2_cov_UTR_w, id.vars = c("xIndex"))
+
+Ago2_cov_UTR_graph <- Ago2_cov_UTR[grepl("minus_ctrl", Ago2_cov_UTR$variable),]
+mean(subset(Ago2_cov_UTR_graph$value, Ago2_cov_UTR_graph$xIndex < 200 & Ago2_cov_UTR_graph$xIndex > 100 & Ago2_cov_UTR_graph$variable=="aegypti_Ago2_minus_ctrl"))
+#0.2086416
+mean(subset(Ago2_cov_UTR_graph$value, Ago2_cov_UTR_graph$xIndex < 200 & Ago2_cov_UTR_graph$xIndex > 100 & Ago2_cov_UTR_graph$variable=="Aag2_Ago2_minus_ctrl"))
+#0.08751284
+
+ggplot(Ago2_cov_UTR_graph, aes(x = xIndex, y = value)) + 
+  geom_line(aes(color = variable)) + 
+  scale_color_manual(values = c("#FA0F0C", "#8A0F09")) + theme_bw() + geom_hline(yintercept = 0.2086416) + geom_hline(yintercept = 0.08751284)
+```
+
+##Get coverage for predictd 6mers and chimera coverage
+
+```{r}
+# fasta <- "/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5_fixed.fa"
+# genome <- Rsamtools::getSeq(Rsamtools:::FaFile(fasta))
+# pattern <-  "/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_unique_filt_seeds_rn3.fa"                        
+# motifSeq <- readDNAStringSet(pattern)
+# pattern <- as.character(motifSeq)
+# 
+# loop_test <- vector("list", length(pattern))
+# for(i in 1:length(pattern)){
+#   message("Search for ",DNAString(pattern[i]))
+#   loop_test[i] <- vmatchPattern(pattern=DNAString(pattern[i]),subject=genome) %>% unlist()}
+# names(loop_test) <- names(pattern)
+# loop <- lapply( loop_test , as.data.frame)
+# loop_df <- rbindlist(loop, idcol=TRUE)
+# loop_GR <-  GRanges(seqnames = loop_df$names, strand = rep("+", nrow(loop_df)), IRanges(start = loop_df$start, width =loop_df$width ))
+# 
+# 
+# loop_testRevComp <- vector("list", length(pattern))
+# for(i in 1:length(pattern)){
+#   message("Search for ",reverseComplement(DNAString(pattern[i])))
+#   loop_testRevComp[i] <- vmatchPattern(pattern=reverseComplement(DNAString(pattern[i])),subject=genome) %>% unlist()}
+# names(loop_testRevComp ) <- names(pattern)
+# loopRC <- lapply( loop_testRevComp , as.data.frame)
+# loopRC_df <- rbindlist(loopRC, idcol=TRUE)
+# loopRC_GR <-  GRanges(seqnames = loopRC_df$names, strand = rep("-", nrow(loopRC_df)), IRanges(start = loopRC_df$start, width =loopRC_df$width ))
+# 
+# #export(loopRC_GR,"/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_neg.bed", format = "BED")
+# #export(loop_GR,"/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_pos.bed", format = "BED")
+# 
+# comp <- import.bed("/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_neg.bed")
+# 
+# comp2 <- import.bed("/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_pos.bed")
+# 
+# all_matches <- c(comp, comp2)
+# export.bw(coverage(all_matches,weight = 1/length(all_matches)),
+#           con="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_pos_neg.bw")
+# 
+# myToPlotpats <- regionPlot(bamFile ="/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_pattern_matches_genomewide_new_pos_neg.bw",threeUTRs,format="bigwig", style = "percentOfRegion")
+# pmatch_genome <- plotRegion(myToPlotpats,outliers = 0.001,groupBy = "Sample")
+# pmatch_genomedf <- pmatch_genome$data
+# 
+# ##chimeras; see chimera processing Rmd to see how input bigwigs were generated
+# Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
+# chim <- dir(Dir,full.names = TRUE,pattern="*chimera_remap.bw")
+# 
+# myToPlotchim <- bplapply(chim, regionPlot,testRanges=threeUTRs,format="bigwig", style = "percentOfRegion")
+# names(myToPlotchim) <- gsub("cat_|_remap.bw",
+#                         "",
+#                         basename(chim))
+# require(magrittr)
+# require(purrr)
+# nonFiltered_common <- lapply(myToPlotchim,function(x) as.vector(mcols(x)$giID)) %>% 
+#   purrr::reduce(intersect)
+# 
+# 
+# for(i in 1:length(myToPlotchim)){
+#   rownames(myToPlotchim[[i]]) <- NULL
+# }
+# 
+# myToPlotchim <- lapply(myToPlotchim,function(x) x[match(nonFiltered_common,as.vector(mcols(x)$giID))]) 
+# 
+# toPlot_chimUTR <- c(myToPlotchim$Aag2Ago1,myToPlotchim$Aag2Ago2, myToPlotchim$Aag2rIgG, myToPlotchim$Aag2mIgG, myToPlotchim$aegyptiAgo1,myToPlotchim$aegyptiAgo2, myToPlotchim$aegyptirIgG, myToPlotchim$aegyptimIgG)
+# fchim <- plotRegion(toPlot_chimUTR ,outliers = 0.001,groupBy = "Sample")
+# dfchim <- fchim$data
+# 
+# ##########chim control 
+# chimctrl <- grep("IgG", chim, value = TRUE, invert=TRUE)
+# myToPlotchim_ctrl <- bplapply(chimctrl, regionPlot,testRanges=threeUTR_ctrl,format="bigwig", style = "percentOfRegion")
+# names(myToPlotchim_ctrl) <- gsub("cat_|_remap.bw",
+#                             "",
+#                             basename(chimctrl))
+# require(magrittr)
+# require(purrr)
+# nonFiltered_common <- lapply(myToPlotchim_ctrl,function(x) as.vector(mcols(x)$giID)) %>% 
+#   purrr::reduce(intersect)
+# 
+# 
+# for(i in 1:length(myToPlotchim_ctrl)){
+#   rownames(myToPlotchim_ctrl[[i]]) <- NULL
+# }
+# 
+# myToPlotchim_ctrl <- lapply(myToPlotchim_ctrl,function(x) x[match(nonFiltered_common,as.vector(mcols(x)$giID))]) 
+# 
+# toPlot_chimctrlUTR <- c(myToPlotchim_ctrl$Aag2Ago1,myToPlotchim_ctrl$Aag2Ago2, myToPlotchim_ctrl$aegyptiAgo1,myToPlotchim_ctrl$aegyptiAgo2)
+# fchim_ctrl <- plotRegion(toPlot_chimctrlUTR,outliers = 0.001,groupBy = "Sample")
+# dfchim_ctrl <- fchim_ctrl$data
+# dfchim_ctrl$Sample <- gsub(".bw", "ctrl", dfchim_ctrl$Sample)
+# chim_UTR <- rbind(dfchim, dfchim_ctrl)
+# #write.table(chim_UTR, "/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/chim_cov_3UTR.txt", col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+# #write.table(pmatch_genomedf, "/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/predicted_6mer_cov_3UTR.txt", col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+
+```
+output files "chim_cov_3UTR.txt"
+##Graph Figure 5F and S4H
+
+```{r}
+##plot chimera and predicted 6mer matches over 3UTR; have provided data tables in my github so the user can start from here; see corresponding Rmd file in my github to see how chimera/predicted pattern frequencies were calculated
+pmatch_genomedf <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/predicted_6mer_cov_3UTR.txt", header = TRUE, sep = "\t")
+chim_UTR <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/chim_cov_3UTR.txt", header = TRUE, sep = "\t")
+
+Ago1_chim_UTR <- chim_UTR[grepl("Ago1", chim_UTR$Sample),]
+aegyptiAgo1_chim_UTR  <- Ago1_chim_UTR[grepl("aegypti", Ago1_chim_UTR$Sample),]
+Aag2Ago1_chim_UTR  <- Ago1_chim_UTR[grepl("Aag2", Ago1_chim_UTR$Sample),]
+
+aegyptiAgo1_chim_UTR  <- rbind(aegyptiAgo1_chim_UTR , pmatch_genomedf)
+
+ggplot(aegyptiAgo1_chim_UTR, aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + 
+  scale_color_manual(values = c("#3360A9", "gray", "#009900")) + theme_bw()
+
+Aag2Ago1_chim_UTR  <- rbind(Aag2Ago1_chim_UTR , pmatch_genomedf)
+
+ggplot(Aag2Ago1_chim_UTR, aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + 
+  scale_color_manual(values = c("#1B0B80", "gray", "#009900")) + theme_bw()
+
+```
+
+##Graph Figure S5D and S5F
+
+```{r}
+Ago2_chim_UTR <- chim_UTR[grepl("Ago2", chim_UTR$Sample),]
+
+aegyptiAgo2_chim_UTR  <- Ago2_chim_UTR[grepl("aegypti", Ago2_chim_UTR$Sample),]
+Aag2Ago2_chim_UTR  <- Ago2_chim_UTR[grepl("Aag2", Ago2_chim_UTR$Sample),]
+
+aegyptiAgo2_chim_UTR  <- rbind(aegyptiAgo2_chim_UTR, pmatch_genomedf)
+ggplot(aegyptiAgo2_chim_UTR , aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + 
+  scale_color_manual(values = c("#FA0F0C", "gray", "#009900")) + theme_bw() + expand_limits(y=c(NA, 7.5e-07))
+
+Aag2Ago2_chim_UTR <- rbind(Aag2Ago2_chim_UTR, pmatch_genomedf)
+
+ggplot(Aag2Ago2_chim_UTR, aes(x = xIndex, y = Score)) + 
+  geom_line(aes(color = Sample)) + scale_color_manual(values = c("#8A0F09", "gray", "#009900"))  + theme_bw() + expand_limits(y=c(NA, 7.5e-07))
+
+```
+

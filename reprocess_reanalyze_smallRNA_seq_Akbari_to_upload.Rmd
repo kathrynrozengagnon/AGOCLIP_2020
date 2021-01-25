@@ -20,8 +20,7 @@ Filtered small RNA sequences to reverse map to Akbari small RNA-seq, "all_unique
   
 Additionally, see CLIPflexR documentation for:  
 [unzip](https://kathrynrozengagnon.github.io/CLIPflexR/reference/decompress.html)  
-[FASTX's fastq_quality_filter](https://kathrynrozengagnon.github.io/CLIPflexR/reference/fastq_quality_filter.html)  
-[FASTX's fastx_collapser](https://kathrynrozengagnon.github.io/CLIPflexR/reference/fastx_collapser.html)   
+[FASTX's fastq_quality_filter](https://kathrynrozengagnon.github.io/CLIPflexR/reference/fastq_quality_filter.html)  s
 [FASTX's fastx_clipper](https://kathrynrozengagnon.github.io/CLIPflexR/reference/fastx_clipper.html)  
 [bowtie2_index](https://kathrynrozengagnon.github.io/CLIPflexR/reference/bowtie2_index.html)  
 [revmap_count](https://kathrynrozengagnon.github.io/CLIPflexR/reference/revmap_count.html)  
@@ -96,40 +95,6 @@ Additionally, see CLIPflexR documentation for:
 # #R command to quality filter:
 # file_QF <- fastq_quality_filter(file,fqf = "/Users/kathryn/FastX/fastq_quality_filter")
 # bplapply(toqf,  fastq_quality_filter, fqf = "/rugpfs/fs0/home/krozen/bin/fastq_quality_filter")
-# 
-# 
-# pathtoQC <- "/rugpfs/fs0/rice_lab/scratch/krozen/Akbari_check_esiRNAs"
-# tocoll <- dir(pathtoQC , pattern= "*.fastq$", full.names = TRUE)
-# fastx_collapser <- function(fileTofxc,fxc="fastx_collapser",qEncoding=33,
-#                             stderr=file.path(getwd(),"fastq_collapse_stderr"),
-#                             stdout=file.path(getwd(),"fastq_collapse_stdout")){
-#   cmd <- fxc
-# 
-#   if(!file.exists(fileTofxc))stop("File does not exist")
-# 
-#   file_fxc <- file.path(dirname(fileTofxc),gsub("\\.fa","_collapse.fasta",basename(fileTofxc)))
-#   if(file.exists(fileTofxc) & !file.exists(file_fxc)){
-# 
-#     args <- c(
-#       paste0("-v "),
-#       paste0("-Q ",qEncoding),
-#       paste0("-i  ",fileTofxc),
-#       paste0("-o ",file_fxc)
-#     )
-#     print(cmd)
-#     print(args)
-# 
-#     system2(cmd,
-#             args,
-#             stdout=stdout,
-#             stderr=stderr
-#     )
-#   }
-#   return(file_fxc)
-# }
-# 
-# bplapply(tocoll, fastx_collapser, fxc="/rugpfs/fs0/home/krozen/bin/fastx_collapser")
-# file_collapse <- fastx_collapser(file_QF,fxc="/rugpfs/fs0/home/krozen/bin/fastx_collapser")
 # 
 # 
 # fastx_clipper <- function(fileTofqs,fqc="fastx_clipper",length=18,
@@ -219,7 +184,7 @@ Additionally, see CLIPflexR documentation for:
 # }
 # 
 # #R command for bamtobed:
-# pathtoQC <- "/rugpfs/fs0/rice_lab/scratch/krozen/Akbari_check_esiRNAs"
+# pathtoQC <- "/Volumes/MyPassport/Akbari_check_esiRNAs/uncollapsed"
 # mapped <- dir(pathtoQC , pattern= "bam$", full.names = TRUE)
 # 
 # bplapply(mapped, bamtobed)
@@ -227,13 +192,12 @@ Additionally, see CLIPflexR documentation for:
 
 ##Load all beds of reverse mapped smallRNA seq reads to filtered small RNAs and count
 
-#the re-processed and mapped files, "reprocessed_smallRNA_seq_from_Akbari_2013.zip", are available on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/blob/master/reprocessed_smallRNA_seq_from_Akbari_2013.zip) 
 ```{r}
-Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/Akbari_check_esiRNAs"
+Dir <- "/Volumes/MyPassport/Akbari_check_esiRNAs/uncollapsed"
 beds <- dir(Dir, pattern="*.bed$",full.names = TRUE)
 esi <- lapply(beds, read.delim, header = FALSE, sep = "")
-col.names <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/Akbari_check_esiRNAs/", "", beds)
-col.names <- gsub("_collapse.bed", "", col.names)
+col.names <- gsub("/Volumes/MyPassport/Akbari_check_esiRNAs/uncollapsed/all_unique_filt_sRNAs_rn_QF_", "", beds)
+col.names <- gsub("_clip.bed", "", col.names)
 names(esi) <- col.names
 esi_count <- lapply(esi, function(x) x %>% group_by(V4) %>% summarize(count=n()))
 esi_count <- Reduce(function(x, y) merge(x, y, by = "V4", all = TRUE), esi_count)
@@ -243,10 +207,11 @@ esi_count <- setNames(esi_count, col.names)
 
 #calculate percentages or rpm for each small RNA
 esi_count_norm_log <- esi_count %>% mutate_at(vars(-smallRNA), funs(((.+1)/sum(.))*1E6))
-
+esi_count_norm_log$smallRNA <- gsub("Ago1", "AGO1", esi_count_norm_log$smallRNA)
+esi_count_norm_log$smallRNA <- gsub("Ago2", "AGO2", esi_count_norm_log$smallRNA)
 #rename 
 #available in my github; all filtered small RNAs, add family name so can collapse by family
-getmatseq <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S6_Resource_paper_FINAL_rn.txt", header =TRUE, sep = "\t")
+getmatseq <-  read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Mol_Cell_resub/Revision_files/Supplementary_Tables/Table_S4.txt", header =TRUE, sep = "\t")
 
 esi_count_norm_log <- merge(esi_count_norm_log, getmatseq[,c("smallRNA", "aae_smallRNA_family")], by = "smallRNA")
 
@@ -255,7 +220,7 @@ t <- str_split(esi_count_norm_log$aae_smallRNA_family, "/")
 
 b <- vector("list", length(t))
 for(i in 1:length(t)){
-   b[[i]]  <- grep("Ago2|aae", t[[i]], value = TRUE)
+   b[[i]]  <- grep("AGO2|aae", t[[i]], value = TRUE)
 }
 b <- lapply(b, function(x) if(identical(x, character(0))) NA_character_ else x)
 esi_count_norm_log$Ago2nm <- unlist(lapply(b,function(x) paste0(x)))
@@ -270,16 +235,23 @@ meta <- meta[, c("Sample.Name", "Run")]
 search_for_these <- as.character(meta$Run)
 replace_with_these <- as.character(meta$Sample.Name)
 topAgo2log <- esi_count_norm_log
-topAgo2log <- setNames(topAgo2log, gsub("QF_", "", colnames(topAgo2log)))
+#topAgo2log <- setNames(topAgo2log, gsub("QF_", "", colnames(topAgo2log)))
 found <- match(colnames(topAgo2log), search_for_these, nomatch = 0)
 colnames(topAgo2log)[colnames(topAgo2log) %in% search_for_these] <- replace_with_these[found]
+
+#write.table(topAgo2log, "/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/small_RNA_seq_counts_7D.txt", col.names = T, row.names = F, quote = F, sep = "\t")
+
 ```
+#Beds are too large for upload to Github, but are available upon request
+An input table for graphing is available on my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/blob/master/small_RNA_seq_counts_7D.txt) to load for use in the subsequent chunk
+
 
 ##Classify by small RNA type in ovary (blood-fed and nonblood-fed), embryos, and carcasses  (all female) and graph expression in rpm for Figure 7D
 
 ```{r}
 #classify by type using fam column
-topAgo2log$type <- ifelse(grepl("Ago2", topAgo2log$Ago2nm), paste0("top_novel"), NA)
+topAgo2log <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/small_RNA_seq_counts_7D.txt", header = T, sep = "\t" )
+topAgo2log$type <- ifelse(grepl("AGO2", topAgo2log$Ago2nm), paste0("top_novel"), NA)
 topAgo2log$type <- ifelse(grepl("novel", topAgo2log$Ago2nm) & !grepl("top_novel", topAgo2log$type), paste0("novel"), topAgo2log$type)
 topAgo2log$type <- ifelse(is.na(topAgo2log$type), paste0("known"), topAgo2log$type)
 
@@ -292,7 +264,7 @@ topAgo2log$tissue <- ifelse(grepl("Ovary",  topAgo2log$variable), paste0("Ovary"
 topAgo2log$tissue <- ifelse(grepl("Female_Carcass",  topAgo2log$variable), paste0("Female_Carcass"), topAgo2log$tissue )
 topAgo2log$tissue  <- ifelse(grepl("Embryo",  topAgo2log$variable), paste0("Embryo"), topAgo2log$tissue )
 
-#classify sampel groups becausehave two different size selections of the same library
+#classify sample groups because have two different size selections of the same library
 topAgo2log$sample_group <- gsub(".low|.high", "", topAgo2log$variable)
 topAgo2log$sample_group <- substring(topAgo2log$sample_group, 7)
 
@@ -300,42 +272,43 @@ topAgo2log$sample_group <- substring(topAgo2log$sample_group, 7)
 topAgo2gg <- topAgo2log %>% group_by(.dots=c("variable", "Ago2nm")) %>% summarise(fam_ab = sum(value), tissue =  dplyr::first(tissue), sample_group =  dplyr::first(sample_group), type =  dplyr::first(type))
 
 #take average between high and low size selection per same sample
-topAgo2gg <- topAgo2gg %>% group_by(.dots=c("sample_group", "Ago2nm")) %>% summarise(mean_fam_ab = mean(fam_ab), tissue = dplyr::first(tissue), type =  dplyr::first(type))
+topAgo2gg <- topAgo2gg %>% group_by(.dots=c("sample_group", "Ago2nm")) %>% summarise(mean_ab = mean(fam_ab), tissue = dplyr::first(tissue), type =  dplyr::first(type))
 
 #select tissues of interest
-topAgo2ggraph <- topAgo2gg[grepl("72hr_PBM|NBF|2-4hr", topAgo2gg$sample_group),]
+topAgo2ggraph <- topAgo2gg[grepl(".72hr_PBM|NBF|.2.4hr", topAgo2gg$sample_group),]
 
 #reorder factor levels so graph will display properly
-topAgo2ggraph$sample_group <- factor(topAgo2ggraph$sample_group , levels=c("72hr_PBM_Female_Carcass", "NBF-Ovary", "72hr_PBM-Ovary", "2-4hr_Embryo"))
+topAgo2ggraph$sample_group <- factor(topAgo2ggraph$sample_group , levels=c(".72hr_PBM_Female_Carcass", ".NBF.Ovary", ".72hr_PBM.Ovary", ".2.4hr_Embryo"))
 
-ggplot(topAgo2ggraph, aes(x=type, y= log2(mean_fam_ab), fill=sample_group)) + geom_boxplot(outlier.shape = NA, width = 0.5, notch = TRUE) + scale_fill_manual(values=c("#CCE70B", "plum", "lightslateblue", "mediumaquamarine")) + theme_bw() + ylim(0, 18)
+ggplot(topAgo2ggraph, aes(x=type, y= log2(mean_ab), fill=sample_group)) + geom_boxplot(outlier.shape = NA, width = 0.5, notch = TRUE) + scale_fill_manual(values=c("#CCE70B", "plum", "lightslateblue", "mediumaquamarine")) + theme_bw() + ylim(0, 18)
 
-#stats, all compaed to carcass, by group
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM-Ovary" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
-            alternative = c("g")) #0.9439 
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".2.4hr_Embryo" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
+            alternative = c("t")) #p-value < 2.2e-16; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM-Ovary" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
-            alternative = c("g")) #0.03901; is the ovary less than the carcasss
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".NBF.Ovary" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
+            alternative = c("t")) #p-value < 2.2e-16; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM-Ovary" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
-            alternative = c("g")) #p-value < 2.2e-16; is the ovary less than the carcass
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM.Ovary" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
+            alternative = c("t")) #p-value < 2.2e-16; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="NBF-Ovary" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
-            alternative = c("g")) #1
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".2.4hr_Embryo" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
+            alternative = c("t")) #p-value = 1.358e-05; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="NBF-Ovary" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
-            alternative = c("g")) #0.009653; is the ovary less than the carcasss
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".NBF.Ovary" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
+            alternative = c("t")) #p-value = 5.681e-05; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="NBF-Ovary" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
-            alternative = c("g")) #2.248e-15; is the ovary less than the carcasss
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM.Ovary" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
+            alternative = c("t")) #p-value = 0.004298; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="2-4hr_Embryo" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
-            alternative = c("g")) #0.9988
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".2.4hr_Embryo" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
+            alternative = c("t")) #p-value = 0.1295; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="2-4hr_Embryo" & topAgo2gg$type=="top_novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="top_novel" ),
-            alternative = c("g")) #0.03907 is the embryo less than the carcass
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".NBF.Ovary" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
+            alternative = c("t")) # p-value = 0.0008516; is the embryo less than the carcass
 
-wilcox.test(subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="2-4hr_Embryo" & topAgo2gg$type=="novel" ) , subset(topAgo2gg$mean_fam_ab, topAgo2gg$sample_group=="72hr_PBM_Female_Carcass" & topAgo2gg$type=="novel" ),
-            alternative = c("g")) #5.305e-09; is the embryo less than the carcass
+wilcox.test(subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM.Ovary" & topAgo2gg$type=="known" ) , subset(topAgo2gg$mean_ab, topAgo2gg$sample_group==".72hr_PBM_Female_Carcass" & topAgo2gg$type=="known" ),
+            alternative = c("t")) #p-value = 2.722e-05; is the embryo less than the carcass
+
 ```
+
 

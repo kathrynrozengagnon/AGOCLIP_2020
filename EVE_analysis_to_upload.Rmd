@@ -1,0 +1,151 @@
+---
+title: "EVEs_analysis"
+author: "KRG"
+date: "12/2/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(ggplot2)
+library(magrittr)
+library(reshape2)
+```
+
+## Get EVE fastas  
+
+Input file "Supplemental_Table_2_aguiar_EVEs.txt" is Table S2 from [Aguiar et al., 2020](https://pubmed.ncbi.nlm.nih.gov/31996404/) and is also available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)  
+*Ae. aegypti* genome fasta (AaegL5) used to be available from  [Vectorbase](https://vectorbase.org/vectorbase/app/downloads/); they have since updated the genome file and I am unsure if users can get previous versions or what the differences are... I can make this genome file available upon request
+```{r }
+Aguiar_bed <- "/Users/kathryn/Reprocess_all_paper_datasets/EVEs/Supplemental_Table_2_aguiar_EVEs.txt"
+Aguiar_EVEs <- read.delim(Aguiar_bed , header=T)
+Aguiar_GR <- GRanges(seqnames = Aguiar_EVEs$chr, strand = Aguiar_EVEs$strand, IRanges(start = Aguiar_EVEs$start, width = Aguiar_EVEs$end - Aguiar_EVEs$start ), class = as.character(Aguiar_EVEs$family))
+myClasses <- sort(unique(Aguiar_GR$class))
+
+mySeq <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa"
+Rsamtools::indexFa(mySeq)
+
+#write fastas by EVE virus family
+# for(i in 1:length(myClasses)){
+#   temp2 <- Aguiar_GR[Aguiar_GR$class %in% myClasses[i],] %>% unique
+#   fsfsfs <- Rsamtools::getSeq(Rsamtools::FaFile(mySeq),temp2)
+#   names(fsfsfs)  <-  as.character(temp2)
+#   fsfsfs %>% writeXStringSet(filepath = file.path(dirname(Aguiar_bed),paste0(make.names(myClasses)[i],"_",basename(mySeq))))
+# }
+```
+
+## Build indices for EVEs and map reads
+
+Building indices and mapping all libraries to all EVE fastas is computationally expensive, so these lines are commented out
+
+```{r }
+#build indices for each repeat feature class
+# for(i in 1:length(myClasses)){
+#   require(Rbowtie2)
+#   bowtie2_build(references=file.path(dirname(Aguiar_bed),paste0(make.names(myClasses)[i],"_",basename(mySeq))),
+#                 bt2Index=gsub("\\.fa","",file.path(dirname(Aguiar_bed),paste0(make.names(myClasses)[i],"_",basename(mySeq)))))
+# }
+# pathtoQC <- "/rugpfs/fs0/rice_agoclip/scratch/krozen/processed_fastas_for_tom" 
+# fqfilles <- dir(pathtoQC, pattern = "*.fa", full.names = T)
+# index<- gsub(".fa","",list.files("/rugpfs/fs0/rice_agoclip/scratch/krozen/EVEs",pattern=".fa$",full.names = TRUE))
+# bplapply(index,function(x,fqfilles){
+#   library(Rbowtie2)
+#   fqFiles <- fqfilles
+# 
+#   for(l in 1:length(fqFiles)){
+#     fq <- fqFiles[l]
+#     sam=file.path("/rugpfs/fs0/rice_agoclip/scratch/krozen/EVEs",
+#                   paste0(gsub("\\.fq|\\.fastq|\\.rm|\\.fa","",basename(fq)), "_", gsub("\\.fq|\\.fastq|\\.rm|\\.fa",".sam",basename(x))))
+#     bowtie2(bt2Index = x,
+#             samOutput = sam,
+#             seq1 = fq,"--threads 4 -f -L 18 -N 1 ")
+#     Rsamtools::asBam(sam,gsub("\\.sam","",sam),overwrite = TRUE)
+#   }
+# },fqfilles=fqfilles)
+
+#uncollapsed, virus 
+bamFiles <- dir("/Volumes/MyPassport/EVEs",pattern="*._.*_.*\\.bam$",full.names=TRUE)
+
+countByFlagStat <- function(bamFile){
+  system(paste0("samtools  flagstat ",bamFile," > ",paste0(bamFile,"_flagStats.txt")))
+}
+#bplapply(bamFiles,countByFlagStat)
+
+FilesToRead <- dir("/Volumes/MyPassport/EVEs",pattern="*._flagStats.txt$",full.names=TRUE)
+
+repName <- gsub(".*_rm5_rm3_|_Aedes-aegypti-.*","",basename(FilesToRead))
+sampleName <- gsub("_rm5_rm3_.*","",basename(FilesToRead))
+
+readEVEMatrix <- data.frame(FilesToRead,repName,sampleName)
+
+parseFlagstat2 <- function(fileToR){
+  flagstats <- read.delim(fileToR,sep=" ",stringsAsFactors=FALSE,header=FALSE)
+  Total <- as.numeric(flagstats[1,1])
+  Mapped <- as.numeric(flagstats[5,1])
+  PercentMapped <- (Mapped/Total)*100
+  return(data.frame(PercentMapped=PercentMapped))
+}
+Samples <- unique(readEVEMatrix[,3])
+myRes <- list()
+for(i in 1:length(Samples)){
+  myRes[[i]] <- unlist(sapply(as.vector(readEVEMatrix[readEVEMatrix[,3] %in% Samples[i],1]),parseFlagstat2))
+}
+
+#make dataframe with rownames as samples, colnames as virus families,and entries are percentage of mapped reads
+
+EVERes <- do.call(rbind,myRes)
+colnames(EVERes) <- unique(readEVEMatrix[,2])
+rownames(EVERes) <- Samples
+EVEdf <- as.data.frame(EVERes)
+
+
+#define groups by Ab/lysate
+aegypti <- grep("aegypti", Samples, value = TRUE)
+cells <- Samples[!Samples %in% aegypti]
+cells_Ago1 <- grep("Ago1", cells, value = TRUE)
+cells_rIgG <- grep("rIgG", cells, value=TRUE)
+cells_mIgG <- grep("mIgG", cells, value=TRUE)
+cells_Ago2 <- grep("Ago2", cells, value=TRUE)
+
+aegypti_Ago1 <- grep("Ago1", aegypti, value = TRUE)
+aegypti_rIgG <- grep("rIgG", aegypti, value=TRUE)
+aegypti_mIgG <- grep("mIgG", aegypti, value=TRUE)
+aegypti_Ago2 <- grep("Ago2", aegypti, value=TRUE)
+
+EVEdf$group <- ifelse(row.names(EVEdf) %in%  aegypti_Ago1, paste0("aegypti_Ago1"), paste0("NA"))
+EVEdf$group  <- ifelse(row.names(EVEdf) %in%  aegypti_rIgG, paste0("aegypti_rIgG"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  aegypti_Ago2, paste0("aegypti_Ago2"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  aegypti_mIgG, paste0("aegypti_mIgG"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  cells_Ago1, paste0("Aag2_Ago1"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  cells_rIgG, paste0("Aag2_rIgG"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  cells_Ago2, paste0("Aag2_Ago2"), paste0(EVEdf$group ))
+EVEdf$group   <- ifelse(row.names(EVEdf) %in%  cells_mIgG, paste0("Aag2_mIgG"), paste0(EVEdf$group ))
+#write.table(EVEdf, "/Volumes/MyPassport/EVEs/mapping_stats_wide.txt", quote = F, sep = "\t", col.names = T)
+
+#in prism, did unpaired t-tests and selected those that were significant
+EVEl <- melt(EVERes, id.vars = col.names(EVERes))
+#write.table(EVEl, "/Volumes/MyPassport/EVEs/EVE_mapping_stats_long.txt", quote = F, sep = "\t", col.names = T)
+```
+For the input file "EVE_mapping_stats_long.txt" to read in at line 130 for graphing, see my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+
+## Graph EVE families that significantly mapped in AGO2 libraries compared to paired irrelevant Ab controls; Figure 6C
+
+```{r }
+EVEl <- read.delim("/Volumes/MyPassport/EVEs/EVE_mapping_stats_long.txt", header = T, sep = "\t")
+EVEl$group <- ifelse(EVEl$Var1 %in%  aegypti_Ago1, paste0("aegypti_Ago1"), paste0("NA"))
+EVEl$group <- ifelse(EVEl$Var1 %in%  aegypti_rIgG, paste0("aegypti_rIgG"), paste0(EVEl$group ))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  aegypti_Ago2, paste0("aegypti_Ago2"), paste0(EVEl$group))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  aegypti_mIgG, paste0("aegypti_mIgG"), paste0(EVEl$group ))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  cells_Ago1, paste0("Aag2_Ago1"), paste0(EVEl$group ))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  cells_rIgG, paste0("Aag2_rIgG"), paste0(EVEl$group ))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  cells_Ago2, paste0("Aag2_Ago2"), paste0(EVEl$group ))
+EVEl$group  <- ifelse(EVEl$Var1 %in%  cells_mIgG, paste0("Aag2_mIgG"), paste0(EVEl$group ))
+
+EVEl_g <- EVEl[!grepl("Ago1", EVEl$group),]
+EVEl_g <- EVEl_g[!grepl("rIgG", EVEl_g$group),]
+EVEl_g$group <- factor(EVEl_g$group, levels = c("Aag2_mIgG", "Aag2_Ago2", "aegypti_mIgG", "aegypti_Ago2"))
+EVEl_g$Var2 <- factor(EVEl_g$Var2, levels = c("Phenuiviridae","Flaviviridae", "Virgaviridae" ,"Phasmaviridae" , "Rhabdoviridae", "Unclassified", "Totiviridae"))
+
+ggplot(EVEl_g, aes(fill=group, y=value, x=Var2))  + geom_boxplot(outlier.colour = "gray", position=position_dodge(1.5)) + theme_bw() + facet_wrap(.~ Var2, scales = "free_y") + scale_fill_manual(values=c("#F87F11", "#8A0F09", "#E9BA97", "#FA0F0C")) 
+```

@@ -1,0 +1,1439 @@
+---
+title: "Ago1_miRNA_target_abundance_and_pies"
+author: "KRG"
+date: "7/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(GenomicFeatures)
+library(GenomicRanges)
+library(BSgenome)
+library(dplyr)
+library(ggplot2)
+library(data.table)
+library(ggrepel)
+library(magrittr)
+library(stringr)
+library(ChIPseeker)
+```
+
+##Seed search functions
+
+Additionally, see CLIPflexR documentation for:  
+[fetchSequencesForCLIP](https://kathrynrozengagnon.github.io/CLIPflexR/reference/fetchSequencesForClIP.html)  
+[annotatePeaksWithPatterns](https://kathrynrozengagnon.github.io/CLIPflexR/reference/annotatePeaksWithPatterns.html)
+```{r}
+fetchSequencesForClIP <- function(peaks,reSize=NULL,fasta,add5=0,add3=0){
+  swd <- Rsamtools::FaFile(fasta)
+  
+  fastaLens <- swd %>%  seqlengths
+  start(peaks) <- start(peaks)-add5
+  end(peaks) <- end(peaks)+add3
+  sees <- seqlevels(peaks)
+  seqlengths(peaks) <- fastaLens[match(sees,names(fastaLens),incomparables = 0)]
+  
+  
+  
+  Boundaries <- GRanges(seqlevels(peaks),IRanges(1,seqlengths(peaks)))
+  
+  if(!is.null(reSize)){
+    resizePeaks <- resize(peaks, reSize, fix="center", use.names=TRUE)
+    
+  }else{
+    resizePeaks <- peaks
+  }
+  names(resizePeaks) <- paste0(seqnames(resizePeaks),":",start(resizePeaks),"-",end(resizePeaks))
+  #temp <- subsetByOverlaps(resizePeaks,Boundaries,type=c("within"))
+  resizePeaks <- trim(resizePeaks)##added this line cause off error when extending going ut of bounds
+  temp <- findOverlaps(resizePeaks,Boundaries,type=c("within"))
+  temp2 <- Rsamtools::getSeq(Rsamtools:::FaFile(fasta),resizePeaks[temp@from])
+  names(temp2) <- names(resizePeaks[temp@from])
+  temp2
+}
+
+
+
+annotatePeaksWithPatterns  <- function(peaks,fasta,patterns,resize=64,add5=0,add3=0,verbose=FALSE,checkReverse=TRUE){
+  require(GenomicRanges)
+  require(magrittr)
+  require(Biostrings)
+  require(Rsamtools)
+  
+  if(verbose) message("Reading in peaks....",appendLF = FALSE)
+  if(is(peaks,"GRanges")){
+    peaks <- peaks
+    peaks$originalPeak <-  paste0(seqnames(peaks),":",start(peaks),"_",end(peaks), "_", strand(peaks))
+  }else if(is(peaks,"character")){
+    if(!file.exists(peaks))stop(paste0("The file ",peaks," does not exist"))
+    peaks <- read.table(peaks, header = TRUE)
+    peaks <- makeGRangesFromDataFrame(peaks,
+                                      keep.extra.columns=TRUE,
+                                      ignore.strand=FALSE,
+                                      seqinfo=NULL,
+                                      seqnames.field="seqnames",
+                                      start.field="start",
+                                      end.field="end",
+                                      strand.field="strand",
+                                      starts.in.df.are.0based=FALSE)
+    peaks$originalPeak <-  paste0(seqnames(peaks),":",start(peaks),"_",end(peaks), ":", strand(peaks))
+    
+  }
+  if(verbose) message("...done")
+  if(verbose) message("Read in ",length(peaks)," peaks")
+  
+  
+  if(!file.exists(fasta))stop(paste0("The file ",fasta," does not exist"))
+  if(verbose) message("Indexing FASTA...",appendLF = FALSE)
+  indexFa(fasta)
+  if(verbose) message("...done")
+  
+  
+  if(verbose) message("Aligning seqlevels across peaks and FASTA...",appendLF = FALSE)
+  fastaLens <- FaFile(fasta) %>% seqlengths
+  sees <- seqlevels(peaks)
+  seqlengths(peaks) <- fastaLens[match(sees,names(fastaLens),incomparables = 0)]
+  if(verbose) message("...done")
+  
+  if(verbose) message("Removing invalid peaks which are outside contig boundaries...",appendLF = FALSE)
+  Boundaries <- GRanges(seqlevels(peaks),IRanges(1,seqlengths(peaks)))
+  resizePeaks <- resize(peaks, resize, fix="center", use.names=TRUE)
+  resizePeaks <- trim(resizePeaks)
+  names(resizePeaks) <- paste0(seqnames(peaks),":",start(peaks),"_",end(peaks), "_", strand(peaks))
+  temp <- findOverlaps(resizePeaks,Boundaries,type=c("within"))
+  validPeaks <- resizePeaks[temp@from]
+  validPeaks$extendedPeak <- paste0(seqnames(validPeaks),":",start(validPeaks),"_",end(validPeaks), "_", strand(validPeaks))
+  if(verbose) message("...done")
+  if(verbose) message("Removed in ",length(validPeaks)-length(resizePeaks)," peaks")
+  
+  if(verbose) message("Retrieving sequence from under peaks....",appendLF = FALSE)
+  myRes <- getSeq(Rsamtools:::FaFile(fasta),validPeaks)
+  names(myRes) <- validPeaks$extendedPeak
+  
+  validPeaks$seqUnderExtendedPeak <- myRes
+  if(verbose) message("...done")
+  
+  if(verbose) message("Retrieving patterns to search for....",appendLF = FALSE)
+  if(length(patterns) > 1){
+    pattern=patterns
+  }else{
+    motifSeq <- readDNAStringSet(patterns)
+    pattern <- as.character(motifSeq)
+  }
+  if(verbose) message("...done")
+  if(verbose) message("Read in ",length(pattern)," patterns")
+  
+  if(verbose) message("Searching for ",length(pattern)," patterns in peaks....")
+  mergePeaksAndSites <- patternCallList <- list()
+  for(i in 1:length(pattern)){
+    if(verbose) message("Search for ",pattern[i])
+    peaks_Sites <- validPeaks
+    fixedInRegion <- vmatchPattern(pattern=pattern[i],subject=myRes) %>% unlist()
+    
+    
+    startOfPmatch <- resize(fixedInRegion,width=1,fix="start") %>% unname %>% as.character
+    pos <- matrix(unlist(strsplit(gsub(".*:","",names(fixedInRegion)),"_")),ncol=3,byrow =T)
+    seq <- gsub(":.*","",names(fixedInRegion))
+    sitesGRpos <- GRanges(seq[pos[,3] =="+"],
+                          IRanges(as.numeric(pos[pos[,3] =="+",1])+start(fixedInRegion[pos[,3] =="+"])-1,
+                                  as.numeric(pos[pos[,3] =="+",1])+end(fixedInRegion[pos[,3] =="+"])-1),startOfPmatch=startOfPmatch[pos[,3] =="+"])
+    sitesGRpos$PeakID <- names(fixedInRegion[pos[,3] =="+"])
+    
+    sitesGRneg <- GRanges(seq[pos[,3] =="-"],
+                          IRanges(as.numeric(pos[pos[,3] =="-",2])-end(fixedInRegion[pos[,3] =="-"])+1,
+                                  as.numeric(pos[pos[,3] =="-",2])-start(fixedInRegion[pos[,3] =="-"])+1),startOfPmatch=startOfPmatch[pos[,3] =="-"])
+    sitesGRneg$PeakID <- names(fixedInRegion[pos[,3] =="-"])
+
+      sitesFA <- c(fetchSequencesForClIP(sitesGRpos,reSize=NULL,fasta),reverseComplement(fetchSequencesForClIP(sitesGRneg,reSize=NULL,fasta)))
+      sitesFAExtended <- c(fetchSequencesForClIP(sitesGRpos,reSize=NULL,fasta,add5=add5,add3=add3),
+                           reverseComplement(fetchSequencesForClIP(sitesGRneg,reSize=NULL,fasta,add5=add5,add3=add3))
+      )
+      sitesGR <- suppressWarnings(c(sitesGRpos,sitesGRneg))
+
+    sitesGR$Seq <- sitesFA
+    sitesGR$SeqExtended <- sitesFAExtended
+    sitesGR$siteOfPattern <- granges(sitesGR) %>% unname %>% as.character
+    sitesGR$centerOfPattern <-  resize(sitesGR,width=1,fix="center") %>% unname %>% as.character
+    dfSitesGR <- as.data.frame(sitesGR)
+    peaks_SitesDF <- as.data.frame(peaks_Sites)
+    
+    mergePeaksAndSites[[i]] <- merge(peaks_SitesDF,dfSitesGR,by.x="extendedPeak",by.y="PeakID",all=FALSE)
+    patternCallList[[i]] <- mergePeaksAndSites[[i]] %>% dplyr::select(Seq,SeqExtended,startOfPmatch,centerOfPattern,siteOfPattern,originalPeak,extendedPeak)
+    rm(peaks_SitesDF)
+    rm(peaks_Sites)
+  }
+  names(mergePeaksAndSites) <- names(patternCallList) <- as.character(pattern)
+  return(list(mergePeaksAndSites,patternCallList))
+}
+```
+
+##stat smooth fun to add regression line equation and r2 to plot 
+
+```{r}
+#add fun to add regression line with equation from ggplot https://gist.github.com/kdauria/524eade46135f6348140
+stat_smooth_func <- function(mapping = NULL, data = NULL,
+                             geom = "smooth", position = "identity",
+                             ...,
+                             method = "auto",
+                             formula = y ~ x,
+                             se = TRUE,
+                             n = 80,
+                             span = 0.75,
+                             fullrange = FALSE,
+                             level = 0.95,
+                             method.args = list(),
+                             na.rm = FALSE,
+                             show.legend = NA,
+                             inherit.aes = TRUE,
+                             xpos = NULL,
+                             ypos = NULL) {
+  layer(
+    data = data,
+    mapping = mapping,
+    stat = StatSmoothFunc,
+    geom = geom,
+    position = position,
+    show.legend = show.legend,
+    inherit.aes = inherit.aes,
+    params = list(
+      method = method,
+      formula = formula,
+      se = se,
+      n = n,
+      fullrange = fullrange,
+      level = level,
+      na.rm = na.rm,
+      method.args = method.args,
+      span = span,
+      xpos = xpos,
+      ypos = ypos,
+      ...
+    )
+  )
+}
+
+StatSmoothFunc <- ggproto("StatSmooth", Stat,
+                          
+                          setup_params = function(data, params) {
+                            # Figure out what type of smoothing to do: loess for small datasets,
+                            # gam with a cubic regression basis for large data
+                            # This is based on the size of the _largest_ group.
+                            if (identical(params$method, "auto")) {
+                              max_group <- max(table(data$group))
+                              
+                              if (max_group < 1000) {
+                                params$method <- "loess"
+                              } else {
+                                params$method <- "gam"
+                                params$formula <- y ~ s(x, bs = "cs")
+                              }
+                            }
+                            if (identical(params$method, "gam")) {
+                              params$method <- mgcv::gam
+                            }
+                            
+                            params
+                          },
+                          
+                          compute_group = function(data, scales, method = "auto", formula = y~x,
+                                                   se = TRUE, n = 80, span = 0.75, fullrange = FALSE,
+                                                   xseq = NULL, level = 0.95, method.args = list(),
+                                                   na.rm = FALSE, xpos=NULL, ypos=NULL) {
+                            if (length(unique(data$x)) < 2) {
+                              # Not enough data to perform fit
+                              return(data.frame())
+                            }
+                            
+                            if (is.null(data$weight)) data$weight <- 1
+                            
+                            if (is.null(xseq)) {
+                              if (is.integer(data$x)) {
+                                if (fullrange) {
+                                  xseq <- scales$x$dimension()
+                                } else {
+                                  xseq <- sort(unique(data$x))
+                                }
+                              } else {
+                                if (fullrange) {
+                                  range <- scales$x$dimension()
+                                } else {
+                                  range <- range(data$x, na.rm = TRUE)
+                                }
+                                xseq <- seq(range[1], range[2], length.out = n)
+                              }
+                            }
+                            # Special case span because it's the most commonly used model argument
+                            if (identical(method, "loess")) {
+                              method.args$span <- span
+                            }
+                            
+                            if (is.character(method)) method <- match.fun(method)
+                            
+                            base.args <- list(quote(formula), data = quote(data), weights = quote(weight))
+                            model <- do.call(method, c(base.args, method.args))
+                            
+                            m = model
+                            eq <- substitute(italic(y) == a + b %.% italic(x)*","~~italic(r)^2~"="~r2, 
+                                             list(a = format(coef(m)[1], digits = 3), 
+                                                  b = format(coef(m)[2], digits = 3), 
+                                                  r2 = format(summary(m)$r.squared, digits = 3)))
+                            func_string = as.character(as.expression(eq))
+                            
+                            if(is.null(xpos)) xpos = min(data$x)*0.9
+                            if(is.null(ypos)) ypos = max(data$y)*0.9
+                            data.frame(x=xpos, y=ypos, label=func_string)
+                            
+                          },
+                          
+                          required_aes = c("x", "y")
+)
+```
+
+## Read in all peaks and search for all filtered 6mer targets of small RNAs
+
+read in all peaks from matrix building and PCA filtering output; input file "Final_matrix_all_peaks_add_filtering.txt" is peak matrix with all sample and filtering information, generated in *PCA_annotation_fgsea_targetvenns* script, and available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+```{r}
+
+all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_add_filtering.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+#for Fig 4, start by trying normalizing  to reads in all peaks 
+norm <- colSums(all[,219:226])
+all$log2aegyptiAgo1_norm_target <- log2(((all$aegyptiAgo1_counts+1)/7297949)*1E6)
+all$log2aegyptiAgo2_norm_target <- log2(((all$aegyptiAgo2_counts+1)/1481167)*1E6)
+all$log2aegyptirIgG_norm_target <- log2(((all$aegyptirIgG_counts+1)/777251)*1E6)
+all$log2aegyptimIgG_norm_target <- log2(((all$aegyptimIgG_counts+1)/221290)*1E6)
+all$log2Aag2Ago1_norm_target <- log2(((all$Aag2Ago1_counts+1)/10744772)*1E6)
+all$log2Aag2Ago2_norm_target <- log2(((all$Aag2Ago2_counts+1)/2851099)*1E6)
+all$log2Aag2rIgG_norm_target <- log2(((all$Aag2rIgG_counts+1)/1122306)*1E6)
+all$log2Aag2mIgG_norm_target <- log2(((all$Aag2mIgG_counts+1)/1060819)*1E6)
+
+
+#make GR for seed search
+allGR <- makeGRangesFromDataFrame(all,
+                                     keep.extra.columns=TRUE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames",
+                                     start.field="start",
+                                     end.field="end",
+                                     strand.field="strand",
+                                     starts.in.df.are.0based=FALSE)
+```
+
+#search all peaks with all filtered unique small RNA 6mer seeds, and get extended 18mer target sequence
+
+"all_unique_filt_seeds_rn3.fa" file with unique small RNA 6mer target sequences was generated in *smallRNA_abundance_scatterplots* script and is available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
+"Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa" is available for download at [Vectorbase](https://vectorbase.org/vectorbase/app/downloads/)  
+
+Additionally, see CLIPflexR documentation for:  
+[annotatePeaksWithPatterns](https://kathrynrozengagnon.github.io/CLIPflexR/reference/annotatePeaksWithPatterns.html)
+```{r}
+res_Agon <- annotatePeaksWithPatterns(peaks=allGR,
+                              fasta="/Users/kathryn/mirdeep2_master/Aedes-aegypti-LVP_AGWG_CHROMOSOMES_AaegL5.fa",
+patterns= "/Users/kathryn/Reprocess_all_paper_datasets/seed_search_refseqs/all_unique_filt_seeds_rn3.fa",
+                                  resize=70,
+                                  add5=11,
+                                  add3=1,
+                                  verbose=TRUE)
+
+res_Agon <- res_Agon[[1]]
+res_Agon <- rbindlist(res_Agon)
+
+#make sure are only counting pattern matches 1X
+#if sequence searched AND pattern position are exactly the same, is a duplicate
+
+res_Agon$search_seq_pattern <- paste0(res_Agon$seqUnderExtendedPeak, "_", res_Agon$siteOfPattern)
+length(unique(res_Agon$search_seq_pattern))
+nrow(res_Agon)
+res_Agon$search_seq_pattern <- NULL
+
+#but, could still have dups if extended sequence of one peak overlaps with the extended peak of another sequence and then a match is in both 
+#if site of pattern and extended sequence is the same, show only the peak with the start of pMatch closest to the center
+res_Agon$group <- paste0(res_Agon$SeqExtended, "_", res_Agon$siteOfPattern)
+length(unique(res_Agon$group)) #384778
+res_Agon$startOfPmatch <- as.numeric(res_Agon$startOfPmatch)
+res_Agon$filt <- duplicated(res_Agon$group)
+res_Agon$center_dist <- res_Agon$startOfPmatch - 33
+res_Agon$distance_from_zero <- ifelse(res_Agon$center_dist >=0, paste0(res_Agon$center_dist), res_Agon$center_dist * -1 )
+res_Agon$TSSdistance_from_zero <- ifelse(res_Agon$distanceToTSS >=0, paste0(res_Agon$distanceToTSS), res_Agon$distanceToTSS * -1 )
+res_Agon$distance_from_zero <- as.numeric(res_Agon$distance_from_zero)
+res_Agon$TSSdistance_from_zero <- as.numeric(res_Agon$TSSdistance_from_zero)
+
+h <- res_Agon %>% group_by(group) %>% top_n(-1, distance_from_zero) #385574 # still some dups, ties I guess (yep)
+length(unique(h$group)) #384778
+
+#can further break ties by  sorting by the distance to TSS 
+h$dups <- duplicated(h$group)
+q <- h[!is.na(h$TSSdistance_from_zero),] #get only ones with annotation, because only these ones have TSS distance
+k <- h[is.na(h$TSSdistance_from_zero),] #7044
+h <- q %>% group_by(group) %>% top_n(-1, TSSdistance_from_zero) #377740
+q <- rbind(h, k) #384784
+q$dups <- duplicated(q$group)
+
+#if I cannot assign, throw dups away randomly 
+res_Agon_to_join <- subset(q, q$dups==FALSE) ##384778
+
+
+res_Agon_to_join$originalPeak <- gsub("\\_-" , "\\:-", res_Agon_to_join$originalPeak)
+res_Agon_to_join$originalPeak <- gsub("\\_[+]" , "\\:+",res_Agon_to_join$originalPeak)
+
+```
+
+## Merge data frame of all pattern matches with original peak matrix and miRNA abundances
+
+```{r }
+#all sRNAs 
+res_Agon_to_join$strand.y <- res_Agon_to_join$strand.x
+res_Agon_to_join <- res_Agon_to_join[,c(7, 1, 264:279)] 
+col.names <- colnames(res_Agon_to_join)
+col.names <- gsub("\\.y", "", col.names)
+col.names <- gsub("center_dist", "Pdistance_to_peak_center", col.names)
+res_Agon_to_join <- setNames(res_Agon_to_join, col.names)
+
+col.names <- colnames(res_Agon_to_join)
+col.names <- c(col.names[1:3], paste0("P",col.names[4:8]), col.names[9:18])
+res_Agon_to_join <- setNames(res_Agon_to_join, col.names)
+
+
+#merge with original peak matrix - will increase row # because have potentially more than one 6mer match/peak 
+res_all <- merge(all, res_Agon_to_join, by="peakID", all.x = TRUE)
+```
+
+#Now need to merge small RNA abundance by family
+
+"Table_S4.txt" table was generated in *smallRNA_abundance_scatterplots* script 
+
+Also need raw counts to normalize with a pseudocount of 1 for log2 visualization: "novel_miRNAs_filtered_counts_all_info.txt", "known_miRNAs_allcols.txt", and "all_putative_known_sRNA_seeds2.txt" files were generated in the *mirdeep2_processing_filtering_to_upload* script
+
+All input files are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+```{r}
+seeds_df <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Mol_Cell_resub/Revision_files/Supplementary_Tables/Table_S4.txt", header =TRUE, sep = "\t")
+
+seeds_df_byfam <- seeds_df %>% group_by(.dots=c("six_mer_target", "six_mer")) %>% summarise(miRNA_family=first(aae_smallRNA_family))
+
+res_all <- merge(res_all, seeds_df_byfam, by.x = "Seq", by.y = "six_mer_target", all.x = TRUE)
+
+
+novel_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/novel_miRNAs_filtered_counts_all_info.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+known_filtered <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/known_miRNAs_allcols.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+known_filtered <- known_filtered[,c(1:150)]
+all_sRNA_filtered <- rbind(known_filtered,novel_filtered)
+
+seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds2.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+all_sRNA_byfam <- merge(all_sRNA_filtered, seed_table[,c("Row.names", "six_mer")], by.x = "miRNA", by.y = "Row.names")
+
+
+##have duplicate seeds in all_sRNA_by_fam since have considered known and novel differently and now are bound together, so need to collapse by seed again 
+all_sRNA_byfam1 <- all_sRNA_byfam %>% group_by(six_mer) %>% summarise( log2aegyptiAgo1_norm_miRNA=log2(sum(aegyptiAgo1_counts_norm)), log2aegyptiAgo2_norm_miRNA=log2(sum(aegyptiAgo2_counts_norm)), log2aegyptirIgG_norm_miRNA=log2(sum(aegyptirIgG_counts_norm)), log2aegyptimIgG_norm_miRNA=log2(sum(aegyptimIgG_counts_norm)), log2Aag2Ago1_norm_miRNA=log2(sum(Aag2Ago1_counts_norm)), log2Aag2Ago2_norm_miRNA=log2(sum(Aag2Ago2_counts_norm)),log2Aag2rIgG_norm_miRNA=log2(sum(Aag2rIgG_counts_norm)), log2Aag2mIgG_norm_miRNA=log2(sum(Aag2mIgG_counts_norm)))
+
+res_all <- merge(res_all, all_sRNA_byfam1, by= "six_mer", all.x=TRUE)
+
+#remove ones without pattern match or annotation for visualization
+res_all <- res_all[!is.na(res_all$six_mer),]
+res_all <- res_all[!is.na(res_all$distanceToTSS),]
+
+#simplify ann groups 
+res_all$ann_group <- ifelse(grepl("Exon", res_all$annotation), paste0("Exon"), paste0(res_all$annotation))
+
+res_all$ann_group <- ifelse(grepl("Intron", res_all$ann_group), paste0("Intron"), paste0(res_all$ann_group))
+
+```
+
+
+#redo annotation of high-confidence peaks that are targets of highly expressed AGO2-loaded small RNAs in both cells and mosquitoes; Figures S3F and S3G
+
+Input files "Final_cells_Ago2_matrix_filtered_peaks.txt" and "Final_aegypti_Ago2_matrix_filtered_peaks.txt" are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+
+AaegL5 LVP_AGWG genome gtf is available for download at [Vectorbase](https://vectorbase.org/vectorbase/app/downloads/) or available upon request
+```{r}
+# need to filter on miRNA cols for AGO2
+hi_ago2 <- res_all[res_all$log2Aag2Ago2_norm_miRNA > 9 & res_all$log2Aag2Ago1_norm_miRNA<9 & res_all$log2aegyptiAgo2_norm_miRNA > 9 & res_all$log2aegyptiAgo1_norm_miRNA<9,]
+
+#select filtered peaks 
+cells_Ago2_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_cells_Ago2_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+Ago2_aag2hi <- hi_ago2[hi_ago2$peakID %in% cells_Ago2_peaks_filt$peakID,]
+
+ae_Ago2_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_aegypti_Ago2_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+
+Ago2_aehi <-hi_ago2[hi_ago2$peakID %in% ae_Ago2_peaks_filt$peakID,]
+
+
+Aag2hiGR <- makeGRangesFromDataFrame(Ago2_aag2hi ,
+                                     keep.extra.columns=FALSE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames",
+                                     start.field="start",
+                                     end.field="end",
+                                     strand.field="strand",
+                                     starts.in.df.are.0based=FALSE)
+
+gtffile <- "/Users/kathryn/Aedes-aegypti-LVP_AGWG_BASEFEATURES_AaegL5.2.gtf"
+
+TxDb <- makeTxDbFromGFF(gtffile)
+
+AGOhianno <- annotatePeak(Aag2hiGR,
+                              TxDb=TxDb,
+                              sameStrand=FALSE,
+                              genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                            "Intron", "Promoter", "Downstream", "Intergenic"),
+                              overlap = "all")
+
+plotAnnoPie(AGOhianno)
+
+AehiGR <- makeGRangesFromDataFrame(Ago2_aehi ,
+                                     keep.extra.columns=FALSE,
+                                     ignore.strand=FALSE,
+                                     seqinfo=NULL,
+                                     seqnames.field="seqnames",
+                                     start.field="start",
+                                     end.field="end",
+                                     strand.field="strand",
+                                     starts.in.df.are.0based=FALSE)
+
+AGOaehianno <- annotatePeak(AehiGR,
+                              TxDb=TxDb,
+                              sameStrand=FALSE,
+                              genomicAnnotationPriority = c("3UTR", "5UTR", "Exon",
+                                                            "Intron", "Promoter", "Downstream", "Intergenic"),
+                              overlap = "all")
+
+plotAnnoPie(AGOaehianno)
+```
+
+#Add annotation column for "top" (ie. abundant) small RNA and classify by type (known/novel)
+
+"all_Ago1_known_novel_fam_rn.fa" & "all_Ago2_known_novel_fam_rn.fa" files were generated in  *smallRNA_abundance_scatterplots_to_upload* script and are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020/tree/master/renamed_smallRNA_fastas)
+```{r}
+Ago1_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/all_Ago1_known_novel_fam_rn.fa", format = "fasta")
+
+Ago1_sRNAs_cells <- Ago1_sRNAs[grepl("common-Ago1|Aag2-Ago1|Aag2-Ago1|top-Aag2|top-both", names(Ago1_sRNAs))]
+Ago1_sRNAs_aegypti <- Ago1_sRNAs[grepl("common-Ago1|aegypti-Ago1|top-aegypti|top-both", names(Ago1_sRNAs))]
+res_all$top_smallRNA <- ifelse(res_all$Seq %in% Ago1_sRNAs_cells & res_all$Seq %in% Ago1_sRNAs_aegypti, paste0("Ago1_both"), paste0("NA"))
+res_all$top_smallRNA <- ifelse(res_all$Seq %in% Ago1_sRNAs_cells & !res_all$Seq %in% Ago1_sRNAs_aegypti, paste0("Ago1_cells"), paste0(res_all$top_smallRNA))
+res_all$top_smallRNA <- ifelse(!res_all$Seq %in% Ago1_sRNAs_cells & res_all$Seq %in% Ago1_sRNAs_aegypti, paste0("Ago1_aegypti"), paste0(res_all$top_smallRNA))
+
+Ago2_sRNAs <- readDNAStringSet("/Users/kathryn/Reprocess_all_paper_datasets/Rmds_to_upload/To_upload/all_Ago2_known_novel_fam_rn.fa", format = "fasta")
+Ago2_sRNAs_cells <- Ago2_sRNAs[grepl("common-Ago2|Aag2-Ago2|Aag2-Ago2|aae-miR", names(Ago2_sRNAs))]
+Ago2_sRNAs_aegypti <- Ago2_sRNAs[grepl("common-Ago2|aegypti-Ago2|aae-miR", names(Ago2_sRNAs))]
+res_all$top_smallRNA2 <- ifelse(res_all$Seq %in% Ago2_sRNAs_cells & res_all$Seq %in% Ago2_sRNAs_aegypti, paste0("Ago2_both"), paste0("NA"))
+res_all$top_smallRNA2 <- ifelse(res_all$Seq %in% Ago2_sRNAs_cells & !res_all$Seq %in% Ago2_sRNAs_aegypti, paste0("Ago2_cells"), paste0(res_all$top_smallRNA2))
+res_all$top_smallRNA2 <- ifelse(!res_all$Seq %in% Ago2_sRNAs_cells & res_all$Seq %in% Ago2_sRNAs_aegypti, paste0("Ago2_aegypti"), paste0(res_all$top_smallRNA2))
+
+res_all$top_smallRNA <- ifelse(res_all$top_smallRNA!="NA" & res_all$top_smallRNA2!="NA", paste0(res_all$top_smallRNA, "; ", res_all$top_smallRNA2), paste0(res_all$top_smallRNA))
+res_all$top_smallRNA <- ifelse(res_all$top_smallRNA=="NA", paste0(res_all$top_smallRNA2), paste0(res_all$top_smallRNA))
+
+res_all$top_smallRNA2 <- NULL
+
+```
+
+##Subset Ago1 peaks and collapse for graphing
+
+```{r }
+
+res_Ago1_BCsample <- subset(res_all, res_all$Aag2_Ago1_BCsample > 0 | res_all$aegypti_Ago1_BCsample > 0)
+
+#get 3'UTR
+res_Ago1_BCsample_3UTR <- res_Ago1_BCsample[grepl("3' UTR", res_Ago1_BCsample$annotation),]
+
+#need to summarize all miRNA and target expression cols by miRNA family
+res_Ago1_BCsample_3UTRgraph <- res_Ago1_BCsample_3UTR  %>%  group_by(miRNA_family) %>% summarize(avlog2aegyptiAgo1_norm_miRNA=mean(log2aegyptiAgo1_norm_miRNA), avlog2aegyptiAgo2_norm_miRNA=mean(log2aegyptiAgo2_norm_miRNA), avlog2aegyptirIgG_norm_miRNA=mean(log2aegyptirIgG_norm_miRNA), avlog2aegyptimIgG_norm_miRNA=mean(log2aegyptimIgG_norm_miRNA), avlog2Aag2Ago1_norm_miRNA=mean(log2Aag2Ago1_norm_miRNA), avlog2Aag2Ago2_norm_miRNA=mean(log2Aag2Ago2_norm_miRNA),log2Aag2rIgG_norm_miRNA=mean(log2Aag2rIgG_norm_miRNA), avlog2Aag2mIgG_norm_miRNA=mean(log2Aag2mIgG_norm_miRNA), 
+avlog2aegyptiAgo1_norm_target=mean(log2aegyptiAgo1_norm_target), avlog2aegyptiAgo2_norm_target=mean(log2aegyptiAgo2_norm_target), avlog2aegyptirIgG_norm_target=mean(log2aegyptirIgG_norm_target), avlog2aegyptimIgG_norm_target=mean(log2aegyptimIgG_norm_target), avlog2Aag2Ago1_norm_target=mean(log2Aag2Ago1_norm_target), avlog2Aag2Ago2_norm_target=mean(log2Aag2Ago2_norm_target),log2Aag2rIgG_norm_target=mean(log2Aag2rIgG_norm_target), avlog2Aag2mIgG_norm_target=mean(log2Aag2mIgG_norm_target), avdistance_topeakcenter=mean(Pdistance_to_peak_center), avdistancetoTSS=mean(distanceToTSS), target = first(Seq), six_mer = first(six_mer), top_smallRNA = first(top_smallRNA))
+
+
+#classify all types I want to highlight
+
+res_Ago1_BCsample_3UTRgraph$type <- ifelse(grepl("novel",res_Ago1_BCsample_3UTRgraph$miRNA_family), paste0("novel"), paste0("known"))
+res_Ago1_cells_BCsample_3UTRgraph <- res_Ago1_BCsample_3UTRgraph
+res_Ago1_cells_BCsample_3UTRgraph$highlight <- ifelse(grepl(".*(Ago1_cells|Ago1_both).*", res_Ago1_cells_BCsample_3UTRgraph$top_smallRNA), paste0("top"), paste0("NA"))
+```
+
+##Get linear regression line and Pearson's correlation coefficient for Aag2 cells, and plot Figure S4E
+
+```{r }
+#get linear regression for all data
+linearMod  <- lm(avlog2Aag2Ago1_norm_target ~ avlog2Aag2Ago1_norm_miRNA, data=subset(res_Ago1_BCsample_3UTRgraph,res_Ago1_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > res_Ago1_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA))  
+
+#0.40329 = Intercept  0.03482 = Slope
+summary(linearMod) #Multiple R-squared:  0.1571
+
+#now for highly expressed miRNAs
+linearModsub  <- lm(avlog2Aag2Ago1_norm_target ~ avlog2Aag2Ago1_norm_miRNA, data=subset(res_Ago1_BCsample_3UTRgraph, res_Ago1_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > res_Ago1_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA & res_Ago1_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > 9))
+# intercept  -0.93545  slope: 0.15491 
+
+summary(linearModsub) #Multiple R-squared:0.3673
+
+cor.test(subset(res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA> res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA), subset(res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_target, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA> res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA), alternative = "greater",
+    method = c("pearson")) #p-value = 2.81e-08, r = 0.396404  
+
+cor.test(subset(res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA> res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA & res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > 9), subset(res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_target, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA> res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA  & res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > 9), alternative = "greater",
+    method = c("pearson")) #p-value = 9.273e-05, r = 0.6060637 
+
+ggplot(aes(x=avlog2Aag2Ago1_norm_miRNA,y=avlog2Aag2Ago1_norm_target), data=subset(res_Ago1_cells_BCsample_3UTRgraph, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA)) + 
+  geom_smooth(method="lm",se=FALSE, colour= "black")  + stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
+  geom_point(aes(shape =type, colour=highlight), size=4) + scale_shape_manual(values=c(19,1)) + scale_colour_manual(values = c( "gray", "#000099")) + geom_abline(intercept = -0.93545, slope = 0.15491 , linetype="dashed") +
+theme_bw() + geom_text_repel(data = subset(res_Ago1_cells_BCsample_3UTRgraph, res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA > res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA & res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA>9 & res_Ago1_cells_BCsample_3UTRgraph$highlight=="top"), aes(label = miRNA_family), size=2, force=5)
+
+```
+
+##Get linear regression line and Pearson's correlation coefficient for whole mosquitoes, and plot Figure 5C
+
+```{r }
+#linear  regression for all data
+linearMod  <- lm(avlog2aegyptiAgo1_norm_target ~ avlog2aegyptiAgo1_norm_miRNA, data=subset(res_Ago1_BCsample_3UTRgraph,res_Ago1_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > res_Ago1_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA))  
+
+#-1.06234 = Intercept  0.023151  = Slope
+summary(linearMod) #Multiple R-squared: 0.06666
+
+#now for highly expressed miRNAs
+linearModsub  <- lm(avlog2aegyptiAgo1_norm_target ~ avlog2aegyptiAgo1_norm_miRNA, data=subset(res_Ago1_BCsample_3UTRgraph, res_Ago1_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > res_Ago1_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA & res_Ago1_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > 9))
+# intercept  -2.07818  slope: 0.11344  
+
+summary(linearModsub) #Multiple R-squared: 0.2979,
+
+res_Ago1_aegypti_BCsample_3UTRgraph <- res_Ago1_BCsample_3UTRgraph
+res_Ago1_aegypti_BCsample_3UTRgraph$highlight <- ifelse(grepl(".*(Ago1_aegypti|Ago1_both).*", res_Ago1_aegypti_BCsample_3UTRgraph$top_smallRNA), paste0("top"), paste0("NA"))
+
+cor.test(subset(res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA> res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA ), subset(res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_target, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA> res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA ), alternative = "greater",
+    method = c("pearson"))
+
+cor.test(subset(res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA> res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA & res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > 9), subset(res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_target, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA> res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA  & res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > 9), alternative = "greater",
+    method = c("pearson"))
+
+ggplot(aes(x=avlog2aegyptiAgo1_norm_miRNA,y=avlog2aegyptiAgo1_norm_target), data=subset(res_Ago1_aegypti_BCsample_3UTRgraph, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA)) + 
+  geom_smooth(method="lm",se=FALSE, colour= "black")  + stat_smooth_func(geom="text",method="lm",hjust=0,parse=TRUE) +
+  geom_point(aes(shape =type, colour=highlight), size=4) + scale_shape_manual(values=c(19,1)) + scale_colour_manual(values = c( "gray", "#3366FF")) + geom_abline(intercept = -2.07818, slope = 0.11344 , linetype="dashed") +
+theme_bw() + geom_text_repel(data = subset(res_Ago1_aegypti_BCsample_3UTRgraph, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA > res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA & res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA>9 & res_Ago1_aegypti_BCsample_3UTRgraph$highlight=="top"), aes(label = miRNA_family), size=2, force=10)
+
+```
+
+##Calculate percentage of known, novel for "top" most abundant or all other miRNAs for inset pie charts in Figures 5C and S4E
+
+```{r}
+#pies
+all_sRNA_byfam2 <- seeds_df %>% group_by(six_mer_target) %>% summarise(aae_smallRNA_family= first(aae_smallRNA_family), aegyptiAgo1_norm_miRNA=sum(aegyptiAGO1_counts_norm), aegyptiAgo2_norm_miRNA=sum(aegyptiAGO2_counts_norm), Aag2Ago1_norm_miRNA=sum(Aag2AGO1_counts_norm), Aag2Ago2_norm_miRNA=sum(Aag2AGO2_counts_norm))
+
+select_mosq <- subset(res_Ago1_aegypti_BCsample_3UTRgraph, res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo1_norm_miRNA >  res_Ago1_aegypti_BCsample_3UTRgraph$avlog2aegyptiAgo2_norm_miRNA)
+
+aegypti_pie <- merge(all_sRNA_byfam2, select_mosq[,c("target", "top_smallRNA", "type", "highlight")], by.x ="six_mer_target", by.y = "target")
+
+aegypti_pie2 <- aegypti_pie %>%
+  mutate_if(is.numeric, funs(./sum(.))) 
+aegypti_pie2$type <- ifelse(grepl("top", aegypti_pie2$highlight), paste0(aegypti_pie2$type , "_top"), paste0(aegypti_pie2$type))
+
+aegypti_pie2 <- aegypti_pie2 %>% group_by(type) %>% summarise(percent=sum(aegyptiAgo1_norm_miRNA))
+
+ggplot(aegypti_pie2, aes(x="", y=percent, fill=type, alpha=type)) +
+  geom_bar(stat="identity") +
+  coord_polar("y", start=0) + theme_void() + 
+  scale_fill_manual(values=c("gray", "#3360A9", "gray", "#3360A9")) + scale_alpha_manual(values=c(1, 1, 0.5, 0.5))
+
+select_cells <- res_Ago1_cells_BCsample_3UTRgraph %>% filter(res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago1_norm_miRNA >  res_Ago1_cells_BCsample_3UTRgraph$avlog2Aag2Ago2_norm_miRNA)
+
+Aag2_pie <- merge(all_sRNA_byfam2, select_cells[,c("target", "top_smallRNA", "type", "highlight")], by.x ="six_mer_target", by.y = "target")
+
+Aag2_pie <- Aag2_pie %>%
+  mutate_if(is.numeric, funs(./sum(.))) 
+Aag2_pie$type <- ifelse(grepl("top", Aag2_pie$highlight), paste0(Aag2_pie$type , "_top"), paste0(Aag2_pie$type))
+
+Aag2_pie <- Aag2_pie %>% group_by(type) %>% summarise(percent=sum(Aag2Ago1_norm_miRNA))
+
+ggplot(Aag2_pie, aes(x="", y=percent, fill=type, alpha=type)) +
+  geom_bar(stat="identity") +
+  coord_polar("y", start=0) + theme_void() + 
+  scale_fill_manual(values=c("gray", "#1B0B80", "gray", "#1B0B80")) + scale_alpha_manual(values=c(1, 1, 0.5, 0.5))
+
+```
+
+##Format Table S5
+
+```{r}
+# #clean up table to remove excess columns; then add different target types (7A1, 7M8, 8, 18mer 0-mismatch, 18mer 1-mismatch)
+# 
+# clean <- res_all
+# cleand <- clean[,c(1:8, 203:255,264:265, 272:274, 278, 280, 290)]
+# 
+# #seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds2.txt", header = TRUE, sep ="\t", stringsAsFactors = FALSE) #913 unique seed combos
+# 
+# #link to new names
+# seed_table <- merge(seeds_df[,c(1:2, 38)], seed_table,by.x = "sequence" , by.y = "FL", all.x= TRUE )
+# 
+# seed_7A1 <- seed_table %>% group_by(seven_A1_target) %>% summarise(sevenA1_target = first(aae_smallRNA_family))
+# 
+# seed_7M8 <- seed_table %>% group_by(.dots=c("six_mer_target", "seven_M8_target")) %>% summarise(sevenM8_target = paste0(smallRNA, collapse =":"), sevenM8_targetfam = first(aae_smallRNA_family))
+# 
+# seed_8mer <- seed_table %>% group_by(eight_target) %>% summarise(eight_target_fam = paste0(smallRNA, collapse =":"))
+# 
+# seed_8mer_alt <- seed_table %>% group_by(eight_alt_target) %>% summarise(eight_alt_target_fam = paste0(smallRNA, collapse =":"))
+# 
+# cleand <- merge(cleand, seed_7A1, by.x = "miRNA_family", by.y = "sevenA1_target", all.x = TRUE)
+# cleand$check <- mapply(grepl, pattern=cleand$seven_A1_target, x=cleand$SeqExtended)
+# cleand$seven_A1_target <- ifelse(cleand$check==TRUE, paste0(cleand$miRNA_family), NA)
+# 
+# #7M8
+# cleand$check <- ifelse(cleand$strand == "+", mapply(substr, x=cleand$SeqExtended, start=11, stop=17), mapply(substr, x=cleand$SeqExtended, start=1, stop=7))
+# cleandd <- merge(cleand, seed_7M8[,c(2:3)], by.x = "check", by.y = "seven_M8_target", all.x = TRUE)
+# 
+# #8mers
+# cleandd$check <- ifelse(cleandd$strand == "+", mapply(substr, x=cleandd$SeqExtended, start=11, stop=18), mapply(substr, x=cleandd$SeqExtended, start=1, stop=8))
+# 
+# #canonical  miRNA 8mer
+# cleandd <- merge(cleandd, seed_8mer, by.x = "check", by.y = "eight_target", all.x = TRUE)
+# 
+# #alternative 8mer, with full complementarity instead of "A" in 3' target position
+# cleandd <- merge(cleandd, seed_8mer_alt , by.x = "check", by.y = "eight_alt_target", all.x = TRUE)
+# 
+# #perfect
+# seed_table$Ago2_top <- seed_table$six_mer_target  %in% Ago2_sRNAs
+# Ago2_tom <- seed_table[seed_table$Ago2_top==TRUE,]
+# Ago2_tom <- Ago2_tom%>% group_by(.dots=c("six_mer_target", "six_mer", "aae_smallRNA_family")) %>% summarise(smallRNAs = paste0(smallRNA, collapse = ":"),  FL_target_seqs = paste0(FL_target, collapse = ":"))
+# 
+# cleanddd <- merge(cleandd, Ago2_tom[,c(1,3,5)], by.x= "Seq", by.y = "six_mer_target",all.x = TRUE )
+# cleanddd$check <- mapply(grepl, pattern=cleanddd$SeqExtended, x=cleanddd$FL_target_seqs)
+# cleanddd$perfect_18mer_target <- ifelse(cleanddd$check==TRUE, paste0(cleanddd$aae_smallRNA_family), NA)
+# 
+# #one mismatch
+# cleanddd$check <- mapply(agrepl, pattern=cleanddd$SeqExtended, x=cleanddd$FL_target_seqs, max=1)
+# cleanddd$one_mis_18mer_target <- ifelse(cleanddd$check==TRUE, paste0(cleanddd$aae_smallRNA_family), NA)
+# 
+# to_coll <- cleanddd[,c(1, 3:5, 64:78)]
+# #write.table(to_coll,"/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_all_info_082120_rn.txt", col.names = TRUE, row.names = FALSE, sep = "\t", quote = FALSE)
+# 
+# #collapse predicted pattern matches; first within family - did this on the hpc, too slow otherwise
+# 
+# #test_coll <-  to_coll %>% group_by(.dots=c("peakID", "six_mer")) %>% summarise(six_target = dplyr::first(Seq), smallRNA_family = dplyr::first(miRNA_family), extendedPeak = dplyr::first(extendedPeak), seqUnderExtendedPeak = dplyr::first(seqUnderExtendedPeak), SeqExtended = paste0(SeqExtended, collapse = ": "), siteOfPattern = paste0(siteOfPattern, collapse = ": "), centerOfPattern = paste0(centerOfPattern, collapse = ": "), Pdistance_to_peak_center = paste0(distance_from_zero, collapse = ": "), top_smallRNA = dplyr::first(top_smallRNA), Psites_within_family = n(), seven_A1_target = paste0(seven_A1_target, collapse = ": "), seven_M8_target = paste0(sevenM8_target, collapse = ": "), eight_target = paste0(eight_target_fam, collapse = ": "), eight_target_alt = paste0(eight_alt_target_fam, collapse = ": "), perfect_18mer_target = paste0(perfect_18mer_target, collapse= ": "), one_mis_18mer_target = paste0(one_mis_18mer_target, collapse= ": "))
+# 
+# 
+# #check and reformat collapse within family to simplify
+# test_coll <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_all_info_082120_rn_col1.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# t <- str_split(test_coll$seven_A1_target, ": ") 
+# 
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$seven_A1_target <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# t <- str_split(test_coll$seven_M8_target, ": ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$seven_M8_target <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# t <- str_split(test_coll$eight_target, ": ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$eight_target <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# t <- str_split(test_coll$eight_target_alt, ": ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$eight_target_alt <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# t <- str_split(test_coll$perfect_18mer_target, ": ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$perfect_18mer_target <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# t <- str_split(test_coll$one_mis_18mer_target, ":  ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+# }
+# 
+# test_coll$one_mis_18mer_target <- unlist(lapply(b,function(x) paste0(x, collapse=": ")))
+# 
+# test_coll[,c(13:18)]<- lapply(test_coll[,c(13:18)],function(x) gsub(": NA", "", x))
+# test_coll[,c(13:18)]<- lapply(test_coll[,c(13:18)],function(x) gsub("NA: ", "", x))
+# 
+# 
+# #write.table(test_coll, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_all_info_infam_082120_reform.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+# ##still rigth
+# 
+# #then across family, again on hpc 
+# 
+# #pat_coll <- test_coll %>% group_by(peakID) %>% summarise(six_mer = paste0(six_mer, collapse = "; "), Psix_target = paste0(six_target, collapse = "; "), PsmallRNA_family = paste0(smallRNA_family, collapse = "; "), extendedPeak = dplyr::first(extendedPeak), seqUnderExtendedPeak = dplyr::first(seqUnderExtendedPeak), PSeqExtended = paste0(SeqExtended, collapse = "; "), PsiteOfPattern = paste0(siteOfPattern, collapse = "; "), PcenterOfPattern = paste0(centerOfPattern, collapse = "; "), Pdistance_to_peak_center = paste0(Pdistance_to_peak_center, collapse = "; "), Ptop_smallRNA = paste0(top_smallRNA,collapse = "; "), Psites_within_family = paste0(Psites_within_family, collapse = "; ") ,Psites_unique_families= n(), Pseven_A1_target = paste0(seven_A1_target, collapse = "; "), Pseven_M8_target = paste0(seven_M8_target, collapse = "; "), Peight_target = paste0(eight_target, collapse = "; "), Peight_target_alt = paste0(eight_target_alt, collapse = "; "), Pperfect_18mer_target = paste0(perfect_18mer_target, collapse= "; "), Pone_mis_18mer_target = paste0(one_mis_18mer_target, collapse = "; "),  aegypti_Ago1_BCsample = dplyr::first(aegypti_Ago1_BCsample), aegypti_Ago2_BCsample=dplyr::first(aegypti_Ago2_BCsample),Aag2_Ago1_BCsample=dplyr::first(Aag2_Ago1_BCsample), Aag2_Ago2_BCsample=dplyr::first(Aag2_Ago2_BCsample), ann_group = dplyr::first(ann_group))
+#   
+# pat_coll <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_all_info_infam_082120_col2.txt", stringsAsFactors = FALSE, header = TRUE, sep = "\t")
+# 
+# 
+# t <- str_split(pat_coll$Pseven_A1_target, "; ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# 
+# }
+# 
+# pat_coll$Pseven_A1_targetc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Pseven_A1_target <-pat_coll$Pseven_A1_targetc
+# pat_coll$Pseven_A1_targetc<- NULL
+# 
+# 
+# t <- str_split(pat_coll$Pseven_M8_target, "; ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# 
+# pat_coll$Pseven_M8_targetc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Pseven_M8_target <- pat_coll$Pseven_M8_targetc
+# pat_coll$Pseven_M8_targetc <- NULL
+# 
+# 
+# t <- str_split(pat_coll$Peight_target, "; ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# 
+# pat_coll$Peight_targetc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Peight_target <- pat_coll$Peight_targetc
+# pat_coll$Peight_targetc <- NULL
+# 
+# t <- str_split(pat_coll$Peight_target_alt, "; ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# pat_coll$Peight_target_altc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Peight_target_alt <- pat_coll$Peight_target_altc
+# pat_coll$Peight_target_altc <- NULL
+# 
+# 
+# t <- str_split(pat_coll$Pperfect_18mer_target, "; ")
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#     b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# 
+# pat_coll$Pperfect_18mer_targetc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Pperfect_18mer_target <- pat_coll$Pperfect_18mer_targetc
+# pat_coll$Pperfect_18mer_targetc <- NULL
+# 
+# t <- str_split(pat_coll$Pone_mis_18mer_target, "; " )
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# 
+# pat_coll$Pone_mis_18mer_target <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# 
+# t <- str_split(pat_coll$Ptop_smallRNA, "; ")
+# 
+# b <- vector("list", length(t))
+# for(i in 1:length(t)){
+#    b[[i]]  <- unique(t[[i]])
+#   b[[i]] <-  b[[i]][b[[i]]!="NA"]
+# }
+# pat_coll$Ptop_smallRNAc <- unlist(lapply(b,function(x) paste0(x, collapse="; ")))
+# pat_coll$Ptop_smallRNA <- pat_coll$Ptop_smallRNAc
+# pat_coll$Ptop_smallRNAc <- NULL
+# 
+#   
+# 
+# #then need to merge back with peaks without patterns
+# colnames(all)
+# all_lim <- all[,c(1:6, 201:253)]
+# pat_coll <- pat_coll[,c(1:19)]
+# all_with_pats <- merge(all_lim, pat_coll, by= "peakID", all.x = TRUE)
+# 
+# #write.table(all_with_pats, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_collapsed_082120_reform.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+
+```
+
+##Add chimera info to Table S5
+
+"chimera_beds.zip" contains the original AaegL5-remapped chimera bedfiles and is available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+```{r}
+# #start with all ranges;extend 70 
+# allGR70 <- resize(allGR,width=70,fix="center")
+# allGR70@elementMetadata <- allGR70@elementMetadata[,c(1, 196:204)]
+# 
+# #read in chimeras
+# Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
+# allmychimera <- dir(Dir,full.names = TRUE,pattern="*_chimera_remap.bed") 
+# chimbed <- lapply(allmychimera, import.bed)
+# names(chimbed) <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped/", "", allmychimera)
+# names(chimbed) <- gsub("_remap.bed", "", names(chimbed))
+# #subset chimeras by overlaps 
+# 
+# chimbed_merge <- lapply(chimbed, function(x) mergeByOverlaps(x, allGR70, type="within"))
+# 
+# test <- lapply(chimbed_merge, function(x) as.data.frame(cbind(as.character(x$name), as.character(x$peakID ))))
+# 
+# col.names <- c("chim_miRNA", "peakID")
+# chim_ls <- lapply(test, setNames, col.names)
+# #chim_ls <- lapply(chim_ls, setNames, col.names)
+# t <- lapply(chim_ls, function(x) smallRNA <- str_split_fixed(x$chim_miRNA, ";", 2)[,2])
+# t <- lapply(t, as.data.frame)
+# t <- lapply(t, setNames, c("smallRNA"))
+# 
+# x <- mapply(cbind, chim_ls, t, SIMPLIFY=FALSE)
+# 
+# #merge small RNA name from chim with final name annotation
+# listm <- seed_table[,c(1:2)]
+# listm$reform <- ifelse(grepl("novel", listm$smallRNA), paste0(listm$sequence), paste0(listm$smallRNA))
+# 
+# for (i in 1:length(x)) {
+#  x[[i]] <- merge(x[[i]], listm, by.x = "smallRNA",by.y = "reform", all.x = TRUE)
+# }
+# 
+# 
+# test <- lapply(x, function(x) x %>% group_by(.dots=c("peakID", "smallRNA.y")) %>% summarize(count=n()))
+# test <- lapply(test, as.data.frame)
+# 
+# d <- lapply(test, function(x) x$chim_miRNA <- paste0(x$smallRNA,"x", x$count))
+# d<- lapply(d, as.data.frame, stringsAsFactors = FALSE)
+# d <- lapply(d, setNames, c("smallRNA_chim"))
+# 
+# chim_test <- mapply(cbind, test, d, SIMPLIFY=FALSE)
+# 
+# #first collapse within family
+# j <- lapply(chim_test, function(x) merge(x, seed_table, by.x = "smallRNA.y", by.y = "smallRNA", all.x = TRUE))
+# j <- lapply(j, function(x) x %>% group_by(.dots=c("peakID", "six_mer")) %>% summarise(smallRNA_chim = paste0(smallRNA_chim, collapse = ": ")))
+# j <- lapply(j, as.data.frame)
+# 
+# #remove NAs
+# try <- lapply(j, function(x) x[!is.na(x$six_mer),])
+# 
+# j <- lapply(try, function(x) x %>% group_by(peakID) %>% summarize(smallRNA_chim = paste0(smallRNA_chim, collapse= "; ")))
+# j <- lapply(j, as.data.frame)
+# 
+# chim_f <- Reduce(function(x, y) merge(x, y, by = "peakID", all = TRUE), j)
+# names(chim_f) <- c("peakID", names(j)) 
+# 
+# seed_table$Ago1_top_cells <- seed_table$six_mer_target  %in% Ago1_sRNAs_cells
+# vec1 <- as.character(subset(seed_table$smallRNA, seed_table$Ago1_top_cells==TRUE))
+# vec1 <- paste0(vec1, "x")
+# seed_table$Ago1_top_aegypti <- seed_table$six_mer_target  %in% Ago1_sRNAs_aegypti
+# 
+# vec2 <- as.character(subset(seed_table$smallRNA, seed_table$Ago1_top_aegypti==TRUE))
+# vec2 <- paste0(vec2, "x")
+# 
+# for (i in 1:length(vec1)) {
+#  chim_f$test <- ifelse( grepl(vec1[i], chim_f$Aag2Ago1_chimera ), paste0("TRUE"), paste0(chim_f$test))
+# }
+# chim_f$test <- ifelse( grepl("TRUE", chim_f$test ), paste0("Ago1_cells"), paste0("NA"))
+# 
+# for (i in 1:length(vec2)) {
+#  chim_f$test2 <- ifelse( grepl(vec2[i], chim_f$aegyptiAgo1_chimera ), paste0("TRUE"), paste0(chim_f$test2))
+# }
+# chim_f$test2 <- ifelse( grepl("TRUE", chim_f$test2 ), paste0("Ago1_aegypti"), paste0("NA"))
+# 
+# chim_f$test <- ifelse( chim_f$test!="NA" & chim_f$test2!="NA", paste0("Ago1_both"), paste0(chim_f$test))
+# chim_f$test <- ifelse( chim_f$test=="NA" & chim_f$test2!="NA", paste0(chim_f$test2), paste0(chim_f$test))
+# 
+# chim_f$test2 <- NULL
+# 
+# seed_table$Ago2_top_cells <- seed_table$six_mer_target  %in% Ago2_sRNAs_cells
+# vec3 <- as.character(subset(seed_table$smallRNA, seed_table$Ago2_top_cells==TRUE))
+# vec3 <- paste0(vec3, "x")
+# seed_table$Ago2_top_aegypti <- seed_table$six_mer_target %in% Ago2_sRNAs_aegypti
+# vec4 <- as.character(subset(seed_table$smallRNA, seed_table$Ago2_top_aegypti==TRUE))
+# vec4 <- paste0(vec4, "x")
+# 
+# for (i in 1:length(vec3)) {
+#  chim_f$test2 <- ifelse( grepl(vec3[i], chim_f$Aag2Ago2_chimera ), paste0("TRUE"), paste0(chim_f$test2))
+# }
+# chim_f$test2 <- ifelse( grepl("TRUE", chim_f$test2 ), paste0("Ago2_cells"), paste0("NA"))
+# 
+# for (i in 1:length(vec4)) {
+#  chim_f$test3 <- ifelse( grepl(vec4[i], chim_f$aegyptiAgo2_chimera ), paste0("TRUE"), paste0(chim_f$test3))
+# }
+# chim_f$test3 <- ifelse( grepl("TRUE", chim_f$test3 ), paste0("Ago2_aegypti"), paste0("NA"))
+# 
+# chim_f$test2 <- ifelse( chim_f$test2!="NA" & chim_f$test3!="NA", paste0("Ago2_both"), paste0(chim_f$test2))
+# chim_f$test2 <- ifelse( chim_f$test2=="NA" & chim_f$test3!="NA", paste0(chim_f$test3), paste0(chim_f$test2))
+# 
+# chim_f$test3 <- NULL
+# chim_f$test <- ifelse( chim_f$test2!="NA" & chim_f$test!="NA", paste0(chim_f$test, "; ", chim_f$test2), paste0(chim_f$test))
+# chim_f$test <- ifelse( chim_f$test2!="NA" & chim_f$test=="NA", paste0(chim_f$test2), paste0(chim_f$test))
+# 
+# chim_f$test2 <- NULL
+# 
+# 
+# ##merge predicted with chimeras
+# all_with_pats <- merge(all_with_pats, chim_f, by="peakID", all.x = TRUE)
+# all_with_pats <- all_with_pats[,c(1:39,44:86)]
+# 
+# names(all_with_pats)[names(all_with_pats)=="test"] <- "top_smallRNA_chimera"
+
+```
+
+##Classify high-confidence targets
+
+The 4 input files: "Final_cells_Ago1_matrix_filtered_peaks.txt", "Final_aegypti_Ago1_matrix_filtered_peaks.txt", "Final_aegypti_Ago2_matrix_filtered_peaks.txt", and "Final_aegypti_Ago2_matrix_filtered_peaks.txt" were generated in *PCA_annotation_fgsea_targetvenns* script and are available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020)
+```{r} 
+# cells_Ago1_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_cells_Ago1_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# 
+# aegypti_Ago1_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_aegypti_Ago1_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# cells_Ago2_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_cells_Ago2_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# aegypti_Ago2_peaks_filt <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_aegypti_Ago2_matrix_filtered_peaks.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# all_with_pats$filtered_peak1 <- ifelse(all_with_pats$peakID %in% cells_Ago1_peaks_filt$peakID & all_with_pats$peakID %in% aegypti_Ago1_peaks_filt$peakID, paste0("Ago1_both"), paste0("NA"))
+# all_with_pats$filtered_peak1 <- ifelse(all_with_pats$peakID %in% cells_Ago1_peaks_filt$peakID & !all_with_pats$peakID %in% aegypti_Ago1_peaks_filt$peakID, paste0("Ago1_cells"), paste0(all_with_pats$filtered_peak1))
+# all_with_pats$filtered_peak1 <- ifelse(!all_with_pats$peakID %in% cells_Ago1_peaks_filt$peakID & all_with_pats$peakID %in% aegypti_Ago1_peaks_filt$peakID, paste0("Ago1_aegypti"), paste0(all_with_pats$filtered_peak1))
+# 
+# 
+# all_with_pats$filtered_peak2 <- ifelse(all_with_pats$peakID %in% cells_Ago2_peaks_filt$peakID & all_with_pats$peakID %in% aegypti_Ago2_peaks_filt$peakID, paste0("Ago2_both"), paste0("NA"))
+# all_with_pats$filtered_peak2 <- ifelse(all_with_pats$peakID %in% cells_Ago2_peaks_filt$peakID & !all_with_pats$peakID %in% aegypti_Ago2_peaks_filt$peakID, paste0("Ago2_cells"), paste0(all_with_pats$filtered_peak2))
+# all_with_pats$filtered_peak2 <- ifelse(!all_with_pats$peakID %in% cells_Ago2_peaks_filt$peakID & all_with_pats$peakID %in% aegypti_Ago2_peaks_filt$peakID, paste0("Ago2_aegypti"), paste0(all_with_pats$filtered_peak2))
+# all_with_pats$filtered_peak <- ifelse(all_with_pats$filtered_peak1!="NA"  & all_with_pats$filtered_peak2!="NA", paste0(all_with_pats$filtered_peak1, "; ", all_with_pats$filtered_peak2), paste0("NA"))
+# all_with_pats$filtered_peak <- ifelse(all_with_pats$filtered_peak1=="NA"  & all_with_pats$filtered_peak2!="NA", paste0(all_with_pats$filtered_peak2), paste0(all_with_pats$filtered_peak))
+# all_with_pats$filtered_peak <- ifelse(all_with_pats$filtered_peak1!="NA"  & all_with_pats$filtered_peak2=="NA", paste0(all_with_pats$filtered_peak1), paste0(all_with_pats$filtered_peak))
+# all_with_pats$filtered_peak1 <- NULL
+# all_with_pats$filtered_peak2 <- NULL
+# 
+# hiconfago2 <- all_with_pats[ grepl("Ago2_both|Ago2_aegypti", all_with_pats$filtered_peak),]
+# hiconfago2 <- hiconfago2[!is.na(hiconfago2$aegyptiAgo2_chimera ) | !is.na(hiconfago2$PsiteOfPattern),] #936
+# 
+# hiconfago1 <- all_with_pats[ grepl("Ago1_both|Ago1_aegypti", all_with_pats$filtered_peak),]
+# hiconfago1 <- hiconfago1[!is.na(hiconfago1$aegyptiAgo1_chimera ) | !is.na(hiconfago1$PsiteOfPattern),]
+# #1140
+# 
+# hiconfago1cells <- all_with_pats[ grepl("Ago1_both|Ago1_cells", all_with_pats$filtered_peak),]
+# hiconfago1cells <- hiconfago1cells[!is.na(hiconfago1cells$Aag2Ago1_chimera) | !is.na(hiconfago1cells$PsiteOfPattern),]
+# #1902
+# 
+# hiconfago2cells <- all_with_pats[ grepl("Ago2_both|Ago2_cells", all_with_pats$filtered_peak),]
+# hiconfago2cells <- hiconfago2cells[!is.na(hiconfago2cells$Aag2Ago2_chimera) | !is.na(hiconfago2cells$PsiteOfPattern),]
+# #1366
+# hiconf <- rbind(hiconfago1cells,hiconfago2cells,hiconfago1, hiconfago2)
+#  
+# all_with_pats$hi_confidence_target <- ifelse(all_with_pats$peakID %in% hiconfago1$peakID & all_with_pats$peakID %in% hiconfago1cells$peakID, paste0("Ago1_both"), paste0("NA"))
+# all_with_pats$hi_confidence_target <- ifelse(!all_with_pats$peakID %in% hiconfago1$peakID & all_with_pats$peakID %in% hiconfago1cells$peakID, paste0("Ago1_cells"), paste0(all_with_pats$hi_confidence_target))
+# all_with_pats$hi_confidence_target <- ifelse(all_with_pats$peakID %in% hiconfago1$peakID & !all_with_pats$peakID %in% hiconfago1cells$peakID, paste0("Ago1_aegypti"), paste0(all_with_pats$hi_confidence_target))
+# 
+# all_with_pats$hi_confidence_target2 <- ifelse(all_with_pats$peakID %in% hiconfago2$peakID & all_with_pats$peakID %in% hiconfago2cells$peakID, paste0("Ago2_both"), paste0("NA"))
+# all_with_pats$hi_confidence_target2 <- ifelse(!all_with_pats$peakID %in% hiconfago2$peakID & all_with_pats$peakID %in% hiconfago2cells$peakID, paste0("Ago2_cells"), paste0(all_with_pats$hi_confidence_target2))
+# all_with_pats$hi_confidence_target2 <- ifelse(all_with_pats$peakID %in% hiconfago2$peakID & !all_with_pats$peakID %in% hiconfago2cells$peakID, paste0("Ago2_aegypti"), paste0(all_with_pats$hi_confidence_target2))
+# 
+# all_with_pats$hi_confidence_target3 <- ifelse(all_with_pats$hi_confidence_target!="NA"  & all_with_pats$hi_confidence_target2!="NA", paste0(all_with_pats$hi_confidence_target, "; ", all_with_pats$hi_confidence_target2), paste0("NA"))
+# all_with_pats$hi_confidence_target3 <- ifelse(all_with_pats$hi_confidence_target3=="NA"  & all_with_pats$hi_confidence_target!="NA", paste0(all_with_pats$hi_confidence_target), paste0(all_with_pats$hi_confidence_target3))
+# all_with_pats$hi_confidence_target3  <- ifelse(all_with_pats$hi_confidence_target2!="NA"  & all_with_pats$hi_confidence_target3 =="NA", paste0(all_with_pats$hi_confidence_target2), paste0(all_with_pats$hi_confidence_target3 ))
+# all_with_pats$hi_confidence_target <- all_with_pats$hi_confidence_target3
+# all_with_pats$hi_confidence_target2 <- NULL
+# all_with_pats$hi_confidence_target3 <- NULL
+# all_with_pats$filtered_peak1 <- NULL
+# 
+# all_with_pats2 <- all_with_pats  %>%
+#    mutate(Ptop_smallRNA = replace(Ptop_smallRNA, !grepl("_", Ptop_smallRNA), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Pseven_A1_target = replace(Pseven_A1_target, !grepl("-", Pseven_A1_target), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Pseven_M8_target = replace(Pseven_M8_target, !grepl("-", Pseven_M8_target), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Peight_target = replace(Peight_target, !grepl("-", Peight_target), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Peight_target_alt = replace(Peight_target_alt, !grepl("-", Peight_target_alt), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Pperfect_18mer_target = replace(Pperfect_18mer_target, !grepl("-", Pperfect_18mer_target), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(Pone_mis_18mer_target = replace(Pone_mis_18mer_target, !grepl("-", Pone_mis_18mer_target), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(top_smallRNA_chimera = replace(top_smallRNA_chimera, !grepl("_",top_smallRNA_chimera), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(filtered_peak = replace(filtered_peak, !grepl("_",filtered_peak), NA))
+# 
+# all_with_pats2 <- all_with_pats2  %>%
+#    mutate(hi_confidence_target = replace(hi_confidence_target, !grepl("_",hi_confidence_target), NA))
+# 
+# all_with_pats2$geneChr <- NULL
+# all_with_pats2$geneStrand <- NULL
+# names(all_with_pats2)[names(all_with_pats2)=="seqnames"] <- "chromosome"
+# 
+# #write.table(all_with_pats2, "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S4_Resource_paper.txt", col.names = TRUE, row.names = FALSE, quote = FALSE, sep = "\t")
+
+```
+
+
+
+```{r}
+# S4_all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S4_Resource_paper.txt", header = TRUE, sep = "\t")
+# S4 <- S4_all[!is.na(S4_all$hi_confidence_target),]
+# 
+# S3 <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/Table_S3_Resource_paper.txt", header = TRUE, sep = "\t")
+# 
+# #before small RNA family collapse
+# uncoll <- read.delim( "/Users/kathryn/Reprocess_all_paper_datasets/Supp_tables/all_pred_all_info_082120_rn.txt", header = TRUE, sep = "\t")
+# 
+# 
+# newt <- uncoll[uncoll$peakID %in% S4$peakID,] #5099 - missing chimeras
+# #newt <-  newt[,c(2,4, 24, 26:33)]
+# #need to make a new column that summarizes the seed
+# #perf are all NA, one mis are all NA
+# newt$target_type <- ifelse(!is.na(newt$eight_target), paste0("8mer"), NA)
+# #should be  no 7M8 and 7A1 in common except 8mer
+# check <- newt[is.na(newt$target_type),]
+# #have 8mer nas but 7A1 and 7m8 are both true, why?
+# seed_table <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/all_putative_known_sRNA_seeds2.txt", header = TRUE, sep ="\t", stringsAsFactors = FALSE)
+# seeds_df <- merge(S3[,c(1:2,38)], seed_table, by.x = "sequence", by.y = "FL", all.x =T)
+# #ok, because 7a8 and A7a1 for some families are the same e.g. 11900, both are AAAAAAA; but 8mer is AAAAAAAA
+# #check2 <- check[!is.na(check$seven_A1_target) & !is.na(check$sevenM8_target),]
+# 
+# #so need to keep the one with the most support
+# #if there is an  8mer for that smallRNA family, just put that for each peak
+# newt$ID <- paste0(newt$peakID, "_", newt$miRNA_family)
+# eightmer <- newt[!is.na(newt$target_type),]
+# eightmer$dups <- duplicated(eightmer$ID)
+# eightmer_rm <- eightmer[eightmer$dups=="FALSE",]  #use this one
+# 
+# #remove 8mers from same peak and miRNA family from other targets
+# check$ID <- paste0(check$peakID, "_", check$miRNA_family)
+# check <- check[!check$ID %in% eightmer_rm$ID,]
+# 
+# #now with check, classify 7mer types
+# #can also be because pattern of 6mer match  is the same, but have both 7mer-A1 nd 7mer-m8 in same ext 18mer seq at different positions, but not 8mer
+# both7 <- check[!is.na(check$seven_A1_target) & !is.na(check$sevenM8_target),]
+# both7$dups <- duplicated(both7$ID)
+# both7$target_type <- paste0("7A1/7M8mer") 
+# 
+# usevens <- check[!check$ID %in% both7$ID,]
+# usevens$dups <- duplicated(usevens$ID)
+# #length(which(!is.na(usevens$seven_A1_target) & !is.na(usevens$sevenM8_target))) 0, good
+# sevenA1 <- usevens[!is.na(usevens$seven_A1_target),]
+# sevenA1$dups <- duplicated(sevenA1$ID)
+# sevenA1 <- sevenA1[sevenA1$dups=="FALSE",] 
+# 
+# sevenm8 <- usevens[!is.na(usevens$sevenM8_target),]
+# sevenm8$dups <- duplicated(sevenm8$ID)
+# sevenm8 <- sevenm8[sevenm8$dups=="FALSE",] 
+# 
+# sevenA1$dups <- sevenA1$ID  %in% sevenm8$ID
+# #so if in both, is supported by both 7mer-m8 and 7mer-A1 otherwise is just one or the other
+# 
+# sevenm8$dups <- sevenm8$ID  %in% sevenA1$ID
+# sevenA1$target_type <- ifelse(sevenA1$dups=="TRUE", paste0("7A1/7M8mer"), paste0("7A1mer"))
+# sevenm8$target_type <- ifelse(sevenm8$dups=="TRUE", paste0("7A1/7M8mer"), paste0("7M8mer"))
+# sevens <- rbind(sevenm8,sevenA1)
+# sevens$dups <- duplicated(sevens$ID)
+# sevens <- sevens[sevens$dups=="FALSE",]
+# 
+# sofar <- rbind(eightmer_rm, both7, sevens) #checked and all peakID/sRNA family are unique, good
+# 
+# six <- newt[!newt$ID %in% sofar$ID,]
+# six$dups <- duplicated(six$ID)
+# six <- six[six$dups=="FALSE",]
+# six$target_type <- paste0("6mer")
+# 
+# pred <- rbind(six, sofar)  #checked and all unique peakID/sRNA, good, and no NAs
+# 
+# #then need to do the same format for chimera - if in common, put both; otherwise, just rbind
+# 
+# #so  first, only need to consider chimera if it is in peak of interest
+# all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_add_filtering.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# #for Fig 4, start by trying normalizing  to reads in all peaks 
+# norm <- colSums(all[,219:226])
+# all$log2aegyptiAgo1_norm_target <- log2(((all$aegyptiAgo1_counts+1)/7297949)*1E6)
+# all$log2aegyptiAgo2_norm_target <- log2(((all$aegyptiAgo2_counts+1)/1481167)*1E6)
+# all$log2aegyptirIgG_norm_target <- log2(((all$aegyptirIgG_counts+1)/777251)*1E6)
+# all$log2aegyptimIgG_norm_target <- log2(((all$aegyptimIgG_counts+1)/221290)*1E6)
+# all$log2Aag2Ago1_norm_target <- log2(((all$Aag2Ago1_counts+1)/10744772)*1E6)
+# all$log2Aag2Ago2_norm_target <- log2(((all$Aag2Ago2_counts+1)/2851099)*1E6)
+# all$log2Aag2rIgG_norm_target <- log2(((all$Aag2rIgG_counts+1)/1122306)*1E6)
+# all$log2Aag2mIgG_norm_target <- log2(((all$Aag2mIgG_counts+1)/1060819)*1E6)
+# 
+# 
+# #make GR for seed search
+# allGR <- makeGRangesFromDataFrame(all,
+#                                      keep.extra.columns=TRUE,
+#                                      ignore.strand=FALSE,
+#                                      seqinfo=NULL,
+#                                      seqnames.field="seqnames",
+#                                      start.field="start",
+#                                      end.field="end",
+#                                      strand.field="strand",
+#                                      starts.in.df.are.0based=FALSE)all <- read.delim("/Users/kathryn/Reprocess_all_paper_datasets/Supp_Figs/Final_matrix_all_peaks_add_filtering.txt", sep = "\t", header = TRUE, stringsAsFactors = FALSE)
+# 
+# #just to keep formatting the same
+# norm <- colSums(all[,219:226])
+# all$log2aegyptiAgo1_norm_target <- log2(((all$aegyptiAgo1_counts+1)/7297949)*1E6)
+# all$log2aegyptiAgo2_norm_target <- log2(((all$aegyptiAgo2_counts+1)/1481167)*1E6)
+# all$log2aegyptirIgG_norm_target <- log2(((all$aegyptirIgG_counts+1)/777251)*1E6)
+# all$log2aegyptimIgG_norm_target <- log2(((all$aegyptimIgG_counts+1)/221290)*1E6)
+# all$log2Aag2Ago1_norm_target <- log2(((all$Aag2Ago1_counts+1)/10744772)*1E6)
+# all$log2Aag2Ago2_norm_target <- log2(((all$Aag2Ago2_counts+1)/2851099)*1E6)
+# all$log2Aag2rIgG_norm_target <- log2(((all$Aag2rIgG_counts+1)/1122306)*1E6)
+# all$log2Aag2mIgG_norm_target <- log2(((all$Aag2mIgG_counts+1)/1060819)*1E6)
+# 
+# 
+# #make GR for seed search
+# allGR <- makeGRangesFromDataFrame(all,
+#                                      keep.extra.columns=TRUE,
+#                                      ignore.strand=FALSE,
+#                                      seqinfo=NULL,
+#                                      seqnames.field="seqnames",
+#                                      start.field="start",
+#                                      end.field="end",
+#                                      strand.field="strand",
+#                                      starts.in.df.are.0based=FALSE)
+# allGR70 <- resize(allGR,width=70,fix="center")
+# allGR70@elementMetadata <- allGR70@elementMetadata[,c(1, 196:204)]
+# 
+# #read in chimeras
+# Dir <- "/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped"
+# allmychimera <- dir(Dir,full.names = TRUE,pattern="*_chimera_remap.bed")
+# chimbed <- lapply(allmychimera, import.bed)
+# names(chimbed) <- gsub("/Users/kathryn/Reprocess_all_paper_datasets/unmapped_for_chimera/known_novel_sRNA_revmapped/alternative_processing/AaegL5_remapped/", "", allmychimera)
+# names(chimbed) <- gsub("_remap.bed", "", names(chimbed))
+# #subset chimeras by overlaps
+# 
+# chimbed_merge <- lapply(chimbed, function(x) mergeByOverlaps(x, allGR70, type="within"))
+# 
+# test <- lapply(chimbed_merge, function(x) as.data.frame(cbind(as.character(x$name), as.character(x$peakID ))))
+# 
+# col.names <- c("chim_miRNA", "peakID")
+# chim_ls <- lapply(test, setNames, col.names)
+# #chim_ls <- lapply(chim_ls, setNames, col.names)
+# t <- lapply(chim_ls, function(x) smallRNA <- str_split_fixed(x$chim_miRNA, ";", 2)[,2])
+# t <- lapply(t, as.data.frame)
+# t <- lapply(t, setNames, c("smallRNA"))
+# 
+# x <- mapply(cbind, chim_ls, t, SIMPLIFY=FALSE)
+# 
+# #merge small RNA name from chim with final name annotation
+# listm <- seed_table[,c(1:2)]
+# listm$reform <- ifelse(grepl("novel", listm$smallRNA), paste0(listm$sequence), paste0(listm$smallRNA))
+# 
+# for (i in 1:length(x)) {
+#  x[[i]] <- merge(x[[i]], listm, by.x = "smallRNA",by.y = "reform", all.x = TRUE)
+# }
+# 
+# 
+# test <- lapply(x, function(x) x %>% group_by(.dots=c("peakID", "smallRNA.y")) %>% summarize(count=n()))
+# test <- lapply(test, as.data.frame)
+# 
+# test <- lapply(test, function(x) x[!is.na(x$smallRNA.y),])
+# lim <- test[!grepl("IgG", names(test))]
+# 
+# #need to change to family name
+# lim <- lapply(lim, function(x) merge(x, seeds_df[,c(1, 38)], by.x="smallRNA.y", by.y="smallRNA", all.x=T))
+# see <- vector("list", 4)
+# for(i in 1:length(lim)) {
+#   lim[[i]]$ID <- paste0(lim[[i]]$peakID, "_", lim[[i]]$aae_smallRNA_family)
+# }
+# 
+# #checked that all names match with pred
+# cells_Ago1_chim <- lim$Aag2Ago1_chimera
+# cells_Ago2_chim <- lim$Aag2Ago2_chimera
+# aae_Ago1_chim <- lim$aegyptiAgo1_chimera
+# aae_Ago2_chim <- lim$aegyptiAgo2_chimera
+# 
+# 
+# cells_Ago1_peaks_filt <- subset(S4$peakID, grepl("Ago1_cells", S4$hi_confidence_target))
+# cells_Ago2_peaks_filt <- subset(S4$peakID, grepl("Ago2_cells", S4$hi_confidence_target))
+# aegypti_Ago1_peaks_filt <- subset(S4$peakID, grepl("Ago1_aegypti", S4$hi_confidence_target))
+# aegypti_Ago2_peaks_filt <- subset(S4$peakID, grepl("Ago2_aegypti", S4$hi_confidence_target))
+# 
+# #get only filt peaks
+# cells_Ago1_chim <- cells_Ago1_chim[cells_Ago1_chim$peakID %in% cells_Ago1_peaks_filt,]
+# cells_Ago2_chim <- cells_Ago2_chim[cells_Ago2_chim$peakID %in% cells_Ago2_peaks_filt,]
+# aae_Ago1_chim <- aae_Ago1_chim[aae_Ago1_chim$peakID %in% aegypti_Ago1_peaks_filt,]
+# aae_Ago2_chim <- aae_Ago2_chim[aae_Ago2_chim$peakID %in% aegypti_Ago2_peaks_filt,]
+# 
+# #after target type, merge with transcript name; then want for what protein
+# 
+# pred$sample <- ifelse(pred$peakID %in% aegypti_Ago1_peaks_filt, paste0("aegypti_AGO1"), NA)
+# pred$sample2 <- ifelse(pred$peakID %in% aegypti_Ago2_peaks_filt, paste0("aegypti_AGO2"),NA)
+# pred$sample3 <- ifelse(pred$peakID %in% cells_Ago1_peaks_filt, paste0("Aag2_AGO1"),NA)
+# pred$sample4 <- ifelse(pred$peakID %in% cells_Ago2_peaks_filt, paste0("Aag2_AGO2"),NA)
+# 
+# pred$chim3 <- ifelse(pred$ID %in% cells_Ago1_chim$ID & pred$sample3=="Aag2_AGO1", paste0("Aag2_AGO1"), NA)
+# pred$chim <- ifelse(pred$ID %in% aae_Ago1_chim$ID & pred$sample=="aegypti_AGO1", paste0("aegypti_AGO1"), NA)
+# pred$chim2 <- ifelse(pred$ID %in% aae_Ago2_chim$ID & pred$sample2=="aegypti_AGO2", paste0("aegypti_AGO2"), NA)
+# pred$chim4 <- ifelse(pred$ID %in% cells_Ago2_chim$ID & pred$sample4=="Aag2_AGO2", paste0("Aag2_AGO2"), NA)
+# 
+# 
+# pred_lim <- pred[,c(2,4,24,34:44)]
+# names(pred_lim )[names(pred_lim) == "miRNA_family"] <- "aae_smallRNA_family"
+# 
+# #need to  add  chim that are not also pred
+# cells_Ago1_chim <-  cells_Ago1_chim[!cells_Ago1_chim$ID %in% subset(pred_lim$ID, pred_lim$chim3=="Aag2_AGO1"),]
+# cells_Ago2_chim <-  cells_Ago2_chim[!cells_Ago2_chim$ID %in% subset(pred_lim$ID, pred_lim$chim4=="Aag2_AGO2"),]
+# aae_Ago1_chim <-  aae_Ago1_chim[!aae_Ago1_chim$ID %in% subset(pred_lim$ID, pred_lim$chim=="aegypti_AGO1"),]
+# aae_Ago2_chim <-  aae_Ago2_chim[!aae_Ago2_chim$ID %in% subset(pred_lim$ID, pred_lim$chim2=="aegypti_AGO2"),]
+# 
+# 
+# #need to format each chimera set to match predlim and Rbind all together
+# #first  remove fam dups 
+# cells_Ago1_chim$count <- NULL
+# cells_Ago1_chim <- cells_Ago1_chim[!duplicated(cells_Ago1_chim$ID),]
+# 
+# cells_Ago2_chim <- cells_Ago2_chim[!duplicated(cells_Ago2_chim$ID),]
+# cells_Ago2_chim$count <- NULL
+# 
+# aae_Ago2_chim <- aae_Ago2_chim[!duplicated(aae_Ago2_chim$ID),]
+# aae_Ago2_chim$count <- NULL
+# 
+# aae_Ago1_chim <- aae_Ago1_chim[!duplicated(aae_Ago1_chim$ID),]
+# aae_Ago1_chim$count <- NULL
+# 
+# #first simplify samples and chimera columns
+# pred_lim$sample_cat <- paste0(pred_lim$sample)
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample2) & pred_lim$sample_cat=="aegypti_AGO1", paste0(pred_lim$sample_cat, "; ", pred_lim$sample2), paste0(pred_lim$sample_cat))
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample2) & pred_lim$sample_cat=="NA", paste0(pred_lim$sample2), pred_lim$sample_cat)
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample3) & pred_lim$sample_cat!="NA", paste0(pred_lim$sample_cat, "; ",pred_lim$sample3), pred_lim$sample_cat)
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample3) & pred_lim$sample_cat=="NA", paste0(pred_lim$sample3), pred_lim$sample_cat)
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample4) & pred_lim$sample_cat!="NA", paste0(pred_lim$sample_cat, "; ",pred_lim$sample4), pred_lim$sample_cat)
+# 
+# pred_lim$sample_cat <- ifelse(!is.na(pred_lim$sample4) & pred_lim$sample_cat=="NA", paste0(pred_lim$sample4), pred_lim$sample_cat)
+# 
+# pred_lim$sample <- NULL
+# pred_lim$sample2 <- NULL
+# pred_lim$sample3 <- NULL
+# pred_lim$sample4 <- NULL
+# 
+# names(pred_lim )[names(pred_lim) == "sample_cat"] <- "sample"
+# 
+# pred_lim$chim_cat <- paste0(pred_lim$chim)
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim2) & pred_lim$chim_cat=="aegypti_AGO1", paste0(pred_lim$chim_cat, "; ", pred_lim$chim2), paste0(pred_lim$chim_cat))
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim2) & pred_lim$chim_cat=="NA", paste0(pred_lim$chim2), pred_lim$chim_cat)
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim3) & pred_lim$chim_cat!="NA", paste0(pred_lim$chim_cat, "; ",pred_lim$chim3), pred_lim$chim_cat)
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim3) & pred_lim$chim_cat=="NA", paste0(pred_lim$chim3), pred_lim$chim_cat)
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim4) & pred_lim$chim_cat!="NA", paste0(pred_lim$chim_cat, "; ",pred_lim$chim4), pred_lim$chim_cat)
+# 
+# pred_lim$chim_cat <- ifelse(!is.na(pred_lim$chim4) & pred_lim$chim_cat=="NA", paste0(pred_lim$chim4), pred_lim$chim_cat)
+# 
+# pred_lim$chim <- NULL
+# pred_lim$chim2 <- NULL
+# pred_lim$chim3 <- NULL
+# pred_lim$chim4 <- NULL
+# pred_lim$dups <- NULL
+# 
+# names(pred_lim )[names(pred_lim) == "chim_cat"] <- "chimera"
+# pred_lim$target_type <- ifelse(pred_lim$chimera!="NA",  paste0(pred_lim$target_type, "; chimera"), pred_lim$target_type)
+# 
+# 
+# #rbind chim
+# cells_Ago1_chim$sample <- paste0("Aag2_AGO1")
+# cells_Ago2_chim$sample <- paste0("Aag2_AGO2")
+# aae_Ago1_chim$sample <- paste0("aegypti_AGO1")
+# aae_Ago2_chim$sample <- paste0("aegypti_AGO2")
+# 
+# cells_Ago1_chim$chimera <- paste0("Aag2_AGO1")
+# cells_Ago2_chim$chimera <- paste0("Aag2_AGO2")
+# aae_Ago1_chim$chimera <- paste0("aegypti_AGO1")
+# aae_Ago2_chim$chimera <- paste0("aegypti_AGO2")
+# 
+# all_chim <- rbind(cells_Ago1_chim, cells_Ago2_chim, aae_Ago2_chim, aae_Ago1_chim)
+# all_chim$smallRNA.y <- NULL
+# all_chim$target_type <- paste0("chimera")
+# all_chim$dups <- duplicated(all_chim$ID)
+# 
+# #fix ones that were called for same peak as chimeras for both AGO1 aand AGO2
+# all_chim$sample[all_chim$ID == "2:241249939_241249961:+_aae-let-7"] <- "aegypti_AGO1; aegypti_AGO2"
+# all_chim$chimera[all_chim$ID == "2:241249939_241249961:+_aae-let-7"] <- "aegypti_AGO1; aegypti_AGO2"
+# 
+# all_chim$sample[all_chim$ID == "3:113630333_113630346:-_aae-miR-184"] <- "aegypti_AGO1; aegypti_AGO2"
+# all_chim$chimera[all_chim$ID == "3:113630333_113630346:-_aae-miR-184"] <- "aegypti_AGO1; aegypti_AGO2"
+# 
+# all_chim$sample[all_chim$ID == "2:19218331_19218369:-_aae-miR-277-3p"] <- "aegypti_AGO1; aegypti_AGO2"
+# all_chim$chimera[all_chim$ID == "2:19218331_19218369:-_aae-miR-277-3p"] <- "aegypti_AGO1; aegypti_AGO2"
+# 
+# all_chim$sample[all_chim$ID == "2:272474588_272474602:+_aae-miR-965"] <- "aegypti_AGO1; aegypti_AGO2"
+# all_chim$chimera[all_chim$ID == "2:272474588_272474602:+_aae-miR-965"] <- "aegypti_AGO1; aegypti_AGO2"
+# all_chim <- all_chim[all_chim$dups=="FALSE",]
+# 
+# all_chim$ann_group <- NA
+# all_chim$dups <- NULL
+# tog <- rbind(pred_lim, all_chim)
+# 
+# tog$dups <- duplicated(tog$ID) #checked and no dups 
+# 
+# aa1 <- tog[grepl("aegypti_AGO1",  tog$sample),]
+# aegypti_Ago1_peaks_filt %in% unique(aa1$peakID) 
+# 
+# aa2 <- tog[grepl("aegypti_AGO2",  tog$sample),]
+# aegypti_Ago2_peaks_filt %in% unique(aa2$peakID) 
+# 
+# ca1 <- tog[grepl("Aag2_AGO1",  tog$sample),]
+# cells_Ago1_peaks_filt %in% unique(ca1$peakID) 
+# 
+# ca2 <- tog[grepl("Aag2_AGO2",  tog$sample),]
+# cells_Ago2_peaks_filt %in% unique(ca2$peakID) 
+# tog$dups <- NULL
+# tog$ann_group <- NULL
+# tog2 <- merge(tog, S4[,c(1:7, 12:13,64,81)], by = "peakID", all.x=T)
+# 
+# tog2 <- tog2[,c(2:3, 1,7:14,5:6,15:16)]
+# 
+# names(tog2)[names(tog2) == "Ptop_smallRNA"] <- "top_smallRNA"
+# 
+# tog2$top_smallRNA  <- NULL
+# tog2$top_smallRNA_chimera  <- NULL
+# tog2$target_type <-  ifelse(grepl("7A1", tog2$target_type), gsub("7A1mer", "7merA1", tog2$target_type), paste0(tog2$target_type))
+# tog2$target_type <-  ifelse(grepl("7M8", tog2$target_type), gsub("7M8mer", "7merM8", tog2$target_type), paste0(tog2$target_type))
+# 
+# #write.table(tog2, "/Users/kathryn/Reprocess_all_paper_datasets/Mol_Cell_resub/Revision_files/Supplementary_Tables/Table_S5_lim.txt", col.names = T, row.names = F, quote = F, sep  = "\t")
+```
+Output table is the RNAi network map of high-confidence targets provided in the paper (Table S5)
+
+```{r}
+# 
+# #fix Ptop_small_NA column for Table S5 ext
+# 
+# S4_all$top_smallRNA_chimera <- gsub("Ago", "AGO", S4_all$top_smallRNA_chimera)
+# 
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago1_cells", S4_all$Ptop_smallRNA) & grepl("Ago1_aegypti", S4_all$Ptop_smallRNA) & !grepl("Ago1_both", S4_all$Ptop_smallRNA), paste0("Ago1_both; ", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago1_both", S4_all$Ptop_smallRNA), gsub("Ago1_cells; ", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago1_both", S4_all$Ptop_smallRNA), gsub("; Ago1_cells", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago1_both", S4_all$Ptop_smallRNA), gsub("Ago1_aegypti; ", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago1_both", S4_all$Ptop_smallRNA), gsub("; Ago1_aegypti", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# 
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago2_cells", S4_all$Ptop_smallRNA) & grepl("Ago2_aegypti", S4_all$Ptop_smallRNA) & !grepl("Ago2_both", S4_all$Ptop_smallRNA), paste0("Ago2_both; ", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago2_both", S4_all$Ptop_smallRNA), gsub("Ago2_cells; ", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago2_both", S4_all$Ptop_smallRNA), gsub("; Ago2_cells", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago2_both", S4_all$Ptop_smallRNA), gsub("Ago2_aegypti; ", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# S4_all$Ptop_smallRNA <- ifelse(grepl("Ago2_both", S4_all$Ptop_smallRNA), gsub("; Ago2_aegypti", "", S4_all$Ptop_smallRNA), paste0(S4_all$Ptop_smallRNA))
+# 
+# S4_all$Ptop_smallRNA <- gsub("Ago", "AGO", S4_all$Ptop_smallRNA)
+# 
+# #write.table(S4_all, "/Users/kathryn/Reprocess_all_paper_datasets/Mol_Cell_resub/Revision_files/Supplementary_Tables/Table_S5_ext.txt", col.names = T, row.names = F, quote = F, sep  = "\t")
+```
+
+The final extended output table, "Table_S5_ext.txt.zip" is available in my [Github](https://github.com/kathrynrozengagnon/AGOCLIP_2020); the legend is also uploaded
+
